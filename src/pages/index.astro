@@ -1,6 +1,5 @@
 ---
-const posts = await Astro.glob('./posts/*.md');
-posts.sort((a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date));
+import { getCollection } from 'astro:content';
 ---
 <html lang="ja">
   <head>
@@ -18,12 +17,10 @@ posts.sort((a, b) => new Date(b.frontmatter.date) - new Date(a.frontmatter.date)
     <main>
       <h2>記事一覧</h2>
       <ul>
-        {posts.map(post => (
-          <li>
-            <a href={post.url}>{post.frontmatter.title}</a>
-            <span> - {post.frontmatter.date}</span>
-          </li>
-        ))}
+        <li>
+          <a href="/posts/cloudflare-github-disconnect">Cloudflare PagesがGitHubと切断された時の対処法</a>
+          <span> - 2026-05-20</span>
+        </li>
       </ul>
     </main>
     <footer>
