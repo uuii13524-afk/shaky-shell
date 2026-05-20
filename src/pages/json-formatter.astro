@@ -6,122 +6,93 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Formatter / Validator - ErrNotes</title>
     <meta name="description" content="JSONを整形・バリデーションできる無料ツール。APIレスポンスや設定ファイルの確認に使えます。" />
-    <style>
-      body { font-family: sans-serif; max-width: 900px; margin: 0 auto; padding: 20px; }
-      h1 a { color: inherit; text-decoration: none; }
-      .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-      @media (max-width: 600px) { .grid { grid-template-columns: 1fr; } }
-      textarea { width: 100%; height: 200px; font-family: monospace; font-size: 13px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; resize: vertical; }
-      .result-box { width: 100%; height: 200px; font-family: monospace; font-size: 13px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; background: #f5f5f5; overflow: auto; white-space: pre; }
-      .buttons { display: flex; gap: 8px; margin: 10px 0; flex-wrap: wrap; }
-      button { padding: 8px 16px; font-size: 13px; cursor: pointer; border: none; border-radius: 4px; background: #0066cc; color: white; }
-      button:hover { background: #0052a3; }
-      button.secondary { background: #666; }
-      button.secondary:hover { background: #444; }
-      button.success { background: #28a745; }
-      button.success:hover { background: #218838; }
-      .status { padding: 8px 12px; border-radius: 4px; font-size: 13px; margin-top: 8px; }
-      .status.ok { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
-      .status.error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
-      label { font-weight: bold; display: block; margin-bottom: 5px; }
-      .related { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-      .related ul { padding-left: 20px; }
-      .related li { margin-bottom: 6px; }
-    </style>
+    <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <header>
-      <h1><a href="/">ErrNotes</a></h1>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+        </nav>
+      </div>
     </header>
-    <main>
+    <main class="site-wrapper tool-page">
       <h2>JSON Formatter / Validator</h2>
-      <p>JSONを整形・バリデーションできます。APIレスポンスや設定ファイルの確認に使えます。</p>
+      <p class="tool-desc">JSONを整形・バリデーションできます。APIレスポンスや設定ファイルの確認に使えます。</p>
 
-      <div class="grid">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
         <div>
-          <label for="input">入力JSON</label>
-          <textarea id="input" placeholder='{"key": "value", "num": 123}'></textarea>
-          <div class="buttons">
-            <button id="formatBtn">整形する</button>
-            <button id="minifyBtn">圧縮する</button>
-            <button class="secondary" id="clearBtn">クリア</button>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">入力JSON</label>
+          <textarea id="input" style="height:180px;" placeholder='{"key": "value"}'></textarea>
+          <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+            <button class="btn btn-primary" id="formatBtn">整形する</button>
+            <button class="btn btn-primary" id="minifyBtn">圧縮する</button>
+            <button class="btn btn-secondary" id="clearBtn">クリア</button>
           </div>
         </div>
         <div>
-          <label>結果</label>
-          <div class="result-box" id="result">結果がここに表示されます</div>
-          <div class="buttons">
-            <button class="success" id="copyBtn">コピー</button>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果</label>
+          <div class="result-box" id="result" style="height:180px;">結果がここに表示されます</div>
+          <div style="margin-top:10px;">
+            <button class="btn btn-success" id="copyBtn">コピー</button>
           </div>
         </div>
       </div>
-
       <div id="status"></div>
 
-      <div class="related">
-        <h3>関連記事</h3>
-        <ul>
-          <li><a href="/posts/docker-compose-basic">docker-composeの基本的な使い方</a></li>
-          <li><a href="/posts/github-actions-basic">GitHub Actionsで自動デプロイする基本的な設定方法</a></li>
-          <li><a href="/posts/cloudflare-pages-env-variables">Cloudflare Pagesで環境変数を設定する方法</a></li>
-        </ul>
-        <h3>その他のツール</h3>
-        <ul>
-          <li><a href="/base64">Base64 Encoder / Decoder</a></li>
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">その他のツール</div>
+        <ul style="list-style:none;">
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
         </ul>
       </div>
     </main>
-
-    <footer style="margin-top:40px;border-top:1px solid #eee;padding-top:20px;">
-      <a href="/">トップページに戻る</a> |
-      <a href="/privacy">プライバシーポリシー</a>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/">← 記事一覧に戻る</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">プライバシーポリシー</a>
+      </div>
     </footer>
-
     <script is:inline>
       function showStatus(msg, isError) {
         var el = document.getElementById('status');
-        el.className = 'status ' + (isError ? 'error' : 'ok');
+        el.style.cssText = 'font-size:13px;font-family:var(--mono);margin-top:8px;';
+        el.style.color = isError ? 'var(--danger)' : 'var(--accent2)';
         el.textContent = msg;
       }
-
       document.getElementById('formatBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value.trim();
         if (!input) { showStatus('JSONを入力してください', true); return; }
         try {
-          var parsed = JSON.parse(input);
-          var formatted = JSON.stringify(parsed, null, 2);
-          document.getElementById('result').textContent = formatted;
+          document.getElementById('result').textContent = JSON.stringify(JSON.parse(input), null, 2);
           showStatus('✓ 有効なJSONです', false);
         } catch(e) {
           document.getElementById('result').textContent = '';
           showStatus('✗ JSONが無効です: ' + e.message, true);
         }
       });
-
       document.getElementById('minifyBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value.trim();
         if (!input) { showStatus('JSONを入力してください', true); return; }
         try {
-          var parsed = JSON.parse(input);
-          var minified = JSON.stringify(parsed);
-          document.getElementById('result').textContent = minified;
+          document.getElementById('result').textContent = JSON.stringify(JSON.parse(input));
           showStatus('✓ 圧縮しました', false);
         } catch(e) {
           document.getElementById('result').textContent = '';
           showStatus('✗ JSONが無効です: ' + e.message, true);
         }
       });
-
       document.getElementById('clearBtn').addEventListener('click', function() {
         document.getElementById('input').value = '';
         document.getElementById('result').textContent = '結果がここに表示されます';
         document.getElementById('status').textContent = '';
-        document.getElementById('status').className = '';
       });
-
       document.getElementById('copyBtn').addEventListener('click', function() {
-        var result = document.getElementById('result').textContent;
-        navigator.clipboard.writeText(result).then(function() {
+        navigator.clipboard.writeText(document.getElementById('result').textContent).then(function() {
           var btn = document.getElementById('copyBtn');
           btn.textContent = 'コピーしました！';
           setTimeout(function() { btn.textContent = 'コピー'; }, 2000);

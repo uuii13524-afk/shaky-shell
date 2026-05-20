@@ -6,108 +6,84 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Base64 Encoder / Decoder - ErrNotes</title>
     <meta name="description" content="テキストをBase64にエンコード・デコードできる無料ツール。APIトークンや設定ファイルの確認に使えます。" />
-    <style>
-      body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-      h1 a { color: inherit; text-decoration: none; }
-      textarea { width: 100%; height: 120px; font-family: monospace; font-size: 14px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
-      .buttons { display: flex; gap: 10px; margin: 10px 0; }
-      button { padding: 8px 20px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; background: #0066cc; color: white; }
-      button:hover { background: #0052a3; }
-      button.secondary { background: #666; }
-      button.secondary:hover { background: #444; }
-      .result-box { background: #f5f5f5; border: 1px solid #ccc; border-radius: 4px; padding: 10px; font-family: monospace; font-size: 14px; min-height: 60px; word-break: break-all; white-space: pre-wrap; }
-      .error { color: red; font-size: 13px; margin-top: 5px; }
-      .copy-btn { padding: 4px 12px; font-size: 12px; background: #28a745; }
-      .copy-btn:hover { background: #218838; }
-      label { font-weight: bold; display: block; margin-bottom: 5px; }
-      .section { margin-bottom: 24px; }
-      .related { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
-      .related ul { padding-left: 20px; }
-      .related li { margin-bottom: 6px; }
-    </style>
+    <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
-    <header>
-      <h1><a href="/">ErrNotes</a></h1>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+        </nav>
+      </div>
     </header>
-    <main>
+    <main class="site-wrapper tool-page">
       <h2>Base64 Encoder / Decoder</h2>
-      <p>テキストをBase64形式にエンコード・デコードできます。APIトークンや設定ファイルの確認に使えます。</p>
+      <p class="tool-desc">テキストをBase64形式にエンコード・デコードできます。APIトークンや設定ファイルの確認に使えます。</p>
 
-      <div class="section">
-        <label for="input">入力テキスト</label>
-        <textarea id="input" placeholder="ここにテキストを入力してください"></textarea>
-        <div class="buttons">
-          <button id="encodeBtn">エンコード（Base64に変換）</button>
-          <button id="decodeBtn">デコード（Base64から変換）</button>
-          <button class="secondary" id="clearBtn">クリア</button>
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">入力テキスト</label>
+        <textarea id="input" style="height:120px;" placeholder="ここにテキストを入力してください"></textarea>
+        <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn btn-primary" id="encodeBtn">エンコード（Base64に変換）</button>
+          <button class="btn btn-primary" id="decodeBtn">デコード（Base64から変換）</button>
+          <button class="btn btn-secondary" id="clearBtn">クリア</button>
         </div>
       </div>
 
-      <div class="section">
-        <label>結果</label>
+      <div>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果</label>
         <div class="result-box" id="result">結果がここに表示されます</div>
-        <div class="error" id="error"></div>
-        <div class="buttons" style="margin-top:8px;">
-          <button class="copy-btn" id="copyBtn">コピー</button>
+        <div id="error" style="color:var(--danger);font-size:12px;font-family:var(--mono);margin-top:6px;"></div>
+        <div style="margin-top:10px;">
+          <button class="btn btn-success" id="copyBtn">コピー</button>
         </div>
       </div>
 
-      <div class="related">
-        <h3>関連記事</h3>
-        <ul>
-          <li><a href="/posts/astro-cloudflare-deploy">AstroをCloudflare Pagesにデプロイする手順</a></li>
-          <li><a href="/posts/github-first-push">GitHubで初めてリポジトリを作ってpushする手順</a></li>
-          <li><a href="/posts/git-gitignore-setup">Gitで.gitignoreを設定してファイルを管理対象から外す方法</a></li>
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">その他のツール</div>
+        <ul style="list-style:none;">
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter / Validator</a></li>
         </ul>
       </div>
     </main>
-
-    <footer style="margin-top:40px;border-top:1px solid #eee;padding-top:20px;">
-      <a href="/">トップページに戻る</a> |
-      <a href="/privacy">プライバシーポリシー</a>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/">← 記事一覧に戻る</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">プライバシーポリシー</a>
+      </div>
     </footer>
-
     <script is:inline>
       document.getElementById('encodeBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
-        if (!input) {
-          document.getElementById('result').textContent = '入力テキストを入力してください';
-          return;
-        }
+        if (!input) { document.getElementById('result').textContent = '入力テキストを入力してください'; return; }
         try {
-          var encoded = btoa(unescape(encodeURIComponent(input)));
-          document.getElementById('result').textContent = encoded;
+          document.getElementById('result').textContent = btoa(unescape(encodeURIComponent(input)));
         } catch(e) {
           document.getElementById('error').textContent = 'エンコードに失敗しました: ' + e.message;
         }
       });
-
       document.getElementById('decodeBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
-        if (!input) {
-          document.getElementById('result').textContent = '入力テキストを入力してください';
-          return;
-        }
+        if (!input) { document.getElementById('result').textContent = '入力テキストを入力してください'; return; }
         try {
-          var decoded = decodeURIComponent(escape(atob(input)));
-          document.getElementById('result').textContent = decoded;
+          document.getElementById('result').textContent = decodeURIComponent(escape(atob(input)));
         } catch(e) {
           document.getElementById('error').textContent = 'デコードに失敗しました。正しいBase64文字列を入力してください。';
         }
       });
-
       document.getElementById('clearBtn').addEventListener('click', function() {
         document.getElementById('input').value = '';
         document.getElementById('result').textContent = '結果がここに表示されます';
         document.getElementById('error').textContent = '';
       });
-
       document.getElementById('copyBtn').addEventListener('click', function() {
-        var result = document.getElementById('result').textContent;
-        navigator.clipboard.writeText(result).then(function() {
+        navigator.clipboard.writeText(document.getElementById('result').textContent).then(function() {
           var btn = document.getElementById('copyBtn');
           btn.textContent = 'コピーしました！';
           setTimeout(function() { btn.textContent = 'コピー'; }, 2000);
