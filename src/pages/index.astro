@@ -1,11 +1,33 @@
 ---
-import Welcome from '../components/Welcome.astro';
-import Layout from '../layouts/Layout.astro';
-
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
-
-<Layout>
-	<Welcome />
-</Layout>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ErrNotes - エラー解決ログ</title>
+    <meta name="description" content="実際に詰まったエラーの記録と解決ログ。Docker・Linux・GitHub Actions・Cloudflareなど開発現場のリアルなトラブルシューティング集。" />
+  </head>
+  <body>
+    <header>
+      <h1>ErrNotes</h1>
+      <p>実際に詰まったエラーの記録と解決ログ</p>
+      <p>A collection of real error logs and fixes.</p>
+    </header>
+    <main>
+      <section>
+        <h2>カテゴリ</h2>
+        <ul>
+          <li>Docker</li>
+          <li>Linux</li>
+          <li>GitHub Actions</li>
+          <li>Cloudflare</li>
+          <li>nginx</li>
+          <li>Windows</li>
+        </ul>
+      </section>
+    </main>
+    <footer>
+      <a href="/privacy">プライバシーポリシー</a>
+    </footer>
+  </body>
+</html>
