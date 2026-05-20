@@ -1,6 +1,6 @@
 ---
 title: 'XserverドメインのネームサーバーをCloudflareに変更する方法'
-date: '2026-05-20'
+date: '2026-05-02'
 category: 'Cloudflare'
 ---
 

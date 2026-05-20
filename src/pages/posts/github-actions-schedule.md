@@ -1,70 +1,32 @@
 ---
 title: 'GitHub Actionsでスケジュール実行（定期実行）を設定する方法'
-date: '2026-05-20'
+date: '2026-05-19'
 category: 'GitHub Actions'
 ---
-
-## やりたかったこと
-
-GitHub Actionsを毎日決まった時間に自動実行したかった。
-cronの設定でスケジュール実行できる。
-
-## 環境
-
-- GitHub Actions
 
 ## 基本的な設定
 
 ```yaml
-name: Daily Task
-
 on:
   schedule:
-    - cron: '0 9 * * *'    # 毎日9時（UTC）に実行
-
-jobs:
-  run-task:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - name: タスクを実行
-        run: echo "定期実行されました"
+    - cron: '0 9 * * *'    # 毎日9時（UTC）
 ```
 
-## cron式の書き方
-
-```
-分 時 日 月 曜日
-*  *  *  *  *
-```
-
-### よく使う設定例
+## よく使うcron設定例
 
 ```
 0 9 * * *       # 毎日9時（UTC）
-0 0 * * *       # 毎日0時（UTC）
-0 9 * * 1       # 毎週月曜日9時
+0 0 * * 1       # 毎週月曜日0時
 0 9 1 * *       # 毎月1日9時
 */30 * * * *    # 30分ごと
 ```
 
-### JSTに変換する場合
+## JSTに変換する
 
-GitHubのcronはUTCなのでJSTとは9時間の差がある。
+GitHubのcronはUTCなので9時間の差がある。
 
 ```
 JSTの9時 = UTCの0時 → cron: '0 0 * * *'
-JSTの18時 = UTCの9時 → cron: '0 9 * * *'
-```
-
-## pushとスケジュール両方で実行する
-
-```yaml
-on:
-  push:
-    branches: [main]
-  schedule:
-    - cron: '0 0 * * *'
 ```
 
 ## 手動実行も可能にする
@@ -73,15 +35,13 @@ on:
 on:
   schedule:
     - cron: '0 0 * * *'
-  workflow_dispatch:    # 手動実行を有効にする
+  workflow_dispatch:
 ```
 
 ## ハマったポイント
 
 - cronはUTCなのでJSTと9時間ずれる
-- スケジュール実行はリポジトリにアクティビティがないと無効化されることがある
-- 無料枠の実行時間制限に注意
-- `workflow_dispatch` を追加すると手動でもテスト実行できる
+- リポジトリにアクティビティがないと無効化されることがある
 
 ## 関連記事
 

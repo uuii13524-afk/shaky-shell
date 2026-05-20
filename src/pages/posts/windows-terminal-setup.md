@@ -1,75 +1,37 @@
 ---
 title: 'Windows Terminalをインストールして使いやすくする方法'
-date: '2026-05-20'
+date: '2026-05-15'
 category: 'Windows'
 ---
 
-## やりたかったこと
-
-Windowsのデフォルトのコマンドプロンプトは使いにくいのでWindows Terminalに乗り換えたかった。
-
-## 環境
-
-- Windows 10 / 11
-
 ## インストール
-
-### Microsoft Storeからインストール
-
-1. Microsoft Storeを開く
-2. 「Windows Terminal」を検索
-3. 「入手」をクリック
-
-### wingetでインストール
 
 ```
 winget install Microsoft.WindowsTerminal
 ```
 
-## 基本的な使い方
+またはMicrosoft Storeから「Windows Terminal」を検索してインストール。
 
-### タブで複数のシェルを使う
-
-上部の「+」ボタンで新しいタブを開く。
-「∨」ボタンでシェルの種類を選べる。
-
-- コマンドプロンプト
-- PowerShell
-- Windows PowerShell
-- Ubuntu（WSL2がインストールされている場合）
-- Git Bash（Gitがインストールされている場合）
-
-### キーボードショートカット
+## キーボードショートカット
 
 ```
 Ctrl + Shift + T    # 新しいタブを開く
 Ctrl + Shift + W    # タブを閉じる
-Ctrl + Tab          # 次のタブへ
-Ctrl + Shift + 1    # プロファイル1を開く
 Alt + Shift + D     # 画面を分割
 ```
 
-## 設定のカスタマイズ
+## デフォルトのシェルを変更
 
-設定ファイルを開く：`Ctrl + ,`
-
-### デフォルトのシェルを変更
-
-設定→スタートアップ→「既定のプロファイル」でシェルを選択する。
-
-### フォントサイズを変更
-
-設定→プロファイル→外観→「フォントサイズ」で変更する。
+設定（Ctrl + ,）→スタートアップ→「既定のプロファイル」で変更。
 
 ## ハマったポイント
 
-- Windows 11はWindows Terminalがデフォルトでインストールされている
-- WSL2をインストールするとUbuntuがプロファイルに自動追加される
-- Git Bashを使いたい場合はGitのインストール時に「Add a Git Bash profile to Windows Terminal」を選ぶ
+- Windows 11はデフォルトでインストール済み
+- WSL2をインストールするとUbuntuが自動追加される
 
 ## 関連記事
 
 - [WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)
 - [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)
-- [Windowsのターミナルでパスにスペースがある時の対処法](/posts/windows-path-with-spaces)
+- [Windowsで環境変数を設定・確認する方法](/posts/windows-env-variables)

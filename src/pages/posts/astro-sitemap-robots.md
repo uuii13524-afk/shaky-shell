@@ -1,6 +1,6 @@
 ---
 title: 'Astroでrobots.txtとsitemapを自動生成する方法'
-date: '2026-05-20'
+date: '2026-05-05'
 category: 'Astro'
 ---
 
@@ -33,8 +33,6 @@ export default defineConfig({
 });
 ```
 
-`site` にサイトのURLを必ず設定する。
-
 ### 3. 動作確認
 
 ```
@@ -43,7 +41,7 @@ https://あなたのドメイン.com/sitemap-index.xml
 
 ## robots.txtの設置
 
-`public/robots.txt` として以下の内容で保存する。
+`public/robots.txt` として保存する。
 
 ```
 User-agent: *
@@ -52,15 +50,10 @@ Allow: /
 Sitemap: https://あなたのドメイン.com/sitemap-index.xml
 ```
 
-## Google Search Consoleにサイトマップを送信
-
-1. Google Search Console→「サイトマップ」
-2. `sitemap-index.xml` と入力して「送信」
-
 ## ハマったポイント
 
 - `site` を設定しないとsitemapが生成されない
-- robots.txtは `public/` に置く（`src/` ではない）
+- robots.txtは `public/` に置く
 - Cloudflareがrobots.txtを上書きすることがあるが問題ない
 
 ## 関連記事

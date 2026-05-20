@@ -1,6 +1,6 @@
 ---
 title: 'Cloudflare PagesがGitHubと切断された時の対処法'
-date: '2026-05-20'
+date: '2026-05-01'
 category: 'Cloudflare'
 ---
 

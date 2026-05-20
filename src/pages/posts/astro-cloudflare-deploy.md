@@ -1,6 +1,6 @@
 ---
 title: 'AstroをCloudflare Pagesにデプロイする手順'
-date: '2026-05-20'
+date: '2026-05-03'
 category: 'Astro'
 ---
 

@@ -1,6 +1,6 @@
 ---
 title: 'Cloudflare PagesのGitHub自動デプロイが動かない時の対処法'
-date: '2026-05-20'
+date: '2026-05-04'
 category: 'Cloudflare'
 ---
 
@@ -35,14 +35,6 @@ git push
 
 ## 原因2：古いコミットがデプロイされている
 
-ログに以下が表示される場合。
-
-```
-HEAD is now at 3218655 first commit
-```
-
-### 解決方法
-
 ```
 git commit --allow-empty -m "force deploy"
 git push
@@ -56,15 +48,6 @@ Deploymentsタブ→「View build logs」でエラー内容を確認する。
 
 - 空のコミットpushが最も確実な強制デプロイ方法
 - ビルドログを最初に確認する習慣をつける
-
-## 予防策
-
-```
-1. Deploymentsタブにデプロイが来ているか確認
-2. ビルドログにエラーがないか確認
-3. GitHubとの接続状態を確認
-4. 空のコミットpushで強制デプロイ
-```
 
 ## 関連記事
 

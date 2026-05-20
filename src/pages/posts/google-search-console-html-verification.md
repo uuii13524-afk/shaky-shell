@@ -1,6 +1,6 @@
 ---
 title: 'Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順'
-date: '2026-05-20'
+date: '2026-05-04'
 category: 'SEO'
 ---
 

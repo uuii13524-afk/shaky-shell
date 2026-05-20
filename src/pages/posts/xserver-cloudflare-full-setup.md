@@ -1,6 +1,6 @@
 ---
 title: 'XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順'
-date: '2026-05-20'
+date: '2026-05-05'
 category: 'Cloudflare'
 ---
 
@@ -56,7 +56,6 @@ Cloudflare PagesにカスタムドメインをActivate
 
 - ネームサーバー変更前にカスタムドメインを設定しようとしても進めない
 - Activeを確認してから改めてCustom domainsの設定をする（2段階）
-- ネームサーバーアドレスは公開情報なので知られても問題ない
 
 ## 関連記事
 
