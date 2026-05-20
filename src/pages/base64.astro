@@ -1,5 +1,4 @@
 ---
-title: 'Base64 Encoder / Decoder'
 ---
 <html lang="ja">
   <head>
@@ -39,9 +38,9 @@ title: 'Base64 Encoder / Decoder'
         <label for="input">入力テキスト</label>
         <textarea id="input" placeholder="ここにテキストを入力してください"></textarea>
         <div class="buttons">
-          <button onclick="encode()">エンコード（Base64に変換）</button>
-          <button onclick="decode()">デコード（Base64から変換）</button>
-          <button class="secondary" onclick="clearAll()">クリア</button>
+          <button id="encodeBtn">エンコード（Base64に変換）</button>
+          <button id="decodeBtn">デコード（Base64から変換）</button>
+          <button class="secondary" id="clearBtn">クリア</button>
         </div>
       </div>
 
@@ -50,7 +49,7 @@ title: 'Base64 Encoder / Decoder'
         <div class="result-box" id="result">結果がここに表示されます</div>
         <div class="error" id="error"></div>
         <div class="buttons" style="margin-top:8px;">
-          <button class="copy-btn" onclick="copyResult()">コピー</button>
+          <button class="copy-btn" id="copyBtn">コピー</button>
         </div>
       </div>
 
@@ -69,51 +68,51 @@ title: 'Base64 Encoder / Decoder'
       <a href="/privacy">プライバシーポリシー</a>
     </footer>
 
-    <script>
-      function encode() {
-        const input = document.getElementById('input').value;
+    <script is:inline>
+      document.getElementById('encodeBtn').addEventListener('click', function() {
+        var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
         if (!input) {
           document.getElementById('result').textContent = '入力テキストを入力してください';
           return;
         }
         try {
-          const encoded = btoa(unescape(encodeURIComponent(input)));
+          var encoded = btoa(unescape(encodeURIComponent(input)));
           document.getElementById('result').textContent = encoded;
         } catch(e) {
           document.getElementById('error').textContent = 'エンコードに失敗しました: ' + e.message;
         }
-      }
+      });
 
-      function decode() {
-        const input = document.getElementById('input').value;
+      document.getElementById('decodeBtn').addEventListener('click', function() {
+        var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
         if (!input) {
           document.getElementById('result').textContent = '入力テキストを入力してください';
           return;
         }
         try {
-          const decoded = decodeURIComponent(escape(atob(input)));
+          var decoded = decodeURIComponent(escape(atob(input)));
           document.getElementById('result').textContent = decoded;
         } catch(e) {
           document.getElementById('error').textContent = 'デコードに失敗しました。正しいBase64文字列を入力してください。';
         }
-      }
+      });
 
-      function clearAll() {
+      document.getElementById('clearBtn').addEventListener('click', function() {
         document.getElementById('input').value = '';
         document.getElementById('result').textContent = '結果がここに表示されます';
         document.getElementById('error').textContent = '';
-      }
+      });
 
-      function copyResult() {
-        const result = document.getElementById('result').textContent;
-        navigator.clipboard.writeText(result).then(() => {
-          const btn = document.querySelector('.copy-btn');
+      document.getElementById('copyBtn').addEventListener('click', function() {
+        var result = document.getElementById('result').textContent;
+        navigator.clipboard.writeText(result).then(function() {
+          var btn = document.getElementById('copyBtn');
           btn.textContent = 'コピーしました！';
-          setTimeout(() => { btn.textContent = 'コピー'; }, 2000);
+          setTimeout(function() { btn.textContent = 'コピー'; }, 2000);
         });
-      }
+      });
     </script>
   </body>
 </html>
