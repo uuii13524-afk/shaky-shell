@@ -59,38 +59,19 @@ git branch -d ブランチ名
 ## よくある使い方
 
 ```
-# 新機能の開発を始める
 git switch -c feature/new-function
-
-# 作業してcommit
 git add .
 git commit -m "add new function"
-
-# mainに戻ってマージ
 git switch main
 git merge feature/new-function
-
-# ブランチを削除
 git branch -d feature/new-function
 ```
 
 ## リモートブランチの操作
 
-### リモートブランチを確認
-
 ```
 git branch -r
-```
-
-### リモートブランチをローカルに取得
-
-```
 git switch -c ブランチ名 origin/ブランチ名
-```
-
-### ローカルブランチをリモートにpush
-
-```
 git push origin ブランチ名
 ```
 
@@ -98,5 +79,12 @@ git push origin ブランチ名
 
 - 古いGitでは `git checkout` を使う。新しいGitでは `git switch` が推奨
 - マージ前に必ずmainブランチに切り替える
-- ブランチ名にスペースは使えない。`/` や `-` を使う
-- `-d` で削除できない場合は `-D` で強制削除できる（マージ前でも削除される）
+- ブランチ名にスペースは使えない
+- `-d` で削除できない場合は `-D` で強制削除できる
+
+## 関連記事
+
+- [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)
+- [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)
+- [Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)
+- [Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)

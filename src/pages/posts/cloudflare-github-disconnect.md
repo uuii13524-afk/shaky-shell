@@ -8,8 +8,10 @@ category: 'Cloudflare'
 
 git pushしてもCloudflare Pagesに反映されない。ダッシュボードに以下のメッセージが表示される。
 
+```
 This project is disconnected from your Git account.
 This may cause deployments to fail.
+```
 
 ## 環境
 
@@ -33,9 +35,18 @@ CloudflareとGitHubの接続が切れていた。
 3. GitHubアカウントを再認証
 4. 以下のコマンドで空のコミットをpushして強制デプロイ
 
+```
 git commit --allow-empty -m "force deploy"
 git push
+```
 
 ## 再発防止
 
 デプロイが反映されない時はまずDeploymentsタブのログを確認する。
+
+## 関連記事
+
+- [Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)
+- [Cloudflare Pagesのビルドログの見方とエラーの対処法](/posts/cloudflare-pages-build-log)
+- [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)
+- [XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)

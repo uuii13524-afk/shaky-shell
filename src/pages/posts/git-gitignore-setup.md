@@ -23,35 +23,15 @@ Gitの管理対象から除外するファイルやフォルダを指定する�
 
 ```
 # コメント
-
-# ファイルを除外
 secret.txt
-
-# フォルダを除外
 node_modules/
-
-# 特定の拡張子を除外
 *.log
 *.env
-
-# 特定のフォルダ内のファイルだけ除外
 dist/
 .cache/
 ```
 
 ## よく使う.gitignoreの設定
-
-### Node.jsプロジェクト向け
-
-```
-node_modules/
-dist/
-.env
-.env.local
-*.log
-.DS_Store
-.cache/
-```
 
 ### Astroプロジェクト向け
 
@@ -69,25 +49,25 @@ dist/
 
 すでにGitの管理下に入っているファイルは `.gitignore` に追加しても無視されない。
 
-### 解決方法
-
 ```
 git rm -r --cached ファイル名またはフォルダ名
 git add .
 git commit -m "remove from tracking"
 ```
 
-`--cached` をつけることでファイル自体は削除せず、Gitの管理対象からだけ外せる。
-
 ## テンプレートを使う方法
 
-https://www.toptal.com/developers/gitignore にアクセスして
-使用している技術（Node、Astro、Windowsなど）を入力すると
-自動で.gitignoreを生成してくれる。
+https://www.toptal.com/developers/gitignore でNode・Astro・Windowsなどを入力すると自動生成できる。
 
 ## ハマったポイント
 
 - `.gitignore` はプロジェクトのルートに置く
 - すでにcommitしたファイルは `git rm --cached` で管理対象から外す
-- `node_modules/` のスラッシュは「フォルダを除外」という意味
 - `.env` ファイルには絶対に秘密のキーや認証情報を書かない
+
+## 関連記事
+
+- [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)
+- [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)
+- [Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)
+- [GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)

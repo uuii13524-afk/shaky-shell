@@ -6,8 +6,6 @@ category: 'Windows'
 
 ## 症状
 
-Windowsのターミナルでパスにスペースが含まれているとコマンドがエラーになる。
-
 ```
 cd C:\Users\acia\My Documents\project
 # エラー：'Documents\project' は認識されません
@@ -26,39 +24,32 @@ cd C:\Users\acia\My Documents\project
 cd "C:\Users\acia\My Documents\project"
 ```
 
-パス全体をダブルクォートで囲む。最もシンプルな解決方法。
+最もシンプルな解決方法。
 
-### 方法2：スペースをアンダースコアに変えてフォルダを作り直す
+### 方法2：スペースなしのフォルダ名にする
 
 ```
 C:\Users\acia\My_Documents\project
 ```
 
-根本的な解決策。フォルダ名にスペースを使わない運用にする。
-
-### 方法3：短いパス名を使う（コマンドプロンプトのみ）
-
-Windowsには8.3形式の短いパス名がある。
-
-```
-dir /x
-```
-
-このコマンドで短いパス名を確認できる。
-`My Documents` は `MYDOCU~1` のような形式になる。
+根本的な解決策。
 
 ## ハマったポイント
 
 - スペースを含むパスは必ずダブルクォートで囲む
-- PowerShellとコマンドプロンプトで挙動が若干違う場合がある
-- プロジェクトフォルダは最初からスペースなしの名前で作るのがベスト
+- 開発用フォルダは最初からスペースなしで作るのがベスト
 
 ## 予防策
-
-開発用のプロジェクトフォルダは以下のようにスペースなしで作る。
 
 ```
 C:\Users\ユーザー名\projects\プロジェクト名
 ```
 
 スペースの代わりにハイフン `-` やアンダースコア `_` を使う。
+
+## 関連記事
+
+- [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)
+- [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)
+- [npmのキャッシュをクリアして問題を解決する方法](/posts/npm-cache-clear)
+- [WindowsにDockerをインストールして動かすまでの手順](/posts/docker-install-windows)

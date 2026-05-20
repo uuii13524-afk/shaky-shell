@@ -7,7 +7,6 @@ category: 'Astro'
 ## やりたかったこと
 
 AstroサイトにSEOに必要なrobots.txtとsitemap.xmlを設置したかった。
-記事が増えるたびに手動でsitemapを更新するのは現実的ではないので自動生成にした。
 
 ## 環境
 
@@ -16,7 +15,7 @@ AstroサイトにSEOに必要なrobots.txtとsitemap.xmlを設置したかった
 
 ## sitemapの自動生成
 
-### 1. sitemapプラグインをインストール
+### 1. プラグインをインストール
 
 ```
 npm install @astrojs/sitemap
@@ -34,31 +33,15 @@ export default defineConfig({
 });
 ```
 
-`site` にサイトのURLを必ず設定する。これがないとsitemapが正しく生成されない。
+`site` にサイトのURLを必ず設定する。
 
 ### 3. 動作確認
-
-ビルドしてから以下のURLにアクセスして確認する。
 
 ```
 https://あなたのドメイン.com/sitemap-index.xml
 ```
 
-以下のようなXMLが表示されれば成功。
-
-```xml
-<sitemapindex xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <sitemap>
-    <loc>https://あなたのドメイン.com/sitemap-0.xml</loc>
-  </sitemap>
-</sitemapindex>
-```
-
 ## robots.txtの設置
-
-sitemapと違い、robots.txtは手動で作成する。
-
-### 1. publicフォルダにrobots.txtを作成
 
 `public/robots.txt` として以下の内容で保存する。
 
@@ -69,28 +52,20 @@ Allow: /
 Sitemap: https://あなたのドメイン.com/sitemap-index.xml
 ```
 
-### 2. 動作確認
-
-以下のURLにアクセスして内容が表示されれば成功。
-
-```
-https://あなたのドメイン.com/robots.txt
-```
-
 ## Google Search Consoleにサイトマップを送信
 
-1. Google Search Consoleにログイン
-2. 左メニュー「サイトマップ」をクリック
-3. 入力欄に `sitemap-index.xml` と入力
-4. 「送信」を押す
+1. Google Search Console→「サイトマップ」
+2. `sitemap-index.xml` と入力して「送信」
 
 ## ハマったポイント
 
-- `astro.config.mjs` に `site` を設定しないとsitemapが生成されない
-- robots.txtは `src/` ではなく `public/` に置く
-- `public/` に置いたファイルはビルド後のサイトのルートに配置される
-- Cloudflareがrobots.txtを上書きすることがある。その場合でも `sitemap-index.xml` のURLは末尾に追加される
+- `site` を設定しないとsitemapが生成されない
+- robots.txtは `public/` に置く（`src/` ではない）
+- Cloudflareがrobots.txtを上書きすることがあるが問題ない
 
-## 補足
+## 関連記事
 
-Cloudflare管理のrobots.txtが追加される場合があるが、自分で設定した内容も末尾に追加されるので問題ない。
+- [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)
+- [Astroで新しいページを追加する基本的な方法](/posts/astro-add-page)
+- [Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順](/posts/google-search-console-html-verification)
+- [Cloudflare Pagesのビルドログの見方とエラーの対処法](/posts/cloudflare-pages-build-log)

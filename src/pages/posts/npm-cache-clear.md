@@ -7,8 +7,8 @@ category: 'Node.js'
 ## 症状
 
 npmでパッケージをインストールしても動かない。
-以前のバージョンが残っていておかしな動作をしている。
 インストールが途中で止まる。
+以前のバージョンが残っておかしな動作をしている。
 
 ## 環境
 
@@ -17,44 +17,13 @@ npmでパッケージをインストールしても動かない。
 
 ## キャッシュのクリア方法
 
-### 基本のキャッシュクリア
-
 ```
 npm cache clean --force
 ```
 
-### キャッシュの状態を確認
+## パッケージ関連の問題をリセット
 
-```
-npm cache verify
-```
-
-キャッシュの整合性チェックと不要なファイルの削除を行う。
-
-### キャッシュの場所を確認
-
-```
-npm config get cache
-```
-
-## パッケージ関連の問題をリセットする方法
-
-キャッシュクリアだけで解決しない場合は以下を試す。
-
-### node_modulesを削除して再インストール
-
-```
-# node_modulesを削除
-rm -rf node_modules
-
-# package-lock.jsonを削除
-rm package-lock.json
-
-# 再インストール
-npm install
-```
-
-Windowsの場合。
+### node_modulesを削除して再インストール（Windows）
 
 ```
 rmdir /s /q node_modules
@@ -62,17 +31,18 @@ del package-lock.json
 npm install
 ```
 
-### npxのキャッシュをクリア
+### node_modulesを削除して再インストール（Mac/Linux）
 
 ```
-npx clear-npx-cache
+rm -rf node_modules
+rm package-lock.json
+npm install
 ```
 
 ## ハマったポイント
 
-- `--force` なしでは警告が出てキャッシュがクリアされない場合がある
-- `node_modules` を削除して再インストールするのが最も確実な方法
-- `package-lock.json` も一緒に削除すると依存関係がリセットされる
+- `--force` なしではキャッシュがクリアされない場合がある
+- `node_modules` を削除して再インストールが最も確実
 - キャッシュクリア後はインストールに時間がかかる
 
 ## いつキャッシュクリアするか
@@ -80,4 +50,10 @@ npx clear-npx-cache
 - パッケージのインストールが失敗する
 - バージョンを変えても古い動作をしている
 - 原因不明のエラーが出る
-- 長期間使っていなかったプロジェクトを再開する時
+
+## 関連記事
+
+- [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)
+- [Node.jsのバージョンをnvmで管理する方法](/posts/node-version-management-nvm)
+- [Windowsのターミナルでパスにスペースがある時の対処法](/posts/windows-path-with-spaces)
+- [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)

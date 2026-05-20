@@ -65,3 +65,10 @@ git config --list
 - インストール後にターミナルを再起動しないとgitコマンドが認識されない
 - user.nameとuser.emailを設定しないとcommit時にエラーになる
 - デフォルトブランチ名を `main` にしないとGitHubと名前が合わずにpushで詰まる
+
+## 関連記事
+
+- [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)
+- [Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)
+- [GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)
+- [Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)

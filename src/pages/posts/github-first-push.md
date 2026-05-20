@@ -57,3 +57,10 @@ git push -u origin main
 4. 「Generate new token」
 5. 必要な権限（repo）にチェックを入れて生成
 6. 生成されたトークンをパスワードの代わりに使う
+
+## 関連記事
+
+- [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)
+- [Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)
+- [GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)
+- [Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)
