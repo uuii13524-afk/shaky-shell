@@ -2,6 +2,7 @@
 title: 'Cloudflareでリダイレクトルールを設定する方法'
 date: '2026-05-16'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## リダイレクトルールの設定手順

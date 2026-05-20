@@ -2,6 +2,7 @@
 title: 'Cloudflareで独自ドメインのSSL設定を確認する方法'
 date: '2026-05-07'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

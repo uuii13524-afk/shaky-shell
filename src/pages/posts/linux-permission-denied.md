@@ -2,6 +2,7 @@
 title: 'Linuxでpermission deniedエラーが出た時の対処法'
 date: '2026-05-14'
 category: 'Linux'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

@@ -2,6 +2,7 @@
 title: 'WindowsにDockerをインストールして動かすまでの手順'
 date: '2026-05-10'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 手順

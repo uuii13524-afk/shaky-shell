@@ -2,6 +2,7 @@
 title: 'Gitのリモートリポジトリ操作まとめ（remote/fetch/pull/push）'
 date: '2026-05-14'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## リモートリポジトリの確認

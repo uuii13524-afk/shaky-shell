@@ -2,6 +2,7 @@
 title: 'Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ'
 date: '2026-05-10'
 category: 'Linux'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## ファイル・フォルダの確認

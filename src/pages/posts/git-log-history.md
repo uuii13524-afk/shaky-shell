@@ -2,6 +2,7 @@
 title: 'git logでコミット履歴を確認する方法'
 date: '2026-05-17'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な使い方

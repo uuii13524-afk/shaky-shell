@@ -2,6 +2,7 @@
 title: 'Cloudflare Pagesのビルドログの見方とエラーの対処法'
 date: '2026-05-09'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## ビルドログの開き方

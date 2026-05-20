@@ -2,6 +2,7 @@
 title: 'Cloudflare AnalyticsをAstroサイトに設定する方法'
 date: '2026-05-19'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## Cloudflare Analyticsとは

@@ -2,6 +2,7 @@
 title: 'SSHキーを生成してGitHubに登録する方法'
 date: '2026-05-11'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 手順

@@ -2,6 +2,7 @@
 title: 'docker-composeの基本的な使い方'
 date: '2026-05-12'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## docker-compose.ymlの基本構成

@@ -2,6 +2,7 @@
 title: 'npmとyarnの違いと使い分け'
 date: '2026-05-11'
 category: 'Node.js'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## コマンド比較

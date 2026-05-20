@@ -2,6 +2,7 @@
 title: 'GitHub ActionsでSecretsを使って秘密情報を管理する方法'
 date: '2026-05-13'
 category: 'GitHub Actions'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## Secretsの設定手順

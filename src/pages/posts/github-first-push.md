@@ -2,6 +2,7 @@
 title: 'GitHubで初めてリポジトリを作ってpushする手順'
 date: '2026-05-06'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

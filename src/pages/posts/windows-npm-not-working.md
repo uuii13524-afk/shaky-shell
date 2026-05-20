@@ -2,6 +2,7 @@
 title: 'Windowsでnpmコマンドが動かない時の対処法'
 date: '2026-05-06'
 category: 'Windows'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

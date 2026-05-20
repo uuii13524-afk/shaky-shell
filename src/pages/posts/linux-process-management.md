@@ -2,6 +2,7 @@
 title: 'Linuxでプロセスを確認・終了する方法（ps/kill）'
 date: '2026-05-19'
 category: 'Linux'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## プロセスの確認

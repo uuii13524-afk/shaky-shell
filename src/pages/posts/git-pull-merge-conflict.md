@@ -2,6 +2,7 @@
 title: 'git pullでコンフリクトが発生した時の解決方法'
 date: '2026-05-13'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

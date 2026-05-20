@@ -2,6 +2,7 @@
 title: 'AstroでSEOに必要なmetaタグを設定する方法'
 date: '2026-05-18'
 category: 'Astro'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的なmetaタグ

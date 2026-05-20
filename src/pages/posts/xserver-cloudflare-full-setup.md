@@ -2,6 +2,7 @@
 title: 'XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順'
 date: '2026-05-05'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

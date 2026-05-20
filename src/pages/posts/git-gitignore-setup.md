@@ -2,6 +2,7 @@
 title: 'Gitで.gitignoreを設定してファイルを管理対象から外す方法'
 date: '2026-05-09'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## .gitignoreとは

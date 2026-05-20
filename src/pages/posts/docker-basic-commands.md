@@ -2,6 +2,7 @@
 title: 'Dockerの基本コマンドまとめ（run/stop/rm/ps）'
 date: '2026-05-12'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## コンテナの操作

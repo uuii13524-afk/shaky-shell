@@ -2,6 +2,7 @@
 title: 'GitのブランチをCLIで作成・切り替える基本コマンド'
 date: '2026-05-08'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本コマンド

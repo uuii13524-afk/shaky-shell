@@ -2,6 +2,7 @@
 title: 'WindowsにGitをインストールして初期設定する方法'
 date: '2026-05-07'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

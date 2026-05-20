@@ -2,6 +2,7 @@
 title: 'Cloudflare PagesのGitHub自動デプロイが動かない時の対処法'
 date: '2026-05-04'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

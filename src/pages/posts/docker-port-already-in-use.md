@@ -2,6 +2,7 @@
 title: 'Dockerでポートが既に使用中エラーが出た時の対処法'
 date: '2026-05-14'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

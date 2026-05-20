@@ -2,6 +2,7 @@
 title: 'GitHub Actionsでスケジュール実行（定期実行）を設定する方法'
 date: '2026-05-19'
 category: 'GitHub Actions'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な設定

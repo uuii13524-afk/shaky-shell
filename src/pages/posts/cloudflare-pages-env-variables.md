@@ -2,6 +2,7 @@
 title: 'Cloudflare Pagesで環境変数を設定する方法'
 date: '2026-05-13'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 設定手順

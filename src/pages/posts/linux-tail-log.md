@@ -2,6 +2,7 @@
 title: 'Linuxでログをリアルタイム監視するtail -fの使い方'
 date: '2026-05-17'
 category: 'Linux'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な使い方

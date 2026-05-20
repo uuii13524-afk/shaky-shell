@@ -2,6 +2,7 @@
 title: 'package.jsonのscriptsを活用して作業を効率化する方法'
 date: '2026-05-17'
 category: 'Node.js'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## scriptsの基本

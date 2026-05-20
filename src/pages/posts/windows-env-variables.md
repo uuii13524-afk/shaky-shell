@@ -2,6 +2,7 @@
 title: 'Windowsで環境変数を設定・確認する方法'
 date: '2026-05-18'
 category: 'Windows'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## GUIで設定する方法

@@ -2,6 +2,7 @@
 title: 'Astroでrobots.txtとsitemapを自動生成する方法'
 date: '2026-05-05'
 category: 'Astro'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

@@ -2,6 +2,7 @@
 title: 'nginxの基本的な設定ファイルの書き方'
 date: '2026-05-12'
 category: 'nginx'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な設定ファイル

@@ -2,6 +2,7 @@
 title: 'Gitで間違えてcommitした時の取り消し方'
 date: '2026-05-06'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

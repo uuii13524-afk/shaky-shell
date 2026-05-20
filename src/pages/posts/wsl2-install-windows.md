@@ -2,6 +2,7 @@
 title: 'WindowsでWSL2をインストールする方法'
 date: '2026-05-11'
 category: 'Windows'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 手順

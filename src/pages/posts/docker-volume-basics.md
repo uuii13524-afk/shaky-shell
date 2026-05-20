@@ -2,6 +2,7 @@
 title: 'Dockerのボリュームでデータを永続化する方法'
 date: '2026-05-16'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## ボリュームとは

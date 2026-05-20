@@ -2,6 +2,7 @@
 title: 'Node.jsのバージョンをnvmで管理する方法（Windows/Mac）'
 date: '2026-05-07'
 category: 'Node.js'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

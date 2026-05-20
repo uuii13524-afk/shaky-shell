@@ -2,6 +2,7 @@
 title: 'Windows Terminalをインストールして使いやすくする方法'
 date: '2026-05-15'
 category: 'Windows'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## インストール

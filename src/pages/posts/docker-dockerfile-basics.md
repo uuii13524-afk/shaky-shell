@@ -2,6 +2,7 @@
 title: 'Dockerfileの基本的な書き方'
 date: '2026-05-18'
 category: 'Docker'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## Dockerfileの基本構成

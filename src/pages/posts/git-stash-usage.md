@@ -2,6 +2,7 @@
 title: 'git stashで作業を一時退避する方法'
 date: '2026-05-20'
 category: 'Git'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な使い方

@@ -2,6 +2,7 @@
 title: 'XserverドメインのネームサーバーをCloudflareに変更する方法'
 date: '2026-05-02'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## やりたかったこと

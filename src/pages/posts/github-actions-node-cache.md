@@ -2,6 +2,7 @@
 title: 'GitHub ActionsでNode.jsのキャッシュを使ってビルドを高速化する方法'
 date: '2026-05-15'
 category: 'GitHub Actions'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## キャッシュありの設定

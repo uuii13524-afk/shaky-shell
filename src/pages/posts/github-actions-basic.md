@@ -2,6 +2,7 @@
 title: 'GitHub Actionsで自動デプロイする基本的な設定方法'
 date: '2026-05-10'
 category: 'GitHub Actions'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 基本的な仕組み
