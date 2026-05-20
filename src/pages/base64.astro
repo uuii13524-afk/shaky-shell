@@ -1,0 +1,119 @@
+---
+title: 'Base64 Encoder / Decoder'
+---
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Base64 Encoder / Decoder - ErrNotes</title>
+    <meta name="description" content="テキストをBase64にエンコード・デコードできる無料ツール。APIトークンや設定ファイルの確認に使えます。" />
+    <style>
+      body { font-family: sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+      h1 a { color: inherit; text-decoration: none; }
+      textarea { width: 100%; height: 120px; font-family: monospace; font-size: 14px; padding: 10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 4px; }
+      .buttons { display: flex; gap: 10px; margin: 10px 0; }
+      button { padding: 8px 20px; font-size: 14px; cursor: pointer; border: none; border-radius: 4px; background: #0066cc; color: white; }
+      button:hover { background: #0052a3; }
+      button.secondary { background: #666; }
+      button.secondary:hover { background: #444; }
+      .result-box { background: #f5f5f5; border: 1px solid #ccc; border-radius: 4px; padding: 10px; font-family: monospace; font-size: 14px; min-height: 60px; word-break: break-all; white-space: pre-wrap; }
+      .error { color: red; font-size: 13px; margin-top: 5px; }
+      .copy-btn { padding: 4px 12px; font-size: 12px; background: #28a745; }
+      .copy-btn:hover { background: #218838; }
+      label { font-weight: bold; display: block; margin-bottom: 5px; }
+      .section { margin-bottom: 24px; }
+      .related { margin-top: 40px; border-top: 1px solid #eee; padding-top: 20px; }
+      .related ul { padding-left: 20px; }
+      .related li { margin-bottom: 6px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1><a href="/">ErrNotes</a></h1>
+    </header>
+    <main>
+      <h2>Base64 Encoder / Decoder</h2>
+      <p>テキストをBase64形式にエンコード・デコードできます。APIトークンや設定ファイルの確認に使えます。</p>
+
+      <div class="section">
+        <label for="input">入力テキスト</label>
+        <textarea id="input" placeholder="ここにテキストを入力してください"></textarea>
+        <div class="buttons">
+          <button onclick="encode()">エンコード（Base64に変換）</button>
+          <button onclick="decode()">デコード（Base64から変換）</button>
+          <button class="secondary" onclick="clearAll()">クリア</button>
+        </div>
+      </div>
+
+      <div class="section">
+        <label>結果</label>
+        <div class="result-box" id="result">結果がここに表示されます</div>
+        <div class="error" id="error"></div>
+        <div class="buttons" style="margin-top:8px;">
+          <button class="copy-btn" onclick="copyResult()">コピー</button>
+        </div>
+      </div>
+
+      <div class="related">
+        <h3>関連記事</h3>
+        <ul>
+          <li><a href="/posts/astro-cloudflare-deploy">AstroをCloudflare Pagesにデプロイする手順</a></li>
+          <li><a href="/posts/github-first-push">GitHubで初めてリポジトリを作ってpushする手順</a></li>
+          <li><a href="/posts/git-gitignore-setup">Gitで.gitignoreを設定してファイルを管理対象から外す方法</a></li>
+        </ul>
+      </div>
+    </main>
+
+    <footer style="margin-top:40px;border-top:1px solid #eee;padding-top:20px;">
+      <a href="/">トップページに戻る</a> |
+      <a href="/privacy">プライバシーポリシー</a>
+    </footer>
+
+    <script>
+      function encode() {
+        const input = document.getElementById('input').value;
+        document.getElementById('error').textContent = '';
+        if (!input) {
+          document.getElementById('result').textContent = '入力テキストを入力してください';
+          return;
+        }
+        try {
+          const encoded = btoa(unescape(encodeURIComponent(input)));
+          document.getElementById('result').textContent = encoded;
+        } catch(e) {
+          document.getElementById('error').textContent = 'エンコードに失敗しました: ' + e.message;
+        }
+      }
+
+      function decode() {
+        const input = document.getElementById('input').value;
+        document.getElementById('error').textContent = '';
+        if (!input) {
+          document.getElementById('result').textContent = '入力テキストを入力してください';
+          return;
+        }
+        try {
+          const decoded = decodeURIComponent(escape(atob(input)));
+          document.getElementById('result').textContent = decoded;
+        } catch(e) {
+          document.getElementById('error').textContent = 'デコードに失敗しました。正しいBase64文字列を入力してください。';
+        }
+      }
+
+      function clearAll() {
+        document.getElementById('input').value = '';
+        document.getElementById('result').textContent = '結果がここに表示されます';
+        document.getElementById('error').textContent = '';
+      }
+
+      function copyResult() {
+        const result = document.getElementById('result').textContent;
+        navigator.clipboard.writeText(result).then(() => {
+          const btn = document.querySelector('.copy-btn');
+          btn.textContent = 'コピーしました！';
+          setTimeout(() => { btn.textContent = 'コピー'; }, 2000);
+        });
+      }
+    </script>
+  </body>
+</html>
