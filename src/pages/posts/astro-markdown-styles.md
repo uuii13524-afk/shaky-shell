@@ -2,6 +2,7 @@
 title: 'AstroでMarkdownのスタイルを設定する方法'
 date: '2026-05-15'
 category: 'Astro'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 方法1：グローバルCSSを使う
