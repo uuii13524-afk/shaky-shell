@@ -2,6 +2,7 @@
 title: 'Cloudflare PagesがGitHubと切断された時の対処法'
 date: '2026-05-01'
 category: 'Cloudflare'
+layout: '../../layouts/PostLayout.astro'
 ---
 
 ## 症状

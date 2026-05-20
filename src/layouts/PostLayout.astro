@@ -1,0 +1,43 @@
+---
+const { frontmatter } = Astro.props;
+---
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{frontmatter.title} - ErrNotes</title>
+    <meta name="description" content={frontmatter.title + ' - ErrNotesの技術解決ログ'} />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-wrapper">
+      <article>
+        <div class="article-header">
+          <div class="category">{frontmatter.category}</div>
+          <h1>{frontmatter.title}</h1>
+          <div class="meta">{frontmatter.date}</div>
+        </div>
+        <div class="article-body">
+          <slot />
+        </div>
+      </article>
+    </main>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/">← 記事一覧に戻る</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">プライバシーポリシー</a>
+      </div>
+    </footer>
+  </body>
+</html>
