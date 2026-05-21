@@ -1,0 +1,43 @@
+---
+const { frontmatter } = Astro.props;
+---
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>{frontmatter.title} - ErrNotes</title>
+    <meta name="description" content={frontmatter.title + ' - ErrNotes error log and dev tools'} />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">Articles</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-wrapper">
+      <article>
+        <div class="article-header">
+          <div class="category">{frontmatter.category}</div>
+          <h1>{frontmatter.title}</h1>
+          <div class="meta">{frontmatter.date}</div>
+        </div>
+        <div class="article-body">
+          <slot />
+        </div>
+      </article>
+    </main>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/">← Back to articles</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">Privacy Policy</a>
+      </div>
+    </footer>
+  </body>
+</html>
