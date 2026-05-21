@@ -1,0 +1,58 @@
+name: Post to Bluesky
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/pages/posts/*.md'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Get new articles
+        id: new_articles
+        run: |
+          NEW_FILES=$(git diff --name-only HEAD~1 HEAD -- 'src/pages/posts/*.md')
+          echo "files=$NEW_FILES" >> $GITHUB_OUTPUT
+
+      - name: Post to Bluesky
+        if: steps.new_articles.outputs.files != ''
+        env:
+          BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
+          BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
+        run: |
+          for FILE in ${{ steps.new_articles.outputs.files }}; do
+            TITLE=$(grep '^title:' $FILE | sed "s/title: '//;s/'$//")
+            SLUG=$(basename $FILE .md)
+            URL="https://errsolved.com/posts/$SLUG"
+            MESSAGE="📝 新記事: $TITLE\n$URL"
+            
+            TOKEN=$(curl -s -X POST https://bsky.social/xrpc/com.atproto.server.createSession \
+              -H "Content-Type: application/json" \
+              -d "{\"identifier\":\"$BLUESKY_HANDLE\",\"password\":\"$BLUESKY_PASSWORD\"}" \
+              | python3 -c "import sys,json; print(json.load(sys.stdin)['accessJwt'])")
+            
+            DID=$(curl -s -X POST https://bsky.social/xrpc/com.atproto.server.createSession \
+              -H "Content-Type: application/json" \
+              -d "{\"identifier\":\"$BLUESKY_HANDLE\",\"password\":\"$BLUESKY_PASSWORD\"}" \
+              | python3 -c "import sys,json; print(json.load(sys.stdin)['did'])")
+            
+            curl -s -X POST https://bsky.social/xrpc/com.atproto.repo.createRecord \
+              -H "Content-Type: application/json" \
+              -H "Authorization: Bearer $TOKEN" \
+              -d "{
+                \"repo\": \"$DID\",
+                \"collection\": \"app.bsky.feed.post\",
+                \"record\": {
+                  \"\$type\": \"app.bsky.feed.post\",
+                  \"text\": \"📝 新記事: $TITLE\n$URL\",
+                  \"createdAt\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
+                }
+              }"
+          done
