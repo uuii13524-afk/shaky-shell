@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>JSON Formatter / Validator - ErrNotes</title>
-    <meta name="description" content="JSONを整形・バリデーションできる無料ツール。APIレスポンスや設定ファイルの確認に使えます。" />
+    <meta name="description" content="Free JSON formatter and validator. JSONを整形・バリデーションできる無料ツール。" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
@@ -16,45 +16,52 @@
           <a href="/">記事</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
+          <a href="/en">English</a>
         </nav>
       </div>
     </header>
     <main class="site-wrapper tool-page">
       <h2>JSON Formatter / Validator</h2>
-      <p class="tool-desc">JSONを整形・バリデーションできます。APIレスポンスや設定ファイルの確認に使えます。</p>
+      <p class="tool-desc">
+        JSONを整形・バリデーションできます。APIレスポンスや設定ファイルの確認に使えます。<br>
+        <span style="color:var(--text2);font-size:12px;">Format and validate JSON. Useful for API responses and config files.</span>
+      </p>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:16px;">
         <div>
-          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">入力JSON</label>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Input JSON / 入力JSON</label>
           <textarea id="input" style="height:180px;" placeholder='{"key": "value"}'></textarea>
           <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-            <button class="btn btn-primary" id="formatBtn">整形する</button>
-            <button class="btn btn-primary" id="minifyBtn">圧縮する</button>
-            <button class="btn btn-secondary" id="clearBtn">クリア</button>
+            <button class="btn btn-primary" id="formatBtn">Format / 整形</button>
+            <button class="btn btn-primary" id="minifyBtn">Minify / 圧縮</button>
+            <button class="btn btn-secondary" id="clearBtn">Clear / クリア</button>
           </div>
         </div>
         <div>
-          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果</label>
-          <div class="result-box" id="result" style="height:180px;">結果がここに表示されます</div>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Result / 結果</label>
+          <div class="result-box" id="result" style="height:180px;">Result will appear here / 結果がここに表示されます</div>
           <div style="margin-top:10px;">
-            <button class="btn btn-success" id="copyBtn">コピー</button>
+            <button class="btn btn-success" id="copyBtn">Copy / コピー</button>
           </div>
         </div>
       </div>
       <div id="status"></div>
 
       <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">その他のツール</div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools / その他のツール</div>
         <ul style="list-style:none;">
           <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/timestamp" style="font-size:13px;color:var(--text);">Timestamp Converter / タイムスタンプ変換</a></li>
         </ul>
       </div>
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/">← 記事一覧に戻る</a>
+        <a href="/">← 記事一覧</a>
         &nbsp;·&nbsp;
-        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/en">English</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">Privacy Policy</a>
       </div>
     </footer>
     <script is:inline>
@@ -66,36 +73,36 @@
       }
       document.getElementById('formatBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value.trim();
-        if (!input) { showStatus('JSONを入力してください', true); return; }
+        if (!input) { showStatus('Enter JSON first / JSONを入力してください', true); return; }
         try {
           document.getElementById('result').textContent = JSON.stringify(JSON.parse(input), null, 2);
-          showStatus('✓ 有効なJSONです', false);
+          showStatus('✓ Valid JSON / 有効なJSONです', false);
         } catch(e) {
           document.getElementById('result').textContent = '';
-          showStatus('✗ JSONが無効です: ' + e.message, true);
+          showStatus('✗ Invalid JSON: ' + e.message, true);
         }
       });
       document.getElementById('minifyBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value.trim();
-        if (!input) { showStatus('JSONを入力してください', true); return; }
+        if (!input) { showStatus('Enter JSON first / JSONを入力してください', true); return; }
         try {
           document.getElementById('result').textContent = JSON.stringify(JSON.parse(input));
-          showStatus('✓ 圧縮しました', false);
+          showStatus('✓ Minified / 圧縮しました', false);
         } catch(e) {
           document.getElementById('result').textContent = '';
-          showStatus('✗ JSONが無効です: ' + e.message, true);
+          showStatus('✗ Invalid JSON: ' + e.message, true);
         }
       });
       document.getElementById('clearBtn').addEventListener('click', function() {
         document.getElementById('input').value = '';
-        document.getElementById('result').textContent = '結果がここに表示されます';
+        document.getElementById('result').textContent = 'Result will appear here / 結果がここに表示されます';
         document.getElementById('status').textContent = '';
       });
       document.getElementById('copyBtn').addEventListener('click', function() {
         navigator.clipboard.writeText(document.getElementById('result').textContent).then(function() {
           var btn = document.getElementById('copyBtn');
-          btn.textContent = 'コピーしました！';
-          setTimeout(function() { btn.textContent = 'コピー'; }, 2000);
+          btn.textContent = 'Copied! / コピーしました';
+          setTimeout(function() { btn.textContent = 'Copy / コピー'; }, 2000);
         });
       });
     </script>

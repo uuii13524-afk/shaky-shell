@@ -5,7 +5,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Base64 Encoder / Decoder - ErrNotes</title>
-    <meta name="description" content="テキストをBase64にエンコード・デコードできる無料ツール。APIトークンや設定ファイルの確認に使えます。" />
+    <meta name="description" content="Free Base64 encoder and decoder. テキストをBase64にエンコード・デコードできる無料ツール。" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
@@ -16,77 +16,84 @@
           <a href="/">記事</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
+          <a href="/en">English</a>
         </nav>
       </div>
     </header>
     <main class="site-wrapper tool-page">
       <h2>Base64 Encoder / Decoder</h2>
-      <p class="tool-desc">テキストをBase64形式にエンコード・デコードできます。APIトークンや設定ファイルの確認に使えます。</p>
+      <p class="tool-desc">
+        テキストをBase64形式にエンコード・デコードできます。APIトークンや設定ファイルの確認に使えます。<br>
+        <span style="color:var(--text2);font-size:12px;">Encode and decode text to/from Base64. Useful for API tokens and config files.</span>
+      </p>
 
       <div style="margin-bottom:16px;">
-        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">入力テキスト</label>
-        <textarea id="input" style="height:120px;" placeholder="ここにテキストを入力してください"></textarea>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">入力テキスト / Input text</label>
+        <textarea id="input" style="height:120px;" placeholder="Enter text here / ここにテキストを入力"></textarea>
         <div style="display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;">
-          <button class="btn btn-primary" id="encodeBtn">エンコード（Base64に変換）</button>
-          <button class="btn btn-primary" id="decodeBtn">デコード（Base64から変換）</button>
-          <button class="btn btn-secondary" id="clearBtn">クリア</button>
+          <button class="btn btn-primary" id="encodeBtn">Encode（Base64に変換）</button>
+          <button class="btn btn-primary" id="decodeBtn">Decode（Base64から変換）</button>
+          <button class="btn btn-secondary" id="clearBtn">Clear / クリア</button>
         </div>
       </div>
 
       <div>
-        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果</label>
-        <div class="result-box" id="result">結果がここに表示されます</div>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Result / 結果</label>
+        <div class="result-box" id="result">Result will appear here / 結果がここに表示されます</div>
         <div id="error" style="color:var(--danger);font-size:12px;font-family:var(--mono);margin-top:6px;"></div>
         <div style="margin-top:10px;">
-          <button class="btn btn-success" id="copyBtn">コピー</button>
+          <button class="btn btn-success" id="copyBtn">Copy / コピー</button>
         </div>
       </div>
 
       <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">その他のツール</div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools / その他のツール</div>
         <ul style="list-style:none;">
           <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter / Validator</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/timestamp" style="font-size:13px;color:var(--text);">Timestamp Converter / タイムスタンプ変換</a></li>
         </ul>
       </div>
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/">← 記事一覧に戻る</a>
+        <a href="/">← 記事一覧</a>
         &nbsp;·&nbsp;
-        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/en">English</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">Privacy Policy</a>
       </div>
     </footer>
     <script is:inline>
       document.getElementById('encodeBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
-        if (!input) { document.getElementById('result').textContent = '入力テキストを入力してください'; return; }
+        if (!input) { document.getElementById('result').textContent = 'Enter text first / テキストを入力してください'; return; }
         try {
           document.getElementById('result').textContent = btoa(unescape(encodeURIComponent(input)));
         } catch(e) {
-          document.getElementById('error').textContent = 'エンコードに失敗しました: ' + e.message;
+          document.getElementById('error').textContent = 'Error: ' + e.message;
         }
       });
       document.getElementById('decodeBtn').addEventListener('click', function() {
         var input = document.getElementById('input').value;
         document.getElementById('error').textContent = '';
-        if (!input) { document.getElementById('result').textContent = '入力テキストを入力してください'; return; }
+        if (!input) { document.getElementById('result').textContent = 'Enter text first / テキストを入力してください'; return; }
         try {
           document.getElementById('result').textContent = decodeURIComponent(escape(atob(input)));
         } catch(e) {
-          document.getElementById('error').textContent = 'デコードに失敗しました。正しいBase64文字列を入力してください。';
+          document.getElementById('error').textContent = 'Invalid Base64 string / 正しいBase64文字列を入力してください';
         }
       });
       document.getElementById('clearBtn').addEventListener('click', function() {
         document.getElementById('input').value = '';
-        document.getElementById('result').textContent = '結果がここに表示されます';
+        document.getElementById('result').textContent = 'Result will appear here / 結果がここに表示されます';
         document.getElementById('error').textContent = '';
       });
       document.getElementById('copyBtn').addEventListener('click', function() {
         navigator.clipboard.writeText(document.getElementById('result').textContent).then(function() {
           var btn = document.getElementById('copyBtn');
-          btn.textContent = 'コピーしました！';
-          setTimeout(function() { btn.textContent = 'コピー'; }, 2000);
+          btn.textContent = 'Copied! / コピーしました';
+          setTimeout(function() { btn.textContent = 'Copy / コピー'; }, 2000);
         });
       });
     </script>

@@ -4,8 +4,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Unixタイムスタンプ変換 - ErrNotes</title>
-    <meta name="description" content="Unixタイムスタンプを日時に変換・日時をUnixタイムスタンプに変換できる無料ツール。サーバーログやAPIレスポンスの確認に使えます。" />
+    <title>Unix Timestamp Converter / Unixタイムスタンプ変換 - ErrNotes</title>
+    <meta name="description" content="Free Unix timestamp converter. Unixタイムスタンプを日時に変換できる無料ツール。" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
@@ -16,41 +16,44 @@
           <a href="/">記事</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
-          <a href="/timestamp">Timestamp</a>
+          <a href="/en">English</a>
         </nav>
       </div>
     </header>
     <main class="site-wrapper tool-page">
-      <h2>Unixタイムスタンプ変換</h2>
-      <p class="tool-desc">Unixタイムスタンプ↔日時を変換できます。サーバーログやAPIレスポンスの確認に使えます。</p>
+      <h2>Unix Timestamp Converter / Unixタイムスタンプ変換</h2>
+      <p class="tool-desc">
+        Unixタイムスタンプ↔日時を変換できます。サーバーログやAPIレスポンスの確認に使えます。<br>
+        <span style="color:var(--text2);font-size:12px;">Convert between Unix timestamps and human-readable datetime. Useful for server logs and API responses.</span>
+      </p>
 
       <div style="margin-bottom:24px;padding:14px 16px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;">
-        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">現在のUnixタイムスタンプ</div>
+        <div style="font-size:12px;color:var(--text2);margin-bottom:6px;">Current Unix Timestamp / 現在のUnixタイムスタンプ</div>
         <div id="currentTs" style="font-family:var(--mono);font-size:20px;font-weight:500;color:var(--accent);"></div>
         <div id="currentDt" style="font-size:13px;color:var(--text2);margin-top:4px;font-family:var(--mono);"></div>
       </div>
 
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;">
         <div>
-          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Unixタイムスタンプ → 日時</label>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Timestamp → Datetime / タイムスタンプ → 日時</label>
           <input id="tsInput" type="number" placeholder="1716134400" style="width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);box-sizing:border-box;" />
           <div style="margin-top:8px;">
-            <button class="btn btn-primary" id="tsConvertBtn">変換する</button>
+            <button class="btn btn-primary" id="tsConvertBtn">Convert / 変換</button>
           </div>
           <div id="tsResult" style="margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--accent2);"></div>
         </div>
         <div>
-          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">日時 → Unixタイムスタンプ</label>
+          <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Datetime → Timestamp / 日時 → タイムスタンプ</label>
           <input id="dtInput" type="datetime-local" style="width:100%;font-family:var(--mono);font-size:13px;padding:10px 12px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;color:var(--text);box-sizing:border-box;" />
           <div style="margin-top:8px;">
-            <button class="btn btn-primary" id="dtConvertBtn">変換する</button>
+            <button class="btn btn-primary" id="dtConvertBtn">Convert / 変換</button>
           </div>
           <div id="dtResult" style="margin-top:10px;font-family:var(--mono);font-size:13px;color:var(--accent2);"></div>
         </div>
       </div>
 
       <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">その他のツール</div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools / その他のツール</div>
         <ul style="list-style:none;">
           <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
           <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter / Validator</a></li>
@@ -59,9 +62,11 @@
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/">← 記事一覧に戻る</a>
+        <a href="/">← 記事一覧</a>
         &nbsp;·&nbsp;
-        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/en">English</a>
+        &nbsp;·&nbsp;
+        <a href="/privacy">Privacy Policy</a>
       </div>
     </footer>
     <script is:inline>
@@ -75,17 +80,15 @@
 
       document.getElementById('tsConvertBtn').addEventListener('click', function() {
         var ts = parseInt(document.getElementById('tsInput').value);
-        if (isNaN(ts)) { document.getElementById('tsResult').textContent = '数値を入力してください'; return; }
+        if (isNaN(ts)) { document.getElementById('tsResult').textContent = 'Enter a number / 数値を入力してください'; return; }
         var d = new Date(ts * 1000);
-        var result = d.toLocaleString('ja-JP') + '\n' + d.toISOString();
-        document.getElementById('tsResult').textContent = result;
+        document.getElementById('tsResult').textContent = d.toLocaleString('ja-JP') + '\n' + d.toISOString();
       });
 
       document.getElementById('dtConvertBtn').addEventListener('click', function() {
         var dt = document.getElementById('dtInput').value;
-        if (!dt) { document.getElementById('dtResult').textContent = '日時を選択してください'; return; }
-        var ts = Math.floor(new Date(dt).getTime() / 1000);
-        document.getElementById('dtResult').textContent = ts;
+        if (!dt) { document.getElementById('dtResult').textContent = 'Select datetime / 日時を選択してください'; return; }
+        document.getElementById('dtResult').textContent = Math.floor(new Date(dt).getTime() / 1000);
       });
     </script>
   </body>
