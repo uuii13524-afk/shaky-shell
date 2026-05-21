@@ -14,8 +14,8 @@ import urllib.parse
 from datetime import datetime, timezone
 
 # ---- 設定 ----
-HANDLE = os.environ['BSKY_HANDLE']
-PASSWORD = os.environ['BSKY_PASSWORD']
+HANDLE = os.environ['BLUESKY_HANDLE']
+PASSWORD = os.environ['BLUESKY_PASSWORD']
 FOLLOW_HANDLE = '@sasukkun.bsky.social'
 
 # ---- 認証 ----
