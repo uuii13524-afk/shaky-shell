@@ -15,34 +15,53 @@ jobs:
         with:
           fetch-depth: 2
 
-      - name: Get new articles
-        id: new_articles
-        run: |
-          NEW_FILES=$(git diff --name-only HEAD~1 HEAD -- 'src/pages/posts/*.md')
-          echo "files=$NEW_FILES" >> $GITHUB_OUTPUT
-
-      - name: Post to Bluesky
-        if: steps.new_articles.outputs.files != ''
+      - name: Get new articles and post to Bluesky
         env:
           BLUESKY_HANDLE: ${{ secrets.BLUESKY_HANDLE }}
           BLUESKY_PASSWORD: ${{ secrets.BLUESKY_PASSWORD }}
         run: |
-          for FILE in ${{ steps.new_articles.outputs.files }}; do
-            TITLE=$(grep '^title:' $FILE | sed "s/title: '//;s/'$//")
+          NEW_FILES=$(git diff --name-only HEAD~1 HEAD -- 'src/pages/posts/*.md')
+          
+          if [ -z "$NEW_FILES" ]; then
+            echo "No new articles found"
+            exit 0
+          fi
+
+          # Get token and DID
+          RESPONSE=$(curl -s -X POST https://bsky.social/xrpc/com.atproto.server.createSession \
+            -H "Content-Type: application/json" \
+            -d "{\"identifier\":\"$BLUESKY_HANDLE\",\"password\":\"$BLUESKY_PASSWORD\"}")
+          
+          TOKEN=$(echo $RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['accessJwt'])")
+          DID=$(echo $RESPONSE | python3 -c "import sys,json; print(json.load(sys.stdin)['did'])")
+
+          for FILE in $NEW_FILES; do
+            TITLE=$(grep "^title:" $FILE | sed "s/title: '//;s/'$//" | sed 's/title: "//' | sed 's/"$//')
+            CATEGORY=$(grep "^category:" $FILE | sed "s/category: '//;s/'$//" | sed 's/category: "//' | sed 's/"$//')
             SLUG=$(basename $FILE .md)
             URL="https://errsolved.com/posts/$SLUG"
-            MESSAGE="📝 新記事: $TITLE\n$URL"
-            
-            TOKEN=$(curl -s -X POST https://bsky.social/xrpc/com.atproto.server.createSession \
-              -H "Content-Type: application/json" \
-              -d "{\"identifier\":\"$BLUESKY_HANDLE\",\"password\":\"$BLUESKY_PASSWORD\"}" \
-              | python3 -c "import sys,json; print(json.load(sys.stdin)['accessJwt'])")
-            
-            DID=$(curl -s -X POST https://bsky.social/xrpc/com.atproto.server.createSession \
-              -H "Content-Type: application/json" \
-              -d "{\"identifier\":\"$BLUESKY_HANDLE\",\"password\":\"$BLUESKY_PASSWORD\"}" \
-              | python3 -c "import sys,json; print(json.load(sys.stdin)['did'])")
-            
+
+            # カテゴリに応じたハッシュタグ
+            case "$CATEGORY" in
+              "Docker") TAGS="#Docker #コンテナ #開発" ;;
+              "Git") TAGS="#Git #GitHub #バージョン管理" ;;
+              "Linux") TAGS="#Linux #コマンド #開発" ;;
+              "nginx") TAGS="#nginx #サーバー #インフラ" ;;
+              "Cloudflare") TAGS="#Cloudflare #CDN #インフラ" ;;
+              "Astro") TAGS="#Astro #静的サイト #フロントエンド" ;;
+              "GitHub Actions") TAGS="#GitHubActions #CI #CD #自動化" ;;
+              "Node.js") TAGS="#Nodejs #npm #JavaScript" ;;
+              "Windows") TAGS="#Windows #開発環境" ;;
+              "SEO") TAGS="#SEO #ウェブ #検索" ;;
+              *) TAGS="#開発 #プログラミング #エラー解決" ;;
+            esac
+
+            MESSAGE="📝 新記事: $TITLE
+
+$URL
+
+$TAGS"
+
             curl -s -X POST https://bsky.social/xrpc/com.atproto.repo.createRecord \
               -H "Content-Type: application/json" \
               -H "Authorization: Bearer $TOKEN" \
@@ -51,8 +70,10 @@ jobs:
                 \"collection\": \"app.bsky.feed.post\",
                 \"record\": {
                   \"\$type\": \"app.bsky.feed.post\",
-                  \"text\": \"📝 新記事: $TITLE\n$URL\",
+                  \"text\": $(echo "$MESSAGE" | python3 -c "import sys,json; print(json.dumps(sys.stdin.read()))"),
                   \"createdAt\": \"$(date -u +%Y-%m-%dT%H:%M:%SZ)\"
                 }
               }"
+            
+            echo "Posted: $TITLE"
           done
