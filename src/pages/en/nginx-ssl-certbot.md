@@ -1,6 +1,6 @@
 ---
 title: "How to Set Up a Free SSL Certificate on nginx with certbot (Let's Encrypt)"
-date: '2026-05-22'
+date: '2026-05-23'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
 ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
