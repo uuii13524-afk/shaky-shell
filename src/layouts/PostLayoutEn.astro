@@ -8,15 +8,20 @@ const { frontmatter } = Astro.props;
     <title>{frontmatter.title} - ErrNotes</title>
     <meta name="description" content={frontmatter.title + ' - ErrNotes error log and dev tools'} />
     <link rel="stylesheet" href="/styles/global.css" />
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3348501480039832" crossorigin="anonymous"></script>
   </head>
   <body>
     <header class="site-header">
       <div class="inner">
         <a href="/" class="site-logo">Err<span>Notes</span></a>
         <nav class="site-nav">
-          <a href="/">Articles</a>
+          <a href="/en">Articles</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
+          <a href="/regex-tester">RegEx</a>
+          <a href="/jwt-decoder">JWT</a>
+          <a href="/cron-checker">Cron</a>
+          <a href="/">日本語</a>
         </nav>
       </div>
     </header>
@@ -34,9 +39,11 @@ const { frontmatter } = Astro.props;
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/">← Back to articles</a>
+        <a href="/en">← Back to articles</a>
         &nbsp;·&nbsp;
         <a href="/privacy">Privacy Policy</a>
+        &nbsp;·&nbsp;
+        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
       </div>
     </footer>
   </body>
