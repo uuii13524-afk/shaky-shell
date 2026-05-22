@@ -1,10 +1,10 @@
 ---
-title: 'How to Set Up a Free SSL Certificate on nginx with certbot (Let\'s Encrypt)'
+title: "How to Set Up a Free SSL Certificate on nginx with certbot (Let's Encrypt)"
 date: '2026-05-22'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
-ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', 'Let\'s Encrypt']
-en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', 'Let\'s Encrypt']
+ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
+en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 ---
 
 ## What I Wanted to Do
