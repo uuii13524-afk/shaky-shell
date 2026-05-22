@@ -1,0 +1,146 @@
+---
+---
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>正規表現テスター - ErrNotes</title>
+    <meta name="description" content="正規表現をリアルタイムでテストできる無料ツール。マッチ結果をハイライト表示。" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+          <a href="/regex-tester">RegEx</a>
+          <a href="/jwt-decoder">JWT</a>
+          <a href="/unix-timestamp">Timestamp</a>
+          <a href="/en">English</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-wrapper tool-page">
+      <h2>正規表現テスター</h2>
+      <p class="tool-desc">
+        正規表現をリアルタイムでテスト。マッチ結果をハイライト表示します。<br>
+        <span style="color:var(--text2);font-size:12px;">Real-time regex tester with match highlighting.</span>
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">パターン / Pattern</label>
+        <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
+          <span style="font-family:var(--mono);font-size:1.2rem;color:var(--primary);">/</span>
+          <input type="text" id="pattern" placeholder="[a-z]+" style="flex:1;" autocomplete="off" spellcheck="false" value="[a-z]+">
+          <span style="font-family:var(--mono);font-size:1.2rem;color:var(--primary);">/</span>
+          <div style="display:flex;gap:4px;margin-left:8px;">
+            <button class="btn btn-secondary flag-btn active" data-flag="g">g</button>
+            <button class="btn btn-secondary flag-btn active" data-flag="i">i</button>
+            <button class="btn btn-secondary flag-btn" data-flag="m">m</button>
+            <button class="btn btn-secondary flag-btn" data-flag="s">s</button>
+          </div>
+        </div>
+        <div id="error" style="color:var(--danger);font-size:12px;font-family:var(--mono);margin-bottom:8px;display:none;"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
+          <button class="btn btn-secondary preset-btn" data-pattern="\d+">\d+ 数字</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}">メール</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="https?:\/\/[^\s]+">URL</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="^\d{3}-\d{4}$">郵便番号</button>
+        </div>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">テスト文字列 / Test String</label>
+        <textarea id="testStr" style="height:140px;font-family:var(--mono);">Hello World 123
+user@example.com
+https://errsolved.com
+〒150-0001 東京都渋谷区</textarea>
+      </div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果 / Result</label>
+        <div class="result-box" id="result" style="font-family:var(--mono);white-space:pre-wrap;word-break:break-all;min-height:80px;"></div>
+      </div>
+
+      <div id="stats" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:16px;"></div>
+      <div id="matchList"></div>
+
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools</div>
+        <ul style="list-style:none;">
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/jwt-decoder" style="font-size:13px;color:var(--text);">JWT デコーダー</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/unix-timestamp" style="font-size:13px;color:var(--text);">Unix タイムスタンプ変換</a></li>
+        </ul>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+      </div>
+    </footer>
+    <style>
+      .flag-btn.active { background: var(--primary); color: white; }
+      .match-highlight { background: rgba(255,100,100,0.2); border-bottom: 2px solid var(--danger); border-radius: 2px; color: var(--danger); }
+      .stat-card { background: var(--surface2,var(--bg)); border: 1px solid var(--border); border-radius: 6px; padding: 8px 14px; }
+      .stat-num { font-size: 1.4rem; font-weight: 700; font-family: var(--mono); color: var(--primary); }
+      .stat-label { font-size: 11px; color: var(--text2); }
+      .match-item { display:flex; gap:10px; align-items:baseline; padding:5px 0; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:13px; }
+    </style>
+    <script is:inline>
+      let activeFlags = new Set(['g','i']);
+
+      document.querySelectorAll('.flag-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const flag = btn.dataset.flag;
+          if (activeFlags.has(flag)) { activeFlags.delete(flag); btn.classList.remove('active'); }
+          else { activeFlags.add(flag); btn.classList.add('active'); }
+          update();
+        });
+      });
+
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => { document.getElementById('pattern').value = btn.dataset.pattern; update(); });
+      });
+
+      function update() {
+        const pattern = document.getElementById('pattern').value;
+        const text = document.getElementById('testStr').value;
+        const errEl = document.getElementById('error');
+        errEl.style.display = 'none';
+        if (!pattern) { document.getElementById('result').textContent = text; document.getElementById('stats').innerHTML = ''; document.getElementById('matchList').innerHTML = ''; return; }
+        let regex;
+        try { regex = new RegExp(pattern, [...activeFlags].join('').replace('g','') + 'g'); }
+        catch(e) { errEl.textContent = '⚠ ' + e.message; errEl.style.display = 'block'; document.getElementById('result').textContent = text; return; }
+        const matches = [...text.matchAll(regex)];
+        let highlighted = '', lastIdx = 0;
+        matches.forEach(m => {
+          highlighted += escHtml(text.slice(lastIdx, m.index));
+          highlighted += '<span class="match-highlight">' + escHtml(m[0]) + '</span>';
+          lastIdx = m.index + m[0].length;
+        });
+        highlighted += escHtml(text.slice(lastIdx));
+        document.getElementById('result').innerHTML = highlighted;
+        const count = matches.length;
+        document.getElementById('stats').innerHTML = `
+          <div class="stat-card"><div class="stat-num">${count}</div><div class="stat-label">マッチ数</div></div>
+          <div class="stat-card"><div class="stat-num">${text.length}</div><div class="stat-label">文字数</div></div>
+          <div class="stat-card"><div class="stat-num">${text.split('\n').length}</div><div class="stat-label">行数</div></div>
+        `;
+        document.getElementById('matchList').innerHTML = count > 0 ? matches.slice(0,20).map((m,i) =>
+          `<div class="match-item"><span style="color:var(--text2);min-width:24px">${i+1}</span><span style="color:var(--danger)">"${escHtml(m[0])}"</span><span style="color:var(--text2);font-size:11px">index: ${m.index}</span></div>`
+        ).join('') : '';
+      }
+
+      function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+      document.getElementById('pattern').addEventListener('input', update);
+      document.getElementById('testStr').addEventListener('input', update);
+      update();
+    </script>
+  </body>
+</html>

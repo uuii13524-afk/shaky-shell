@@ -1,0 +1,115 @@
+---
+---
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JWT デコーダー - ErrNotes</title>
+    <meta name="description" content="JWTトークンをブラウザ上で安全にデコード。Header・Payload・Signatureを確認できます。" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+          <a href="/regex-tester">RegEx</a>
+          <a href="/jwt-decoder">JWT</a>
+          <a href="/unix-timestamp">Timestamp</a>
+          <a href="/en">English</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-wrapper tool-page">
+      <h2>JWT デコーダー</h2>
+      <p class="tool-desc">
+        JWTトークンをブラウザ上で安全にデコードします。通信は発生しません。<br>
+        <span style="color:var(--text2);font-size:12px;">Decode JWT tokens securely in your browser. No data is sent to any server.</span>
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">JWT Token</label>
+        <textarea id="jwtInput" style="height:100px;font-family:var(--mono);font-size:12px;word-break:break-all;" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...." spellcheck="false"></textarea>
+        <button class="btn btn-secondary" id="sampleBtn" style="margin-top:8px;">サンプルを使う</button>
+      </div>
+
+      <div id="output"></div>
+
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools</div>
+        <ul style="list-style:none;">
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/regex-tester" style="font-size:13px;color:var(--text);">正規表現テスター</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/unix-timestamp" style="font-size:13px;color:var(--text);">Unix タイムスタンプ変換</a></li>
+        </ul>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+      </div>
+    </footer>
+    <style>
+      .jwt-part { border-radius:6px; overflow:hidden; border:1px solid var(--border); margin-bottom:12px; }
+      .jwt-part-header { padding:8px 14px; font-size:12px; font-family:var(--mono); font-weight:600; }
+      .jwt-part-body { background:var(--bg); padding:14px; font-family:var(--mono); font-size:13px; line-height:1.7; white-space:pre-wrap; word-break:break-all; }
+      .jwt-h .jwt-part-header { background:#f76a8c22; color:#f76a8c; border-bottom:1px solid #f76a8c44; }
+      .jwt-p .jwt-part-header { background:#6af79722; color:#6af797; border-bottom:1px solid #6af79744; }
+      .jwt-s .jwt-part-header { background:#6aaff722; color:#6aaff7; border-bottom:1px solid #6aaff744; }
+      .exp-info { margin-top:8px; padding:8px 12px; border-radius:4px; font-family:var(--mono); font-size:12px; }
+      .exp-valid { background:#6af79722; border:1px solid #6af79744; color:#6af797; }
+      .exp-expired { background:rgba(255,100,100,0.1); border:1px solid rgba(255,100,100,0.3); color:var(--danger); }
+    </style>
+    <script is:inline>
+      const SAMPLE = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IlRhcm8gWWFtYWRhIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjk5OTk5OTk5OTl9.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c';
+      document.getElementById('sampleBtn').onclick = () => { document.getElementById('jwtInput').value = SAMPLE; decode(); };
+      document.getElementById('jwtInput').addEventListener('input', decode);
+
+      function decode() {
+        const token = document.getElementById('jwtInput').value.trim();
+        const out = document.getElementById('output');
+        if (!token) { out.innerHTML = ''; return; }
+        const parts = token.split('.');
+        if (parts.length !== 3) { out.innerHTML = '<div style="color:var(--danger);font-family:var(--mono);font-size:13px;padding:10px;background:rgba(255,100,100,0.1);border-radius:6px;">⚠ 無効なJWT形式です（3つのパートが必要です）</div>'; return; }
+        try {
+          const header = JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/')));
+          const payload = JSON.parse(atob(parts[1].replace(/-/g,'+').replace(/_/g,'/')));
+          let expHtml = '';
+          if (payload.exp) {
+            const expDate = new Date(payload.exp * 1000);
+            const expired = expDate < new Date();
+            expHtml = `<div class="exp-info ${expired?'exp-expired':'exp-valid'}">${expired?'✗ 期限切れ':'✓ 有効'} — ${expDate.toLocaleString('ja-JP')}</div>`;
+          }
+          out.innerHTML = `
+            <div class="jwt-part jwt-h">
+              <div class="jwt-part-header">HEADER</div>
+              <div class="jwt-part-body">${colorize(header)}</div>
+            </div>
+            <div class="jwt-part jwt-p">
+              <div class="jwt-part-header">PAYLOAD</div>
+              <div class="jwt-part-body">${colorize(payload)}</div>
+              ${expHtml}
+            </div>
+            <div class="jwt-part jwt-s">
+              <div class="jwt-part-header">SIGNATURE</div>
+              <div class="jwt-part-body" style="color:#6aaff7">${parts[2]}</div>
+            </div>
+          `;
+        } catch(e) { out.innerHTML = `<div style="color:var(--danger);font-size:13px;">⚠ デコード失敗: ${e.message}</div>`; }
+      }
+
+      function colorize(obj) {
+        return JSON.stringify(obj,null,2)
+          .replace(/(".*?"):/g,'<span style="color:var(--primary)">$1</span>:')
+          .replace(/: (".*?")/g,': <span style="color:#f7d46a">$1</span>')
+          .replace(/: (\d+)/g,': <span style="color:#6aaff7">$1</span>')
+          .replace(/: (true|false|null)/g,': <span style="color:#f76a8c">$1</span>');
+      }
+    </script>
+  </body>
+</html>

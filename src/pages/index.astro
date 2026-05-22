@@ -21,17 +21,30 @@ import BaseLayout from '../layouts/BaseLayout.astro';
       <div class="tool-name">Timestamp変換</div>
       <div class="tool-desc">Unixタイムスタンプ↔日時</div>
     </a>
+    <a href="/regex-tester" class="tool-card">
+      <div class="tool-name">Regex Tester</div>
+      <div class="tool-desc">正規表現をリアルタイムでテスト</div>
+    </a>
+    <a href="/jwt-decoder" class="tool-card">
+      <div class="tool-name">JWT Decoder</div>
+      <div class="tool-desc">JWTトークンをデコード</div>
+    </a>
+    <a href="/cron-checker" class="tool-card">
+      <div class="tool-name">Cron Checker</div>
+      <div class="tool-desc">Cron式を解析・次回実行時刻確認</div>
+    </a>
   </div>
 
   <div class="section-title">記事一覧</div>
   <ul class="article-list">
+    <li class="article-item"><a href="/posts/linux-firewall-ufw">LinuxのUFWファイアウォール設定の基本</a><span class="article-date">2026-05-22</span></li>
     <li class="article-item"><a href="/posts/git-cherry-pick">git cherry-pickで特定のコミットだけ別ブランチに適用する</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/linux-ssh-basics">LinuxのSSH接続の基本（VPSに接続する方法）</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/git-tag-release">Gitのタグとリリースを管理する方法</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/docker-network-basics">Dockerのネットワーク設定の基本</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/linux-curl-command">curlコマンドの基本的な使い方</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/cloudflare-workers-intro">Cloudflare Workers入門：サーバーレス関数を作る方法</a><span class="article-date">2026-05-21</span></li>
-    <li class="article-item"><a href="/posts/vscode-extensions">VSCodeのおすすめ拡張機能10選（開発効率化）</a><span class="article-date">2026-05-21</span></li>
+    <li class="article-item"><a href="/posts/vscode-extensions">VSCodeのおすすめ拡張機能10選</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/linux-cron-setup">LinuxでCronジョブを設定して定期実行する方法</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/github-issue-pullrequest">GitHubのIssueとPull Requestの基本的な使い方</a><span class="article-date">2026-05-21</span></li>
     <li class="article-item"><a href="/posts/vps-docker-setup">VPSにDockerをインストールして本番環境を構築する方法</a><span class="article-date">2026-05-21</span></li>
@@ -45,34 +58,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <li class="article-item"><a href="/posts/astro-seo-meta-tags">AstroでSEOに必要なmetaタグを設定する方法</a><span class="article-date">2026-05-18</span></li>
     <li class="article-item"><a href="/posts/linux-tail-log">Linuxでログをリアルタイム監視するtail -fの使い方</a><span class="article-date">2026-05-17</span></li>
     <li class="article-item"><a href="/posts/git-log-history">git logでコミット履歴を確認する方法</a><span class="article-date">2026-05-17</span></li>
-    <li class="article-item"><a href="/posts/npm-package-json-scripts">package.jsonのscriptsを活用して作業を効率化する方法</a><span class="article-date">2026-05-17</span></li>
-    <li class="article-item"><a href="/posts/cloudflare-redirect-rules">Cloudflareでリダイレクトルールを設定する方法</a><span class="article-date">2026-05-16</span></li>
-    <li class="article-item"><a href="/posts/docker-volume-basics">Dockerのボリュームでデータを永続化する方法</a><span class="article-date">2026-05-16</span></li>
-    <li class="article-item"><a href="/posts/linux-grep-find">Linuxでファイルを検索するgrep・findコマンドの使い方</a><span class="article-date">2026-05-16</span></li>
-    <li class="article-item"><a href="/posts/github-actions-node-cache">GitHub ActionsでNode.jsのキャッシュを使ってビルドを高速化する方法</a><span class="article-date">2026-05-15</span></li>
-    <li class="article-item"><a href="/posts/windows-terminal-setup">Windows Terminalをインストールして使いやすくする方法</a><span class="article-date">2026-05-15</span></li>
-    <li class="article-item"><a href="/posts/astro-markdown-styles">AstroでMarkdownのスタイルを設定する方法</a><span class="article-date">2026-05-15</span></li>
-    <li class="article-item"><a href="/posts/git-remote-operations">Gitのリモートリポジトリ操作まとめ</a><span class="article-date">2026-05-14</span></li>
-    <li class="article-item"><a href="/posts/docker-port-already-in-use">Dockerでポートが既に使用中エラーが出た時の対処法</a><span class="article-date">2026-05-14</span></li>
-    <li class="article-item"><a href="/posts/linux-permission-denied">Linuxでpermission deniedエラーが出た時の対処法</a><span class="article-date">2026-05-14</span></li>
-    <li class="article-item"><a href="/posts/github-actions-secrets">GitHub ActionsでSecretsを使って秘密情報を管理する方法</a><span class="article-date">2026-05-13</span></li>
-    <li class="article-item"><a href="/posts/cloudflare-pages-env-variables">Cloudflare Pagesで環境変数を設定する方法</a><span class="article-date">2026-05-13</span></li>
-    <li class="article-item"><a href="/posts/git-pull-merge-conflict">git pullでコンフリクトが発生した時の解決方法</a><span class="article-date">2026-05-13</span></li>
-    <li class="article-item"><a href="/posts/nginx-basic-config">nginxの基本的な設定ファイルの書き方</a><span class="article-date">2026-05-12</span></li>
-    <li class="article-item"><a href="/posts/docker-compose-basic">docker-composeの基本的な使い方</a><span class="article-date">2026-05-12</span></li>
-    <li class="article-item"><a href="/posts/docker-basic-commands">Dockerの基本コマンドまとめ</a><span class="article-date">2026-05-12</span></li>
-    <li class="article-item"><a href="/posts/npm-vs-yarn">npmとyarnの違いと使い分け</a><span class="article-date">2026-05-11</span></li>
-    <li class="article-item"><a href="/posts/wsl2-install-windows">WindowsでWSL2をインストールする方法</a><span class="article-date">2026-05-11</span></li>
-    <li class="article-item"><a href="/posts/ssh-key-github">SSHキーを生成してGitHubに登録する方法</a><span class="article-date">2026-05-11</span></li>
-    <li class="article-item"><a href="/posts/linux-basic-commands">Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ</a><span class="article-date">2026-05-10</span></li>
-    <li class="article-item"><a href="/posts/github-actions-basic">GitHub Actionsで自動デプロイする基本的な設定方法</a><span class="article-date">2026-05-10</span></li>
-    <li class="article-item"><a href="/posts/docker-install-windows">WindowsにDockerをインストールして動かすまでの手順</a><span class="article-date">2026-05-10</span></li>
-    <li class="article-item"><a href="/posts/cloudflare-pages-build-log">Cloudflare Pagesのビルドログの見方とエラーの対処法</a><span class="article-date">2026-05-09</span></li>
-    <li class="article-item"><a href="/posts/git-gitignore-setup">Gitで.gitignoreを設定してファイルを管理対象から外す方法</a><span class="article-date">2026-05-09</span></li>
-    <li class="article-item"><a href="/posts/npm-cache-clear">npmのキャッシュをクリアして問題を解決する方法</a><span class="article-date">2026-05-09</span></li>
-    <li class="article-item"><a href="/posts/windows-path-with-spaces">Windowsのターミナルでパスにスペースがある時の対処法</a><span class="article-date">2026-05-08</span></li>
-    <li class="article-item"><a href="/posts/git-branch-basics">GitのブランチをCLIで作成・切り替える基本コマンド</a><span class="article-date">2026-05-08</span></li>
-    <li class="article-item"><a href="/posts/astro-add-page">Astroで新しいページを追加する基本的な方法</a><span class="article-date">2026-05-08</span></li>
+    <li class="article-item"><a href="/posts/npm-package-json-scripts">package.jsonのscriptsを使ってコマンドを管理する方法</a><span class="article-date">2026-05-16</span></li>
     <li class="article-item"><a href="/posts/cloudflare-ssl-check">Cloudflareで独自ドメインのSSL設定を確認する方法</a><span class="article-date">2026-05-07</span></li>
     <li class="article-item"><a href="/posts/node-version-management-nvm">Node.jsのバージョンをnvmで管理する方法</a><span class="article-date">2026-05-07</span></li>
     <li class="article-item"><a href="/posts/windows-git-install">WindowsにGitをインストールして初期設定する方法</a><span class="article-date">2026-05-07</span></li>

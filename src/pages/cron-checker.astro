@@ -1,0 +1,186 @@
+---
+---
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Cron式チェッカー - ErrNotes</title>
+    <meta name="description" content="Cron式をリアルタイムで解析。次回実行時刻と実行スケジュールを確認できる無料ツール。" />
+    <link rel="stylesheet" href="/styles/global.css" />
+  </head>
+  <body>
+    <header class="site-header">
+      <div class="inner">
+        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <nav class="site-nav">
+          <a href="/">記事</a>
+          <a href="/base64">Base64</a>
+          <a href="/json-formatter">JSON</a>
+          <a href="/regex-tester">RegEx</a>
+          <a href="/jwt-decoder">JWT</a>
+          <a href="/cron-checker">Cron</a>
+          <a href="/en">English</a>
+        </nav>
+      </div>
+    </header>
+    <main class="site-wrapper tool-page">
+      <h2>Cron式チェッカー</h2>
+      <p class="tool-desc">
+        Cron式を入力すると次回実行時刻と直近のスケジュールを確認できます。GitHub ActionsやLinux Cronの設定に。<br>
+        <span style="color:var(--text2);font-size:12px;">Parse cron expressions and preview upcoming execution times.</span>
+      </p>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Cron式 / Cron Expression</label>
+        <input type="text" id="cronInput" placeholder="0 9 * * *" value="0 9 * * *" style="width:100%;font-family:var(--mono);font-size:1.1rem;" autocomplete="off" spellcheck="false">
+        <div id="cronError" style="color:var(--danger);font-size:12px;font-family:var(--mono);margin-top:6px;display:none;"></div>
+      </div>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn btn-secondary preset-btn" data-cron="* * * * *">毎分</button>
+        <button class="btn btn-secondary preset-btn" data-cron="0 * * * *">毎時0分</button>
+        <button class="btn btn-secondary preset-btn" data-cron="0 9 * * *">毎日9時(UTC)</button>
+        <button class="btn btn-secondary preset-btn" data-cron="0 0 * * *">毎日0時(UTC)</button>
+        <button class="btn btn-secondary preset-btn" data-cron="0 9 * * 1">毎週月曜9時</button>
+        <button class="btn btn-secondary preset-btn" data-cron="0 0 1 * *">毎月1日0時</button>
+        <button class="btn btn-secondary preset-btn" data-cron="*/5 * * * *">5分ごと</button>
+        <button class="btn btn-secondary preset-btn" data-cron="*/30 * * * *">30分ごと</button>
+      </div>
+
+      <div id="cronDesc" style="margin-bottom:16px;padding:12px 16px;background:var(--bg2,var(--bg));border:1px solid var(--border);border-radius:8px;font-size:14px;display:none;"></div>
+
+      <div style="margin-bottom:16px;">
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">直近10回の実行時刻 / Next 10 executions (JST)</label>
+        <div id="schedule" style="font-family:var(--mono);font-size:13px;line-height:2;"></div>
+      </div>
+
+      <div style="margin-bottom:16px;padding:12px 16px;background:var(--bg2,var(--bg));border:1px solid var(--border);border-radius:8px;">
+        <div style="font-size:12px;color:var(--text2);margin-bottom:4px;">GitHub Actions用（UTC換算）</div>
+        <div id="ghActions" style="font-family:var(--mono);font-size:13px;color:var(--accent);"></div>
+      </div>
+
+      <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools</div>
+        <ul style="list-style:none;">
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/timestamp" style="font-size:13px;color:var(--text);">Timestamp変換</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/regex-tester" style="font-size:13px;color:var(--text);">正規表現テスター</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/jwt-decoder" style="font-size:13px;color:var(--text);">JWT デコーダー</a></li>
+        </ul>
+      </div>
+    </main>
+    <footer class="site-footer">
+      <div class="site-wrapper">
+        <a href="/privacy">プライバシーポリシー</a>
+        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+      </div>
+    </footer>
+    <script is:inline>
+      document.querySelectorAll('.preset-btn').forEach(btn => {
+        btn.addEventListener('click', () => { document.getElementById('cronInput').value = btn.dataset.cron; parse(); });
+      });
+      document.getElementById('cronInput').addEventListener('input', parse);
+
+      function parse() {
+        const expr = document.getElementById('cronInput').value.trim();
+        const errEl = document.getElementById('cronError');
+        const descEl = document.getElementById('cronDesc');
+        const schedEl = document.getElementById('schedule');
+        const ghEl = document.getElementById('ghActions');
+        errEl.style.display = 'none';
+
+        const parts = expr.split(/\s+/);
+        if (parts.length !== 5) {
+          errEl.textContent = '⚠ Cron式は「分 時 日 月 曜日」の5つのフィールドが必要です';
+          errEl.style.display = 'block';
+          descEl.style.display = 'none';
+          schedEl.innerHTML = '';
+          ghEl.textContent = '';
+          return;
+        }
+
+        try {
+          const [min, hour, day, month, weekday] = parts;
+          const desc = describe(min, hour, day, month, weekday);
+          descEl.textContent = '📋 ' + desc;
+          descEl.style.display = 'block';
+
+          const times = nextTimes(parts, 10);
+          schedEl.innerHTML = times.map((d, i) => {
+            const jst = new Date(d.getTime());
+            return `<div style="padding:4px 0;border-bottom:1px solid var(--border);display:flex;gap:16px;">
+              <span style="color:var(--text2);min-width:24px">${i+1}</span>
+              <span style="color:var(--accent)">${jst.toLocaleString('ja-JP',{timeZone:'Asia/Tokyo'})}</span>
+              <span style="color:var(--text2);font-size:11px">${jst.toISOString()}</span>
+            </div>`;
+          }).join('');
+
+          // GitHub Actions用UTC表記
+          ghEl.textContent = `cron: '${expr}'  # JSTは+9時間`;
+        } catch(e) {
+          errEl.textContent = '⚠ ' + e.message;
+          errEl.style.display = 'block';
+        }
+      }
+
+      function describe(min, hour, day, month, weekday) {
+        const days = ['日','月','火','水','木','金','土'];
+        const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+        let parts = [];
+        if (month !== '*') parts.push(months[(parseInt(month)-1)] || month + '月');
+        if (day !== '*') parts.push(day + '日');
+        if (weekday !== '*') {
+          const wd = parseInt(weekday);
+          parts.push('毎週' + (days[wd] || weekday) + '曜日');
+        }
+        if (hour === '*' && min === '*') return '毎分実行';
+        if (hour === '*') return (parts.length ? parts.join('、') + 'の' : '') + `毎時${min}分に実行`;
+        if (min.startsWith('*/')) return (parts.length ? parts.join('、') + 'の' : '') + `${min.slice(2)}分ごとに実行`;
+        if (hour.startsWith('*/')) return (parts.length ? parts.join('、') + 'の' : '') + `${hour.slice(2)}時間ごとに実行`;
+        return (parts.length ? parts.join('、') + 'の' : '') + `${hour}:${min.padStart(2,'0')}に実行（UTC）`;
+      }
+
+      function nextTimes(parts, count) {
+        const [minExpr, hourExpr, dayExpr, monthExpr, weekdayExpr] = parts;
+        const results = [];
+        const now = new Date();
+        let d = new Date(now);
+        d.setSeconds(0, 0);
+        d.setMinutes(d.getMinutes() + 1);
+        let limit = 0;
+
+        while (results.length < count && limit < 100000) {
+          limit++;
+          if (matchField(monthExpr, d.getUTCMonth() + 1, 1, 12) &&
+              matchField(dayExpr, d.getUTCDate(), 1, 31) &&
+              matchField(weekdayExpr, d.getUTCDay(), 0, 6) &&
+              matchField(hourExpr, d.getUTCHours(), 0, 23) &&
+              matchField(minExpr, d.getUTCMinutes(), 0, 59)) {
+            results.push(new Date(d));
+            d.setMinutes(d.getMinutes() + 1);
+          } else {
+            d.setMinutes(d.getMinutes() + 1);
+          }
+        }
+        return results;
+      }
+
+      function matchField(expr, val, min, max) {
+        if (expr === '*') return true;
+        if (expr.startsWith('*/')) {
+          const step = parseInt(expr.slice(2));
+          return val % step === 0;
+        }
+        if (expr.includes(',')) return expr.split(',').some(e => matchField(e.trim(), val, min, max));
+        if (expr.includes('-')) {
+          const [a, b] = expr.split('-').map(Number);
+          return val >= a && val <= b;
+        }
+        return parseInt(expr) === val;
+      }
+
+      parse();
+    </script>
+  </body>
+</html>
