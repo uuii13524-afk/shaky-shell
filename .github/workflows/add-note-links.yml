@@ -1,0 +1,23 @@
+name: Add Note Links
+
+on:
+  workflow_dispatch:
+
+jobs:
+  add-links:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Add note links to related posts
+        run: python3 .github/scripts/add_note_links.py
+
+      - name: Commit and push
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+          git add src/pages/posts/
+          git diff --staged --quiet || git commit -m "add note links to related posts"
+          git push
