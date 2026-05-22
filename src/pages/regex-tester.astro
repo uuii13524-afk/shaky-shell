@@ -4,8 +4,8 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>正規表現テスター - ErrNotes</title>
-    <meta name="description" content="正規表現をリアルタイムでテストできる無料ツール。マッチ結果をハイライト表示。" />
+    <title>Regex Tester / 正規表現テスター - ErrNotes</title>
+    <meta name="description" content="正規表現をリアルタイムでテスト。Test regular expressions in real-time with match highlighting." />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
@@ -18,20 +18,20 @@
           <a href="/json-formatter">JSON</a>
           <a href="/regex-tester">RegEx</a>
           <a href="/jwt-decoder">JWT</a>
-          <a href="/unix-timestamp">Timestamp</a>
+          <a href="/cron-checker">Cron</a>
           <a href="/en">English</a>
         </nav>
       </div>
     </header>
     <main class="site-wrapper tool-page">
-      <h2>正規表現テスター</h2>
+      <h2>Regex Tester / 正規表現テスター</h2>
       <p class="tool-desc">
         正規表現をリアルタイムでテスト。マッチ結果をハイライト表示します。<br>
-        <span style="color:var(--text2);font-size:12px;">Real-time regex tester with match highlighting.</span>
+        <span style="color:var(--text2);font-size:12px;">Test regular expressions in real-time with match highlighting.</span>
       </p>
 
       <div style="margin-bottom:16px;">
-        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">パターン / Pattern</label>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Pattern / パターン</label>
         <div style="display:flex;align-items:center;gap:4px;margin-bottom:8px;">
           <span style="font-family:var(--mono);font-size:1.2rem;color:var(--primary);">/</span>
           <input type="text" id="pattern" placeholder="[a-z]+" style="flex:1;" autocomplete="off" spellcheck="false" value="[a-z]+">
@@ -45,23 +45,23 @@
         </div>
         <div id="error" style="color:var(--danger);font-size:12px;font-family:var(--mono);margin-bottom:8px;display:none;"></div>
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;">
-          <button class="btn btn-secondary preset-btn" data-pattern="\d+">\d+ 数字</button>
-          <button class="btn btn-secondary preset-btn" data-pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}">メール</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="\d+">\d+ digits / 数字</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="[a-zA-Z0-9._%+\-]+@[a-zA-Z0-9.\-]+\.[a-zA-Z]{2,}">Email / メール</button>
           <button class="btn btn-secondary preset-btn" data-pattern="https?:\/\/[^\s]+">URL</button>
-          <button class="btn btn-secondary preset-btn" data-pattern="^\d{3}-\d{4}$">郵便番号</button>
+          <button class="btn btn-secondary preset-btn" data-pattern="\d{3}-\d{4}">Postal / 郵便番号</button>
         </div>
       </div>
 
       <div style="margin-bottom:16px;">
-        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">テスト文字列 / Test String</label>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Test String / テスト文字列</label>
         <textarea id="testStr" style="height:140px;font-family:var(--mono);">Hello World 123
 user@example.com
 https://errsolved.com
-〒150-0001 東京都渋谷区</textarea>
+〒150-0001 Tokyo</textarea>
       </div>
 
       <div style="margin-bottom:16px;">
-        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">結果 / Result</label>
+        <label style="font-size:13px;color:var(--text2);display:block;margin-bottom:6px;">Result / 結果</label>
         <div class="result-box" id="result" style="font-family:var(--mono);white-space:pre-wrap;word-break:break-all;min-height:80px;"></div>
       </div>
 
@@ -69,12 +69,13 @@ https://errsolved.com
       <div id="matchList"></div>
 
       <div style="margin-top:48px;padding-top:24px;border-top:1px solid var(--border);">
-        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools</div>
+        <div style="font-size:12px;font-weight:600;text-transform:uppercase;letter-spacing:0.08em;color:var(--text2);margin-bottom:14px;">Other Tools / その他のツール</div>
         <ul style="list-style:none;">
           <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/base64" style="font-size:13px;color:var(--text);">Base64 Encoder / Decoder</a></li>
-          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter</a></li>
-          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/jwt-decoder" style="font-size:13px;color:var(--text);">JWT デコーダー</a></li>
-          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/unix-timestamp" style="font-size:13px;color:var(--text);">Unix タイムスタンプ変換</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/json-formatter" style="font-size:13px;color:var(--text);">JSON Formatter / Validator</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/timestamp" style="font-size:13px;color:var(--text);">Timestamp Converter / タイムスタンプ変換</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/jwt-decoder" style="font-size:13px;color:var(--text);">JWT Decoder / JWTデコーダー</a></li>
+          <li style="padding:6px 0;border-bottom:1px solid var(--border);"><a href="/cron-checker" style="font-size:13px;color:var(--text);">Cron Checker / Cron式チェッカー</a></li>
         </ul>
       </div>
     </main>
@@ -94,7 +95,6 @@ https://errsolved.com
     </style>
     <script is:inline>
       let activeFlags = new Set(['g','i']);
-
       document.querySelectorAll('.flag-btn').forEach(btn => {
         btn.addEventListener('click', () => {
           const flag = btn.dataset.flag;
@@ -103,11 +103,9 @@ https://errsolved.com
           update();
         });
       });
-
       document.querySelectorAll('.preset-btn').forEach(btn => {
         btn.addEventListener('click', () => { document.getElementById('pattern').value = btn.dataset.pattern; update(); });
       });
-
       function update() {
         const pattern = document.getElementById('pattern').value;
         const text = document.getElementById('testStr').value;
@@ -128,15 +126,14 @@ https://errsolved.com
         document.getElementById('result').innerHTML = highlighted;
         const count = matches.length;
         document.getElementById('stats').innerHTML = `
-          <div class="stat-card"><div class="stat-num">${count}</div><div class="stat-label">マッチ数</div></div>
-          <div class="stat-card"><div class="stat-num">${text.length}</div><div class="stat-label">文字数</div></div>
-          <div class="stat-card"><div class="stat-num">${text.split('\n').length}</div><div class="stat-label">行数</div></div>
+          <div class="stat-card"><div class="stat-num">${count}</div><div class="stat-label">Matches / マッチ数</div></div>
+          <div class="stat-card"><div class="stat-num">${text.length}</div><div class="stat-label">Characters / 文字数</div></div>
+          <div class="stat-card"><div class="stat-num">${text.split('\n').length}</div><div class="stat-label">Lines / 行数</div></div>
         `;
         document.getElementById('matchList').innerHTML = count > 0 ? matches.slice(0,20).map((m,i) =>
           `<div class="match-item"><span style="color:var(--text2);min-width:24px">${i+1}</span><span style="color:var(--danger)">"${escHtml(m[0])}"</span><span style="color:var(--text2);font-size:11px">index: ${m.index}</span></div>`
         ).join('') : '';
       }
-
       function escHtml(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
       document.getElementById('pattern').addEventListener('input', update);
       document.getElementById('testStr').addEventListener('input', update);
