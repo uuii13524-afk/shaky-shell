@@ -2,7 +2,7 @@
 title: 'Linux UFW Firewall Setup Basics'
 date: '2026-05-22'
 category: 'Linux'
-layout: '../../../layouts/PostLayout.astro'
+layout: '../../layouts/PostLayoutEn.astro'
 ja_tags: ['Linux', 'UFW', 'ファイアウォール', 'セキュリティ', 'VPS']
 en_tags: ['Linux', 'UFW', 'Firewall', 'Security', 'VPS']
 ---
