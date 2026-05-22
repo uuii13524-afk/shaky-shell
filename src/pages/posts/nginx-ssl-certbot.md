@@ -1,10 +1,10 @@
 ---
-title: 'nginxにLet's EncryptのSSL証明書を設定する方法（certbot）'
+title: "nginxにLet's EncryptのSSL証明書を設定する方法（certbot）"
 date: '2026-05-22'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
-ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', 'Let\'s Encrypt']
-en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', 'Let\'s Encrypt']
+ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
+en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 ---
 
 ## やりたかったこと
