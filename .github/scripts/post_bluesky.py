@@ -52,6 +52,9 @@ def parse_frontmatter(filepath):
     data['en_tags'] = en
     return data
 
+def byte_len(text):
+    return len(text.encode('utf-8'))
+
 def make_tag_facets(text, tags):
     facets = []
     encoded = text.encode('utf-8')
@@ -126,22 +129,42 @@ for filepath in new_files:
     follow_cta_ja = f'Tips定期投稿中! {FOLLOW_HANDLE} をフォローしてね'
     follow_cta_en = f'Follow {FOLLOW_HANDLE} for dev tips!'
 
+    # フルバージョン（CTA付き）
     if en_info and en_info['title']:
-        text = (
+        text_full = (
             f"New article\n\n"
             f"{info['title']}\n{ja_url}\n\n"
             f"{en_info['title']}\n{en_url}\n\n"
             f"{ja_hashtags}\n{en_hashtags}\n\n"
             f"{follow_cta_ja}\n{follow_cta_en}"
         )
+        text_short = (
+            f"New article\n\n"
+            f"{info['title']}\n{ja_url}\n\n"
+            f"{en_info['title']}\n{en_url}\n\n"
+            f"{ja_hashtags}\n{en_hashtags}"
+        )
         urls = [ja_url, en_url]
     else:
-        text = (
+        text_full = (
             f"{info['title']}\n{ja_url}\n\n"
             f"{ja_hashtags}\n\n"
             f"{follow_cta_ja}"
         )
+        text_short = (
+            f"{info['title']}\n{ja_url}\n\n"
+            f"{ja_hashtags}"
+        )
         urls = [ja_url]
+
+    # Blueskyは300バイト制限
+    if byte_len(text_full) <= 300:
+        text = text_full
+    else:
+        text = text_short
+
+    print(f'Text bytes: {byte_len(text)} / 300')
+    print(f'Text: {text}')
 
     all_tags = info['ja_tags'] + (info['en_tags'] if en_info else [])
     facets = make_link_facets(text, urls) + make_tag_facets(text, all_tags)
@@ -165,5 +188,10 @@ for filepath in new_files:
             'Authorization': f'Bearer {token}'
         }
     )
-    urllib.request.urlopen(req)
-    print(f'Posted: {info["title"]}')
+    try:
+        urllib.request.urlopen(req)
+        print(f'Posted: {info["title"]}')
+    except urllib.error.HTTPError as e:
+        print(f'HTTPError: {e.code} {e.reason}')
+        print(f'Response body: {e.read().decode()}')
+        raise
