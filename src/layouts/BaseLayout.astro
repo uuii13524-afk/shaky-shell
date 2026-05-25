@@ -8,6 +8,7 @@ const { title, description } = Astro.props;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="stylesheet" href="/styles/global.css" />
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3348501480039832" crossorigin="anonymous"></script>
   </head>
   <body>
@@ -34,13 +35,6 @@ const { title, description } = Astro.props;
         <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
       </div>
     </footer>
-    <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
     <script src="/pagefind/pagefind-ui.js" is:inline></script>
-    <div id="search"></div>
-    <script is:inline>
-      window.addEventListener('DOMContentLoaded', () => {
-        new PagefindUI({ element: '#search', showImages: false });
-      });
-    </script>
   </body>
 </html>
