@@ -258,6 +258,16 @@ textarea:focus { outline: none; border-color: var(--accent); }
 .privacy-content h2 { font-size: 17px; margin: 28px 0 10px; padding-bottom: 6px; border-bottom: 1px solid var(--border); }
 .privacy-content p { color: var(--text2); margin-bottom: 12px; font-size: 14px; }
 
+/* ===== Pagefind UI Dark Theme ===== */
+.pagefind-ui {
+  --pagefind-ui-primary: #58a6ff;
+  --pagefind-ui-text: #e6edf3;
+  --pagefind-ui-background: #161b22;
+  --pagefind-ui-border: #30363d;
+  --pagefind-ui-tag: #21262d;
+  --pagefind-ui-font: 'IBM Plex Sans', sans-serif;
+}
+
 /* ===== Search Form (Top Page) ===== */
 .search-section {
   margin-bottom: 40px;
