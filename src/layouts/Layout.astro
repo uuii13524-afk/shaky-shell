@@ -11,9 +11,9 @@
 	<body>
 		<slot />
 	<link href="/pagefind/pagefind-ui.css" rel="stylesheet">
-	<script src="/pagefind/pagefind-ui.js"></script>
+	<script src="/pagefind/pagefind-ui.js" is:inline></script>
 	<div id="search"></div>
-	<script>
+	<script is:inline>
 	  window.addEventListener('DOMContentLoaded', () => {
 	    new PagefindUI({ element: '#search', showImages: false });
 	  });
