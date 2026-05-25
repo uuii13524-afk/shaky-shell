@@ -4,5 +4,6 @@ import sitemap from '@astrojs/sitemap';
 
 export default defineConfig({
   site: 'https://errsolved.com',
+  trailingSlash: 'never',
   integrations: [sitemap()],
 });
