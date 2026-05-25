@@ -34,5 +34,13 @@ const { title, description } = Astro.props;
         <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
       </div>
     </footer>
+    <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+    <script src="/pagefind/pagefind-ui.js"></script>
+    <div id="search"></div>
+    <script>
+      window.addEventListener('DOMContentLoaded', () => {
+        new PagefindUI({ element: '#search', showImages: false });
+      });
+    </script>
   </body>
 </html>
