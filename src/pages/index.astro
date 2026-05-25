@@ -7,6 +7,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
     <p>実際に詰まったエラーの記録と解決ログ / A collection of real error logs and fixes.</p>
   </div>
 
+  <div class="search-section">
+    <div id="search"></div>
+    <script is:inline>
+      window.addEventListener('DOMContentLoaded', () => {
+        new PagefindUI({ element: '#search', showImages: false });
+      });
+    </script>
+  </div>
+
   <div class="section-title">ツール</div>
   <div class="tools-grid" style="margin-bottom:40px;">
     <a href="/base64" class="tool-card">
