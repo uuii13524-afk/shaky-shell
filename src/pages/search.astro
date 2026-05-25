@@ -1,12 +1,16 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<BaseLayout title="記事検索">
-  <h1>記事検索</h1>
+<BaseLayout title="記事検索 - ErrNotes">
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+  <h1 style="font-size:20px; font-weight:600; margin-bottom:24px;">記事検索</h1>
   <div id="search"></div>
+  <script src="/pagefind/pagefind-ui.js" is:inline></script>
   <script is:inline>
     window.addEventListener('DOMContentLoaded', () => {
-      new PagefindUI({ element: '#search', showImages: false });
+      const pf = new PagefindUI({ element: '#search', showImages: false });
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) pf.triggerSearch(q);
     });
   </script>
 </BaseLayout>
