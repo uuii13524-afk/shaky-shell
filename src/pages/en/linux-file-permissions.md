@@ -70,3 +70,10 @@ chown -R username directory    # Recursive
 - [Linux Permission Denied Fix](/en/linux-permission-denied)
 - [SSH Key Setup for GitHub](/posts/ssh-key-github)
 - [Linux SSH Basics](/posts/linux-ssh-basics)
+
+
+## Recommended VPS / Cloud Hosting
+
+If you're looking for high-performance cloud infrastructure, Cherry Servers offers developer-friendly VPS and dedicated servers optimized for AI, Web3, and production workloads.
+
+<a href="https://www.awin1.com/cread.php?awinmid=88911&awinaffid=2909773&ued=https%3A%2F%2Fwww.cherryservers.com" target="_blank" rel="sponsored">Cherry Servers</a>
