@@ -49,3 +49,10 @@ Open the build log from the Deployments tab and look for lines starting with `[E
 
 - [Cloudflare Pages Build Log Guide](/posts/cloudflare-pages-build-log)
 - [How to Deploy Astro to Cloudflare Pages](/en/docker-install-windows)
+
+
+## Recommended VPS / Cloud Hosting
+
+If you're looking for high-performance cloud infrastructure, Cherry Servers offers developer-friendly VPS and dedicated servers optimized for AI, Web3, and production workloads.
+
+<a href="https://www.awin1.com/cread.php?awinmid=88911&awinaffid=2909773&ued=https%3A%2F%2Fwww.cherryservers.com" target="_blank" rel="sponsored">Cherry Servers</a>
