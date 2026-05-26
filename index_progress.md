@@ -15,12 +15,24 @@ https://errsolved.com/posts/cloudflare-github-disconnect
 https://errsolved.com/posts/cloudflare-pages-build-log
 https://errsolved.com/posts/cloudflare-pages-deploy-not-working
 https://errsolved.com/posts/cloudflare-pages-env-variables
+https://errsolved.com/posts/cloudflare-redirect-rules
+https://errsolved.com/posts/cloudflare-ssl-check
+https://errsolved.com/posts/cloudflare-workers-intro
+https://errsolved.com/posts/docker-basic-commands
+https://errsolved.com/posts/docker-compose-basic
+https://errsolved.com/posts/docker-dockerfile-basics
 https://errsolved.com/posts/docker-install-windows
+https://errsolved.com/posts/docker-network-basics
+https://errsolved.com/posts/docker-port-already-in-use
+https://errsolved.com/posts/docker-volume-basics
 https://errsolved.com/posts/git-branch-basics
 https://errsolved.com/posts/git-cherry-pick
 https://errsolved.com/posts/git-commit-undo
 https://errsolved.com/posts/git-gitignore-setup
+https://errsolved.com/posts/git-log-history
+https://errsolved.com/posts/git-pull-merge-conflict
 https://errsolved.com/posts/git-rebase-basics
+https://errsolved.com/posts/git-remote-operations
 https://errsolved.com/posts/github-actions-secrets
 https://errsolved.com/posts/github-first-push
 https://errsolved.com/posts/google-search-console-html-verification
@@ -36,19 +48,7 @@ https://errsolved.com/posts/windows-path-with-spaces
 https://errsolved.com/posts/xserver-cloudflare-full-setup
 https://errsolved.com/posts/xserver-cloudflare-nameserver
 
-## 残り（次回以降）
-https://errsolved.com/posts/cloudflare-redirect-rules
-https://errsolved.com/posts/cloudflare-ssl-check
-https://errsolved.com/posts/cloudflare-workers-intro
-https://errsolved.com/posts/docker-basic-commands
-https://errsolved.com/posts/docker-compose-basic
-https://errsolved.com/posts/docker-dockerfile-basics
-https://errsolved.com/posts/docker-network-basics
-https://errsolved.com/posts/docker-port-already-in-use
-https://errsolved.com/posts/docker-volume-basics
-https://errsolved.com/posts/git-log-history
-https://errsolved.com/posts/git-pull-merge-conflict
-https://errsolved.com/posts/git-remote-operations
+## 残り
 https://errsolved.com/posts/git-stash-usage
 https://errsolved.com/posts/git-tag-release
 https://errsolved.com/posts/github-actions-basic
@@ -80,6 +80,5 @@ https://errsolved.com/posts/windows-terminal-setup
 https://errsolved.com/posts/wsl2-install-windows
 
 ## ルール
-- 1日5件まで（Googleの割当量上限）
-- 毎日上から5件ずつ申請して、申請済みに移動する
+- 申請できる限り毎日申請する
 - Routinesで追加された新規記事も随時追加する
