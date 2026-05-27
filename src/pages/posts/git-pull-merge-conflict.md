@@ -50,6 +50,8 @@ git merge --abort
 - 記号を残したままコミットしないように注意
 - こまめにpullしてコンフリクトを小さくする
 
+コンフリクトを避けるためにも、[git rebaseの基本的な使い方](/posts/git-rebase-basics)を覚えておくと履歴を整理しながら作業できる。
+
 ## 関連記事
 
 - [GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)

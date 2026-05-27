@@ -69,6 +69,8 @@ git push origin --delete v1.0.0  # リモートのタグを削除
 - 注釈付きタグは作者・日時・メッセージが記録される
 - セマンティックバージョニング（v1.0.0）が一般的
 
+タグを付けた後、[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)を使ってタグpush時に自動でリリースする仕組みも作れる。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

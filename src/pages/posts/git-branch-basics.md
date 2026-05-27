@@ -31,6 +31,8 @@ git branch -d feature/new-function
 - 古いGitでは `git checkout`。新しいGitでは `git switch` が推奨
 - マージ前に必ずmainに切り替える
 
+ブランチの操作に慣れたら、[git rebaseで履歴を整理する方法](/posts/git-rebase-basics)も覚えておくと便利だ。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

@@ -39,6 +39,8 @@ jobs:
 - YAMLはインデントが重要（スペース2つ）
 - Actionsタブでログを確認できる
 
+APIキーなどの秘密情報をワークフロー内で使う場合は[GitHub ActionsでSecretsを使って秘密情報を管理する方法](/posts/github-actions-secrets)を参照。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

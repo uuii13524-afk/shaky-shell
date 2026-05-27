@@ -73,6 +73,8 @@ git reset --hard HEAD~1
 - 同じ変更を複数回cherry-pickするとコンフリクトが起きやすい
 - push済みのコミットを取り消すときは `reset` ではなく `revert` を使う
 
+特定コミットのハッシュを調べる際は[git logでコミット履歴を確認する方法](/posts/git-log-history)が参考になる。また、作業中の変更を一時退避したい場合は[git stashで作業を一時退避する方法](/posts/git-stash-usage)も活用できる。
+
 ## 関連記事
 
 - [Gitのブランチ操作まとめ](/posts/git-branch-basics)

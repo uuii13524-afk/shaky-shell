@@ -38,6 +38,8 @@ https://www.toptal.com/developers/gitignore で自動生成できる。
 - `.env` ファイルには絶対に秘密のキーを書かない
 - すでにcommitしたファイルは `git rm --cached` で外す
 
+誤って `.env` などをcommitしてしまった場合は、[Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)で対処できる。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

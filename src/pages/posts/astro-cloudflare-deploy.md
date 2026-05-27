@@ -36,6 +36,8 @@ http://localhost:4321 でAstroの画面が出れば成功。
 
 ### 3. GitHubにpush
 
+GitHubへの初回pushが初めての場合は、[GitHubへの初回pushの手順](/posts/github-first-push)も参考にしてほしい。
+
 ```
 git init
 git add .
@@ -57,6 +59,7 @@ git push -u origin main
 
 - 「Create application」を押すとWorkers用の画面が出る。Pages用は画面下部の「Get started」から入る
 - Framework presetでAstroを選ぶとビルド設定が自動入力される
+- デプロイ後に環境変数を設定したい場合は[Cloudflare Pagesの環境変数の設定方法](/posts/cloudflare-pages-env-variables)を参照。
 
 ## 関連記事
 
