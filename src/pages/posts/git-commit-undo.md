@@ -3,6 +3,7 @@ title: 'Gitで間違えてcommitした時の取り消し方'
 date: '2026-05-06'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitで間違えてcommitした時の取り消し方を解説。git reset --softやgit revertを使ったコミットの取り消し・修正方法をまとめて紹介します。'
 ---
 
 ## 症状

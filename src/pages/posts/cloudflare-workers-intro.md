@@ -3,6 +3,7 @@ title: 'Cloudflare Workers入門：サーバーレス関数を作る方法'
 date: '2026-05-21'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Workersでサーバーレス関数を作る方法をハンズオンで解説。wranglerのセットアップからデプロイまでの基本的な流れを紹介します。'
 ---
 
 ## やりたかったこと

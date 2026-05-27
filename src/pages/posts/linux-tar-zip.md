@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'tar', 'zip', 'コマンド', 'ファイル操作']
 en_tags: ['Linux', 'tar', 'zip', 'command', 'file operation']
+description: 'tarコマンドでtar.gzファイルを作成・解凍する方法とzipコマンドの使い方を解説。ファイル圧縮・展開に必要なオプションをまとめて紹介します。'
 ---
 
 ## やりたかったこと

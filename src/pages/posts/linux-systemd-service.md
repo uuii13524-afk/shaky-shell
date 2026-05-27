@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'systemd', 'サービス管理']
 en_tags: ['Linux', 'systemd', 'service management']
+description: 'systemctlコマンドでsystemdサービスをstart・stop・enable・disableする方法を解説。自作サービスのユニットファイル作成方法も紹介します。'
 ---
 
 ## やりたかったこと

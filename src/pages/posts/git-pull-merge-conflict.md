@@ -3,6 +3,7 @@ title: 'git pullでコンフリクトが発生した時の解決方法'
 date: '2026-05-13'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git pullでコンフリクトが発生した時の原因と解決方法を解説。コンフリクトを手動で解消してコミットする手順をわかりやすく紹介します。'
 ---
 
 ## 症状

@@ -3,6 +3,7 @@ title: 'VSCodeのおすすめ拡張機能10選（開発効率化）'
 date: '2026-05-21'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'VSCodeのPrettier・GitLens・GitHub Copilotなど開発効率を上げるおすすめ拡張機能10選を紹介。各拡張機能の特徴と使い方も解説します。'
 ---
 
 ## やりたかったこと

@@ -3,6 +3,7 @@ title: 'Cloudflareでリダイレクトルールを設定する方法'
 date: '2026-05-16'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflareのダッシュボードでリダイレクトルールを設定する方法を解説。URLのパス変更や旧URLから新URLへの301リダイレクト設定手順を紹介します。'
 ---
 
 ## リダイレクトルールの設定手順

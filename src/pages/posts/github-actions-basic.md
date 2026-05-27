@@ -3,6 +3,7 @@ title: 'GitHub Actionsで自動デプロイする基本的な設定方法'
 date: '2026-05-10'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub Actionsを使ってpush時に自動デプロイを実行する基本的なワークフロー設定を解説。YAMLファイルの書き方と実行の仕組みを紹介します。'
 ---
 
 ## 基本的な仕組み

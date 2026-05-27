@@ -3,6 +3,7 @@ title: 'Gitのリモートリポジトリ操作まとめ（remote/fetch/pull/pus
 date: '2026-05-14'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitのremote・fetch・pull・pushコマンドでリモートリポジトリを操作する方法を解説。originの確認・追加・変更手順もまとめて紹介します。'
 ---
 
 ## リモートリポジトリの確認

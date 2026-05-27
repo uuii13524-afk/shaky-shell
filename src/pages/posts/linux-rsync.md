@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'rsync', 'バックアップ', 'SSH']
 en_tags: ['Linux', 'rsync', 'backup', 'SSH']
+description: 'rsyncコマンドでファイルをリモートサーバーに同期・バックアップする方法を解説。SSH経由でのファイル転送オプションと実用的な使い方を紹介します。'
 ---
 
 ## やりたかったこと

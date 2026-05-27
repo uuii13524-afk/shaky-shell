@@ -3,6 +3,7 @@ title: 'GitHubのIssueとPull Requestの基本的な使い方'
 date: '2026-05-21'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHubのIssueでタスク管理しPull Requestでコードレビューを行うチーム開発の基本的なワークフローを解説します。'
 ---
 
 ## やりたかったこと

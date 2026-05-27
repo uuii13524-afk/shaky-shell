@@ -3,6 +3,7 @@ title: 'Dockerの基本コマンドまとめ（run/stop/rm/ps）'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'Dockerのrun・stop・rm・psなど基本的なコマンドの使い方をまとめました。コンテナの起動・停止・削除・確認に必要なオプションも解説します。'
 ---
 
 ## コンテナの操作

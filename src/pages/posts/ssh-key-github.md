@@ -3,6 +3,7 @@ title: 'SSHキーを生成してGitHubに登録する方法'
 date: '2026-05-11'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'SSH鍵ペアを生成してGitHubアカウントに公開鍵を登録する手順を解説。~/.ssh/configの設定方法とSSH接続の確認コマンドも紹介します。'
 ---
 
 ## 手順

@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'swap', 'VPS']
 en_tags: ['Linux', 'swap', 'VPS']
+description: 'Linuxでswapfileを作成してスワップを有効化する方法を解説。swapの作成・有効化・永続化・使用量確認までの手順をステップごとに紹介します。'
 ---
 
 ## やりたかったこと

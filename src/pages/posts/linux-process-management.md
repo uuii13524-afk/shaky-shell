@@ -3,6 +3,7 @@ title: 'Linuxでプロセスを確認・終了する方法（ps/kill）'
 date: '2026-05-19'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのps・kill・top・pkillコマンドでプロセスを確認・終了する方法を解説。暴走プロセスの特定と安全な停止方法もわかりやすく紹介します。'
 ---
 
 ## プロセスの確認

@@ -3,6 +3,7 @@ title: 'Dockerfileの基本的な書き方'
 date: '2026-05-18'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'DockerfileのFROM・RUN・COPY・CMD・EXPOSEなど基本的な命令の書き方を解説。イメージのビルド手順と実践的なサンプルも紹介します。'
 ---
 
 ## Dockerfileの基本構成

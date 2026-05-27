@@ -3,6 +3,7 @@ title: 'AstroでMarkdownのスタイルを設定する方法'
 date: '2026-05-15'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroでMarkdownコンテンツにCSSスタイルを適用する方法を解説。グローバルCSSを使う方法とTailwindのtypographyプラグインを使う方法を紹介します。'
 ---
 
 ## 方法1：グローバルCSSを使う

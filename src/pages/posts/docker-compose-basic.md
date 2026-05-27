@@ -3,6 +3,7 @@ title: 'docker-composeの基本的な使い方'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'docker-compose.ymlの基本的な書き方とdocker compose up/downコマンドの使い方を解説。複数コンテナをまとめて管理する方法を紹介します。'
 ---
 
 ## docker-compose.ymlの基本構成

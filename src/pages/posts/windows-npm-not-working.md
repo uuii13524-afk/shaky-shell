@@ -3,6 +3,7 @@ title: 'Windowsでnpmコマンドが動かない時の対処法'
 date: '2026-05-06'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'Windowsでnpmコマンドが認識されない・動かない時の原因と解決方法を解説。PATHの確認・Node.jsの再インストール手順を紹介します。'
 ---
 
 ## 症状

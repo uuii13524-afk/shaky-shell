@@ -3,6 +3,7 @@ title: 'GitのブランチをCLIで作成・切り替える基本コマンド'
 date: '2026-05-08'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitのブランチをCLIで作成・切り替え・削除する基本コマンドを解説。git branch・git checkout・git switchの使い方をまとめて紹介します。'
 ---
 
 ## 基本コマンド

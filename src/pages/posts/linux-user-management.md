@@ -3,6 +3,7 @@ title: 'Linuxでユーザーを追加・削除する方法（useradd/userdel）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのuseradd・userdelコマンドでユーザーを追加・削除する方法を解説。sudoグループへの追加やパスワード設定手順もわかりやすく紹介します。'
 ---
 
 ## やりたかったこと

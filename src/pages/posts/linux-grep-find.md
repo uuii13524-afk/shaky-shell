@@ -3,6 +3,7 @@ title: 'Linuxでファイルを検索するgrep・findコマンドの使い方'
 date: '2026-05-16'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのgrepコマンドでファイル内のテキストを検索し、findコマンドでファイルを探す方法を解説。正規表現や絞り込みオプションも紹介します。'
 ---
 
 ## grep：ファイルの中身を検索

@@ -3,6 +3,7 @@ title: 'Windows Terminalをインストールして使いやすくする方法'
 date: '2026-05-15'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'Windows Terminalをインストールして見た目や起動設定をカスタマイズする方法を解説。WSL2・PowerShell・コマンドプロンプトとの連携も紹介します。'
 ---
 
 ## インストール

@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'gzip', 'パフォーマンス']
 en_tags: ['nginx', 'gzip', 'performance']
+description: 'nginxのgzip圧縮を有効にしてWebページの転送量を削減し表示速度を改善する設定方法を解説。gzip_typesやgzip_levelの最適な設定値を紹介します。'
 ---
 
 ## やりたかったこと

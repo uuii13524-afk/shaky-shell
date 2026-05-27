@@ -3,6 +3,7 @@ title: 'LinuxでCronジョブを設定して定期実行する方法'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'LinuxのcrontabでCronジョブを設定してスクリプトを定期実行する方法を解説。cron式の書き方と実行ログの確認方法も紹介します。'
 ---
 
 ## やりたかったこと

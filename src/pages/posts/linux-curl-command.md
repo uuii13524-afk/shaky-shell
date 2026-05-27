@@ -3,6 +3,7 @@ title: 'curlコマンドの基本的な使い方（APIテストに使える）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'curlコマンドでHTTPリクエストを送る基本的な使い方を解説。GET・POST・ヘッダー指定・認証・ファイルダウンロードのオプションをまとめて紹介します。'
 ---
 
 ## やりたかったこと

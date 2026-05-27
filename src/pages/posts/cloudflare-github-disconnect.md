@@ -3,6 +3,7 @@ title: 'Cloudflare PagesがGitHubと切断された時の対処法'
 date: '2026-05-01'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare PagesとGitHubの連携が切断された時の症状と再接続する手順を解説。pushが反映されない場合の確認ポイントも紹介します。'
 ---
 
 ## 症状
