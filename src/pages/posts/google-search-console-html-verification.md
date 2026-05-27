@@ -54,6 +54,8 @@ git push
 - デプロイ完了前に「確認」を押しても失敗する
 - 確認後もHTMLファイルを削除しないこと
 
+Search Consoleへの登録が完了したら、[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)でサイトマップを作成して送信しておくとクロールが促進される。
+
 ## 関連記事
 
 - [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)

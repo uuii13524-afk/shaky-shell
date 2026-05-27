@@ -28,6 +28,8 @@ cd "C:\Users\acia\My Documents\project"
 C:\Users\ユーザー名\projects\プロジェクト名
 ```
 
+Windowsの開発環境を整えるなら[Windows Terminalをインストールして使いやすくする方法](/posts/windows-terminal-setup)でターミナルを使いやすくしておくとパス操作もしやすくなる。
+
 ## 関連記事
 
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)

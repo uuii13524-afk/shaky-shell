@@ -34,6 +34,8 @@ find . -name "*.js" | xargs grep "console.log"
 - `grep -r` はnode_modulesも検索する。フォルダを絞ること
 - `find /` はルートから検索するので時間がかかる
 
+ログファイルをリアルタイムで監視しながらgrepで絞り込む使い方については[Linuxでログをリアルタイム監視するtail -fの使い方](/posts/linux-tail-log)も参考にしてほしい。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

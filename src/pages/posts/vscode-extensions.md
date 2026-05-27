@@ -112,6 +112,8 @@ VSCodeのUIを日本語化する。
 - Prettierを使う場合はESLintと設定を合わせる必要がある
 - Remote - SSHは開発効率が大幅に上がるのでVPSを使う人には必須
 
+Remote - SSHを使うにはVPS側でSSH接続が設定されている必要がある。[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)の `~/.ssh/config` を設定しておくとVSCodeからもワンクリックで接続できる。
+
 ## 関連記事
 
 - [WindowsにGitをインストールして初期設定する方法](/posts/windows-git-install)

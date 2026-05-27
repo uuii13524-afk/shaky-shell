@@ -50,6 +50,8 @@ Deploymentsタブ→「View build logs」でエラー内容を確認する。
 - 空のコミットpushが最も確実な強制デプロイ方法
 - ビルドログを最初に確認する習慣をつける
 
+そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
+
 ## 関連記事
 
 - [Cloudflare PagesがGitHubと切断された時の対処法](/posts/cloudflare-github-disconnect)

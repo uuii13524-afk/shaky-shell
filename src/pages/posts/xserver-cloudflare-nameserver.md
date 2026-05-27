@@ -29,6 +29,8 @@ Cloudflare PagesにカスタムドメインをXserverで取得したドメイン
 - 反映まで時間がかかるので焦らず待つ
 - Activeになってから改めてCustom domainsでドメインを設定する必要がある
 
+ネームサーバーがActiveになったら[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)の続きの手順でカスタムドメインを有効化してほしい。
+
 ## 関連記事
 
 - [XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)

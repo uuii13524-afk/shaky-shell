@@ -31,6 +31,8 @@ docker build -t myapp .      # Dockerfileからビルド
 - `-d` をつけないとフォアグラウンドで起動してターミナルが占有される
 - ポートは `-p ホスト側:コンテナ側` の順番
 
+複数のコンテナをまとめて管理したい場合は[docker-composeの基本的な使い方](/posts/docker-compose-basic)を使うと `up` / `down` で一括操作できる。
+
 ## 関連記事
 
 - [WindowsにDockerをインストールして動かすまでの手順](/posts/docker-install-windows)

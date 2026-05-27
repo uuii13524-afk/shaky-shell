@@ -42,6 +42,8 @@ docker volume prune
 - `docker compose down -v` はボリュームも削除する（注意）
 - ボリュームなしでコンテナを削除するとデータが全部消える
 
+ボリュームを使ったdocker-composeの構成については[docker-composeの基本的な使い方](/posts/docker-compose-basic)でまとめて確認できる。
+
 ## 関連記事
 
 - [Dockerの基本コマンドまとめ](/posts/docker-basic-commands)

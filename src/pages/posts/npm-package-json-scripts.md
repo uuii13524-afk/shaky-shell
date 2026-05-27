@@ -37,6 +37,8 @@ npm run build
 - `&&` はWindowsで動かない場合がある
 - `npm start` と `npm test` は `run` が不要
 
+スクリプトをCI/CDで自動実行したい場合は[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)と組み合わせると `npm run build` などをワークフローに組み込める。
+
 ## 関連記事
 
 - [npmとyarnの違いと使い分け](/posts/npm-vs-yarn)

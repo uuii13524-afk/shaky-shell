@@ -121,6 +121,8 @@ sudo vim /etc/fstab
 - SSDのVPSでは書き込み回数を増やすので `swappiness` を低くする（10前後）がおすすめ
 - `free -h` で Swap行が `0` のままなら `swapon` ができていない
 
+スワップを設定してもディスク容量が足りない場合は[Linuxでディスク使用量を確認する方法（df/du）](/posts/linux-disk-usage)で大きなファイルを探して削除するとよい。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

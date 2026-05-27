@@ -103,6 +103,8 @@ sudo systemctl reload nginx
 - `server_name`が正しく設定されていないとcertbotがnginxを認識しない
 - VPSのIPとドメインのDNS設定が一致していないと失敗する
 
+certbot実行前にUFWでポート80を開放しておく必要がある。[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)で `sudo ufw allow 80` を確認してほしい。
+
 ## 関連記事
 
 - [nginxの基本的な設定ファイルの書き方](/posts/nginx-basic-config)

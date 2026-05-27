@@ -30,6 +30,8 @@ layout: '../../layouts/PostLayout.astro'
 - 無料プランではリダイレクトルールは10個まで
 - `Always Use HTTPS` がオンならHTTP→HTTPSのルールは不要
 
+Cloudflareのリダイレクトルールで対応できない複雑なロジックが必要な場合は、[Cloudflare Workers入門：サーバーレス関数を作る方法](/posts/cloudflare-workers-intro)を使って柔軟に処理できる。
+
 ## 関連記事
 
 - [Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)

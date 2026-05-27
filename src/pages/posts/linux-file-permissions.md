@@ -67,6 +67,8 @@ chown -R ユーザー名 フォルダ名   # 再帰的に変更
 - Webサーバーのファイルは777にしない（セキュリティリスク）
 - `chmod -R` で再帰的に変更する時は慎重に
 
+パーミッション設定後もアクセスできない場合は[Linuxでpermission deniedエラーが出た時の対処法](/posts/linux-permission-denied)で所有者の設定も確認してほしい。
+
 ## 関連記事
 
 - [Linuxでpermission deniedエラーが出た時の対処法](/posts/linux-permission-denied)

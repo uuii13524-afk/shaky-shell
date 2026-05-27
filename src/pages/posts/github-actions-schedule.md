@@ -44,6 +44,8 @@ on:
 - cronはUTCなのでJSTと9時間ずれる
 - リポジトリにアクティビティがないと無効化されることがある
 
+Linuxのcronジョブとの使い分けについては[LinuxでCronジョブを設定して定期実行する方法](/posts/linux-cron-setup)も参考にしてほしい。GitHub Actionsのスケジュールはリポジトリへのアクセスが必要な処理に、サーバー側の処理はcronで使い分けるのが一般的だ。
+
 ## 関連記事
 
 - [GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)

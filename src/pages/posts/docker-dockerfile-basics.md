@@ -40,6 +40,8 @@ docker run -d -p 3000:3000 myapp
 - `COPY package*.json ./` してから `RUN npm ci` を分けるとキャッシュが効く
 - `.dockerignore` がないと `node_modules` がコピーされてイメージが巨大になる
 
+DockerfileでビルドしたイメージをCI/CDで自動デプロイしたい場合は[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)と組み合わせると効率が上がる。
+
 ## 関連記事
 
 - [Dockerの基本コマンドまとめ](/posts/docker-basic-commands)

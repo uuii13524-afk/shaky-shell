@@ -35,6 +35,8 @@ docker run hello-world
 - BIOSで仮想化（Intel VT-x / AMD-V）を有効にする
 - WSL2のインストールが必要：`wsl --install`
 
+WSL2のセットアップが初めての場合は[WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)の手順を先に確認しておくと迷わずに進められる。
+
 ## ConoHa VPSでDockerを本番環境で使う
 
 ローカルでDockerを動かせるようになったら、次は本番サーバーへの展開です。

@@ -80,6 +80,8 @@ resolves #123
 - レビューなしでmainに直接pushするのは避ける
 - ブランチ名はわかりやすく付ける
 
+Pull Requestのブランチ管理に慣れたら、[git rebaseの基本的な使い方](/posts/git-rebase-basics)でコミット履歴を整理してからPRを出すと、レビュワーが変更内容を追いやすくなる。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

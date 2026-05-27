@@ -58,6 +58,8 @@ Cloudflare PagesにカスタムドメインをActivate
 - ネームサーバー変更前にカスタムドメインを設定しようとしても進めない
 - Activeを確認してから改めてCustom domainsの設定をする（2段階）
 
+カスタムドメインが設定できたら[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)でHTTPS接続が正常に機能しているか確認しておくとよい。
+
 ## 関連記事
 
 - [XserverドメインのネームサーバーをCloudflareに変更する方法](/posts/xserver-cloudflare-nameserver)

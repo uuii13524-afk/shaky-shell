@@ -40,6 +40,8 @@ wsl --list --verbose   # インストール済み一覧
 - BIOSでIntel VT-x / AMD-Vを有効にする
 - Windows Updateで最新版にしてから実行する
 
+WSL2がインストールできたら[Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)でLinuxの操作方法を覚えておくと作業効率が上がる。
+
 ## XServer VPSで本番環境を用意する
 
 ローカルでの動作確認ができたら、次は本番サーバーへの展開です。

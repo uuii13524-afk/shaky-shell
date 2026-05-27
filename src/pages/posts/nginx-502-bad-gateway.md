@@ -52,6 +52,8 @@ tail -f /var/log/nginx/error.log
 - Docker環境では `localhost` ではなくサービス名でアクセスする
 - バックエンドが起動していない場合が一番多い
 
+バックエンドサービスが起動していない原因を調べるには[systemdでサービスを管理する方法](/posts/linux-systemd-service)の `systemctl status` でサービスの状態を確認するのが確実だ。
+
 ## 関連記事
 
 - [nginxの基本的な設定ファイルの書き方](/posts/nginx-basic-config)

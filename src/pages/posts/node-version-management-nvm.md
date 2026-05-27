@@ -41,6 +41,8 @@ nvm alias default 22
 - インストール前に既存のNode.jsをアンインストール
 - `nvm alias default` でデフォルトを設定しないとターミナルを開くたびに設定が必要
 
+nvmでNode.jsを切り替えた後でも `npm` コマンドが使えない場合は[Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)も参考にしてほしい。
+
 ## 関連記事
 
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)

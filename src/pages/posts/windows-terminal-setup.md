@@ -30,6 +30,8 @@ Alt + Shift + D     # 画面を分割
 - Windows 11はデフォルトでインストール済み
 - WSL2をインストールするとUbuntuが自動追加される
 
+WSL2を使うとWindows Terminal上でLinuxコマンドが使えるようになる。[WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)と組み合わせるとWindowsでLinux開発環境が揃う。
+
 ## 関連記事
 
 - [WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)

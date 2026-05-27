@@ -108,6 +108,8 @@ server {
 - Cloudflare経由のサイトはCloudflare側でも圧縮されるので、nginxでの設定が上書きされることがある
 - `gzip_vary on` を忘れるとCDNがgzip版と非gzip版を区別できずキャッシュがおかしくなる
 
+gzip設定の後は `sudo nginx -t` と `sudo systemctl reload nginx` で反映する。systemdの使い方に不慣れな場合は[systemdでサービスを管理する方法](/posts/linux-systemd-service)を参照してほしい。
+
 ## 関連記事
 
 - [nginxの基本的な設定ファイルの書き方](/posts/nginx-basic-config)

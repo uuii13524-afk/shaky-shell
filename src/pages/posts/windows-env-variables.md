@@ -30,6 +30,8 @@ set MY_KEY=my_value          # コマンドプロンプト
 - 変更後はターミナルを再起動しないと反映されない
 - ユーザー環境変数はそのユーザーのみ有効
 
+環境変数を設定してもnpmコマンドが動かない場合は[Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)でPATHの設定を確認してほしい。
+
 ## 関連記事
 
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)
