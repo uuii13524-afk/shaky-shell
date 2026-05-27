@@ -47,6 +47,8 @@ nginx -s reload   # リロード
 - 設定変更後は必ず `nginx -t` してから `nginx -s reload`
 - セミコロン `;` が抜けるとエラー
 
+nginxを外部に公開する前に[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)でポート80・443を開放しておくことを忘れずに。
+
 ## ConoHa VPSでDockerを本番環境で使う
 
 ローカルでDockerを動かせるようになったら、次は本番サーバーへの展開です。

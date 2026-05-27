@@ -82,6 +82,8 @@ PasswordAuthentication no
 - SSHキーのパーミッションは600でないと使えない（`chmod 600 ~/.ssh/id_ed25519`）
 - VPSは初回接続時にフィンガープリントの確認が出る
 
+ファイアウォールの設定でSSHポートが閉じていないか確認する方法は[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)を参照してほしい。
+
 ## 関連記事
 
 - [SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)

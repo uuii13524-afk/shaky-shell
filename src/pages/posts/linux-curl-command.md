@@ -63,6 +63,8 @@ curl -H "Authorization: Bearer トークン" https://api.example.com
 - `-s` と `-o` を組み合わせると進捗なしでファイルに保存できる
 - JSONを整形して表示するには `| python3 -m json.tool` をパイプで繋ぐ
 
+APIテストでレスポンスが正しく返ってくるか確認したら、その結果を[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)と組み合わせてパイプで絞り込む使い方も覚えておくと便利だ。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

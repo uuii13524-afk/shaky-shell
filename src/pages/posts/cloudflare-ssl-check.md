@@ -26,6 +26,8 @@ layout: '../../layouts/PostLayout.astro'
 - 証明書エラー→15分〜24時間待つ
 - Mixed Contentエラー→URLをHTTPSに変更
 
+SSL設定が完了したら、不要なポートを閉じるために[Cloudflareでリダイレクトルールを設定する方法](/posts/cloudflare-redirect-rules)でHTTP→HTTPSのリダイレクトも合わせて確認しておくとよい。
+
 ## 関連記事
 
 - [XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)

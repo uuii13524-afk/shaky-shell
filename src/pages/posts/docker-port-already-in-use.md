@@ -48,6 +48,8 @@ docker stop コンテナID
 - 以前起動したコンテナが残っていてポートを占有していることが多い
 - `docker ps -a` で停止中のコンテナも確認する
 
+ポートを使っているプロセスを特定して終了する方法は[Linuxでプロセスを確認・終了する方法（ps/kill）](/posts/linux-process-management)も参考になる。
+
 ## 関連記事
 
 - [Dockerの基本コマンドまとめ](/posts/docker-basic-commands)

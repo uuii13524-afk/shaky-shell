@@ -35,6 +35,8 @@ docker logs -f --tail 100 コンテナID
 /var/log/auth.log            # 認証ログ
 ```
 
+特定のキーワードだけを絞り込んで監視したい場合は、`tail -f` のパイプ先で[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)を組み合わせると効率よくエラーを確認できる。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

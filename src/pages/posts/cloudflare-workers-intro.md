@@ -114,6 +114,8 @@ export default {
 - `wrangler dev` でローカルテストができる
 - 無料枠でも十分な用途が多い
 
+WorkersにAPIキーなどのシークレットを渡す場合は、[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)と同様にwrangler secretを使って安全に管理できる。
+
 ## 関連記事
 
 - [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)

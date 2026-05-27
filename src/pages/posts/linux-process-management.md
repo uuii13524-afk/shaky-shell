@@ -33,6 +33,8 @@ ss -tlnp | grep 8080
 - `kill` だけで終了しない場合は `kill -9` で強制終了
 - `kill -9` は最終手段
 
+nginxやDockerなどのサービスはプロセスを直接killするより[systemdでサービスを管理する方法](/posts/linux-systemd-service)の `systemctl stop` で停止する方が安全で確実だ。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

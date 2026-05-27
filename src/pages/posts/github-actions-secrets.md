@@ -26,6 +26,8 @@ steps:
 - 一度登録すると値を確認できない（上書きのみ）
 - フォークされたリポジトリからのPRではSecretsは使えない
 
+Cloudflare Pagesで同様に環境変数を管理したい場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)を参照。`.gitignore` で `.env` ファイルを除外しておくことも重要で、[Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)が参考になる。
+
 ## 関連記事
 
 - [GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)

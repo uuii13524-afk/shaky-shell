@@ -35,6 +35,8 @@ Astroのレイアウトファイルの `</body>` 直前に貼り付ける。
 - データの反映に数時間かかることがある
 - Cookieなしのためアドブロッカーに影響されにくい
 
+Analyticsを設置したついでに、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとサイトの計測基盤が一通り整う。
+
 ## 関連記事
 
 - [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)

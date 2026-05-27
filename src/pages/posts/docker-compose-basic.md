@@ -35,6 +35,8 @@ docker compose exec web bash  # コンテナに入る
 - `docker-compose`（ハイフンあり）は古い書き方
 - `down` はコンテナを削除する。ボリュームも消す場合は `-v`
 
+データベースなどのデータを永続化したい場合は[Dockerのボリュームでデータを永続化する方法](/posts/docker-volume-basics)も合わせて確認してほしい。
+
 ## ConoHa VPSでDockerを本番環境で使う
 
 ローカルでDockerを動かせるようになったら、次は本番サーバーへの展開です。

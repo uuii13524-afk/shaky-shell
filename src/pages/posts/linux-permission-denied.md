@@ -41,6 +41,8 @@ chmod 644 ファイル名   # 所有者：読み書き、他：読みのみ
 chmod +x ファイル名    # 実行権限を追加
 ```
 
+chmodの数値の意味やよく使う設定値については[Linuxのファイルパーミッション（chmod/chown）完全ガイド](/posts/linux-file-permissions)で詳しく解説している。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

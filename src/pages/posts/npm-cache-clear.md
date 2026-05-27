@@ -28,6 +28,8 @@ npm install
 - `--force` なしではキャッシュがクリアされない場合がある
 - `node_modules` を削除して再インストールが最も確実
 
+それでも解決しない場合はNode.jsのバージョン自体が問題のことがある。[Node.jsのバージョンをnvmで管理する方法](/posts/node-version-management-nvm)でバージョンを切り替えて試してみると解決することがある。
+
 ## 関連記事
 
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)

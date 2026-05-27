@@ -81,6 +81,8 @@ tail -f /var/log/cron.log
 - `2>&1` をつけるとエラーもログに記録できる
 - `*/5` は「5の倍数分ごと」という意味
 
+Cronのログを確認する際は[Linuxでログをリアルタイム監視するtail -fの使い方](/posts/linux-tail-log)を使うとリアルタイムで確認できる。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

@@ -113,6 +113,8 @@ du -sh ./mydir
 - Linuxサーバーに `unzip` が入っていないことがある（`apt install unzip` で入れる）
 - `tar` でパスを指定する際、先頭の `/` があると絶対パスで展開されて危険なことがある（`-P` オプションで解除可能）
 
+定期的なバックアップを自動化したい場合は[LinuxでCronジョブを設定して定期実行する方法](/posts/linux-cron-setup)と組み合わせてtarコマンドをcronで実行するのが定番だ。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

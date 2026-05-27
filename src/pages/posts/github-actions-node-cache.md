@@ -31,6 +31,8 @@ steps:
 - `cache: 'npm'` を設定するだけで自動的にキャッシュされる
 - `package-lock.json` が変わるとキャッシュが無効になる
 
+GitHub Actionsの基本的なワークフロー構成については[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)を先に確認しておくとキャッシュの設定箇所がわかりやすい。
+
 ## 関連記事
 
 - [GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)

@@ -80,6 +80,8 @@ crontab -e
 - SSHの公開鍵認証が設定されていないとCronでの自動実行が止まる
 - rsyncはデフォルトで変更のないファイルをスキップするので、自動的に差分転送になる
 
+SSHの公開鍵認証が未設定の場合は[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)の `~/.ssh/config` の設定も合わせて確認してほしい。
+
 ## 関連記事
 
 - [LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)

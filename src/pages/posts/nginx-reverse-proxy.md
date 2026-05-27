@@ -148,6 +148,8 @@ Certbotが `proxy_pass` の設定はそのままにしてSSLの設定だけ追�
 - Node.jsアプリが127.0.0.1でlistenしていないと `502 Bad Gateway` になる
 - `nginx -t` でテストしてからreloadしないと設定ミスで本番が落ちる
 
+リバースプロキシの設定後にHTTPSも対応させたい場合は[nginxにLet's EncryptのSSL証明書を設定する方法（certbot）](/posts/nginx-ssl-certbot)で無料のSSL証明書を取得できる。
+
 ## 関連記事
 
 - [nginxの基本的な設定ファイルの書き方](/posts/nginx-basic-config)

@@ -24,6 +24,8 @@ layout: '../../layouts/PostLayout.astro'
 - npmとyarnを同じプロジェクトで混在させない
 - チームで開発する場合はどちらかに統一する
 
+GitHub Actionsのキャッシュはnpmかyarnかによって設定が変わる。[GitHub ActionsでNode.jsのキャッシュを使ってビルドを高速化する方法](/posts/github-actions-node-cache)で `cache: 'npm'` か `cache: 'yarn'` を使い分けてほしい。
+
 ## 関連記事
 
 - [Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)

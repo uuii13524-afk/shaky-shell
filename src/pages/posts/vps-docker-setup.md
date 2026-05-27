@@ -83,6 +83,8 @@ ufw enable
 - rootでDockerを使うのはセキュリティリスクがある
 - UFWとDockerの相性に注意が必要
 
+VPSを使い始めたらrootのSSH接続を無効にして一般ユーザーで運用するのが安全だ。[Linuxでユーザーを追加・削除する方法（useradd/userdel）](/posts/linux-user-management)で一般ユーザーを作成してから設定を進めてほしい。
+
 ## VPSを選ぶなら
 
 <a href="https://px.a8.net/svt/ejp?a8mat=4B3UZB+CFPZOY+50+4YQYYA" rel="nofollow">ConoHa VPSを見てみる →</a>

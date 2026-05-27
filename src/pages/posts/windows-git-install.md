@@ -40,6 +40,8 @@ git config --global user.email "メールアドレス"
 - user.nameとuser.emailを設定しないとcommit時にエラーになる
 - デフォルトブランチ名を `main` にする
 
+GitをインストールしたらGitHubにSSH鍵を登録しておくと毎回パスワードを入力しなくて済む。[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)で設定しておくと便利だ。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

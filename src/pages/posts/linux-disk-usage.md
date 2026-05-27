@@ -61,6 +61,8 @@ docker system prune -a
 - `-h` オプションで人間が読みやすい形式（GB/MB）になる
 - Dockerを使っている場合は `/var/lib/docker` が大きくなりやすい
 
+VPSのRAMが少なくてメモリ不足になっている場合は、[Linuxでswapを設定する方法](/posts/linux-swap-setup)でスワップ領域を追加してメモリ不足を緩和できる。
+
 ## 関連記事
 
 - [Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)

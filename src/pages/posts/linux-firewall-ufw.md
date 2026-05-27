@@ -110,6 +110,8 @@ To                         Action      From
 - Dockerを使っている場合、UFWのルールをDockerが迂回することがある（`DOCKER-USER` チェーンの設定が必要）
 - デフォルトで incoming は deny になっているので、必要なポートだけ明示的に許可する
 
+UFWを設定する前に、[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)でSSHポートの設定を確認しておくと、誤ってSSH接続を遮断するリスクを減らせる。
+
 ## 関連記事
 
 - [LinuxのSSH基本操作まとめ](/posts/linux-ssh-basics)

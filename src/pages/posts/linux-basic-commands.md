@@ -43,6 +43,8 @@ tail -f logfile.log  # リアルタイム表示
 - `rm -rf` は元に戻せない
 - Linuxはファイル名の大文字小文字を区別する
 
+ファイルの中身を検索したい場合は[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)も覚えておくと便利だ。
+
 ## ConoHa VPSでDockerを本番環境で使う
 
 ローカルでDockerを動かせるようになったら、次は本番サーバーへの展開です。

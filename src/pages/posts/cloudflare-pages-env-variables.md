@@ -32,6 +32,8 @@ MY_API_KEY=ローカル用のキー
 - 環境変数を追加したら再デプロイが必要
 - `.env` をGitHubにpushしないよう注意
 
+`.env` ファイルをGitにコミットしてしまわないよう、[Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)で `.env` を除外しておくと安全だ。
+
 ## 関連記事
 
 - [Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)

@@ -37,7 +37,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### 原因4：ターミナルを再起動していない
 
-インストール後にターミナルを再起動する。
+インストール後にターミナルを再起動する。[Windows Terminalをインストールして使いやすくする方法](/posts/windows-terminal-setup)で快適なターミナル環境を整えておくと開発がしやすくなる。
 
 ## 関連記事
 
