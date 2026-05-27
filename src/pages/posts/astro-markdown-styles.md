@@ -38,6 +38,8 @@ layout: '../../layouts/PostLayout.astro'
 - Markdownから生成されたHTMLには自動でクラスが付かない
 - レイアウトファイルのパスはMarkdownファイルからの相対パス
 
+スタイルを整えたら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も設定しておくとSEO対策が一通り揃う。
+
 ## 関連記事
 
 - [Astroで新しいページを追加する基本的な方法](/posts/astro-add-page)

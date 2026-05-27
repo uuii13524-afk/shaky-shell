@@ -57,6 +57,8 @@ Sitemap: https://あなたのドメイン.com/sitemap-index.xml
 - robots.txtは `public/` に置く
 - Cloudflareがrobots.txtを上書きすることがあるが問題ない
 
+sitemapの設置が完了したら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も一緒に対応しておくとSEO対策が一通り揃う。
+
 ## 関連記事
 
 - [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)

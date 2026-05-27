@@ -33,6 +33,8 @@ git stash pop
 - 新規ファイルは `-u` オプションが必要
 - `git stash clear` は元に戻せないので注意
 
+stash後にブランチを切り替えて作業する場合は[GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)と組み合わせて使うとよい。
+
 ## 関連記事
 
 - [GitのブランチをCLIで作成・切り替える基本コマンド](/posts/git-branch-basics)

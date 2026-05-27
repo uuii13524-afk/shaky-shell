@@ -33,6 +33,8 @@ git push -u origin main  # 上流ブランチを設定してpush
 - `git push --force` は共有リポジトリでは使わない
 - `-u` フラグで上流ブランチを設定すると次回から `git push` だけで済む
 
+GitHubにSSH接続している場合は[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)でリモートURLをSSH形式にしておくと認証が楽になる。
+
 ## 関連記事
 
 - [GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)

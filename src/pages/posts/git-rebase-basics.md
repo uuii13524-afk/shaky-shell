@@ -104,6 +104,8 @@ git push --force-with-lease origin feature/my-feature
 - コンフリクトが多いときは `git rebase --abort` してmergeに切り替えるのもあり
 - squashしすぎるとどこで何を変えたか分からなくなる
 
+rebase前に一時的に変更を退避したい場合は[git stashで作業を一時退避する方法](/posts/git-stash-usage)が便利だ。
+
 ## 関連記事
 
 - [Gitのブランチ操作まとめ](/posts/git-branch-basics)

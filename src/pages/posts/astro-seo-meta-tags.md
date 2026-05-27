@@ -46,6 +46,8 @@ const { title, description } = Astro.props;
 - `description` は120〜160文字程度が推奨
 - `canonical` タグを設定しないと重複コンテンツとみなされることがある
 
+SEOをさらに強化したい場合は、[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)と組み合わせることで検索エンジンへのクロールを適切に制御できる。
+
 ## 関連記事
 
 - [Astroで新しいページを追加する基本的な方法](/posts/astro-add-page)

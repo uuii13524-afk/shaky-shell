@@ -35,6 +35,8 @@ git diff HEAD~1
 - `git log` は `q` キーで終了する
 - `--oneline` が一番見やすい
 
+特定のコミットを他のブランチに持っていきたい場合は[git cherry-pickで特定のコミットだけ別ブランチに適用する](/posts/git-cherry-pick)も参考にしてほしい。
+
 ## 関連記事
 
 - [Gitで間違えてcommitした時の取り消し方](/posts/git-commit-undo)

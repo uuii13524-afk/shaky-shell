@@ -38,6 +38,8 @@ date: '2026-05-08'
 - `src/pages/` 以外に置いてもページにならない
 - ファイル名がそのままURLになる
 
+ページが増えてきたら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとよい。
+
 ## 関連記事
 
 - [AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)
