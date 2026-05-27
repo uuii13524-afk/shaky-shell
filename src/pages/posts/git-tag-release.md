@@ -3,6 +3,7 @@ title: 'Gitのタグとリリースを管理する方法'
 date: '2026-05-21'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitのタグを使ってリリースバージョンを管理する方法を解説。タグの作成・プッシュ・削除コマンドとGitHubでのリリース作成手順を紹介します。'
 ---
 
 ## やりたかったこと

@@ -3,6 +3,7 @@ title: 'npmのキャッシュをクリアして問題を解決する方法'
 date: '2026-05-09'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'npmのキャッシュをクリアしてパッケージのインストールエラーや不具合を解決する方法を解説。npm cache cleanコマンドの使い方と手順を紹介します。'
 ---
 
 ## 症状

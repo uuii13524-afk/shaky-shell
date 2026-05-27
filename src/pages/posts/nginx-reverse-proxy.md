@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'リバースプロキシ', 'Node.js', 'VPS']
 en_tags: ['nginx', 'reverse proxy', 'Node.js', 'VPS']
+description: 'nginxのリバースプロキシ設定でNode.jsやPythonアプリをポート80/443で公開する方法を解説。proxy_passの書き方とヘッダー設定を紹介します。'
 ---
 
 ## やりたかったこと

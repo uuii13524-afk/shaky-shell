@@ -3,6 +3,7 @@ title: 'Gitで.gitignoreを設定してファイルを管理対象から外す�
 date: '2026-05-09'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitで.gitignoreを設定してnode_modulesや.envなどのファイルを管理対象から外す方法を解説。テンプレートの活用法も紹介します。'
 ---
 
 ## .gitignoreとは

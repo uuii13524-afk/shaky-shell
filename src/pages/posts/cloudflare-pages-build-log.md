@@ -3,6 +3,7 @@ title: 'Cloudflare Pagesのビルドログの見方とエラーの対処法'
 date: '2026-05-09'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Pagesのビルドログの確認方法とよくあるビルドエラーの原因・解決策を解説。ダッシュボードからログを開く手順も紹介します。'
 ---
 
 ## ビルドログの開き方

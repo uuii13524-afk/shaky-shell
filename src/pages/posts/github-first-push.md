@@ -3,6 +3,7 @@ title: 'GitHubで初めてリポジトリを作ってpushする手順'
 date: '2026-05-06'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHubでリポジトリを新規作成してローカルの既存プロジェクトを初めてpushするまでの手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと

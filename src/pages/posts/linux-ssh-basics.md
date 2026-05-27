@@ -3,6 +3,7 @@ title: 'LinuxのSSH接続の基本（VPSに接続する方法）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'LinuxのSSHコマンドでVPSやリモートサーバーに接続する基本手順を解説。ポート番号の指定・鍵認証・ssh_configの設定方法も紹介します。'
 ---
 
 ## やりたかったこと

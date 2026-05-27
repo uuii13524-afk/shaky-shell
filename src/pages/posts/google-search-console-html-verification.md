@@ -3,6 +3,7 @@ title: 'Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pages�
 date: '2026-05-04'
 category: 'SEO'
 layout: '../../layouts/PostLayout.astro'
+description: 'Google Search ConsoleにAstro+Cloudflare Pagesのサイトを登録するHTMLファイル認証の手順を解説。ファイルの設置方法から確認まで紹介します。'
 ---
 
 ## やりたかったこと

@@ -3,6 +3,7 @@ title: 'Cloudflare Pagesで環境変数を設定する方法'
 date: '2026-05-13'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Pagesのダッシュボードで環境変数（APIキーなど）を設定する手順を解説。本番環境とプレビュー環境への設定方法も紹介します。'
 ---
 
 ## 設定手順

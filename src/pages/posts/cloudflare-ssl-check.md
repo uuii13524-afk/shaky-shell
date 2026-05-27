@@ -3,6 +3,7 @@ title: 'Cloudflareで独自ドメインのSSL設定を確認する方法'
 date: '2026-05-07'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflareで独自ドメインのSSL設定を確認する方法を解説。HTTPSで正しく表示されない場合の確認ポイントとSSLモードの設定方法を紹介します。'
 ---
 
 ## やりたかったこと

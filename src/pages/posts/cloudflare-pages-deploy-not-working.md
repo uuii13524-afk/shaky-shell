@@ -3,6 +3,7 @@ title: 'Cloudflare PagesのGitHub自動デプロイが動かない時の対処�
 date: '2026-05-04'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'git pushしてもCloudflare Pagesに変更が反映されない原因と解決方法を解説。GitHub連携の確認やビルドコマンドの見直しポイントを紹介します。'
 ---
 
 ## 症状

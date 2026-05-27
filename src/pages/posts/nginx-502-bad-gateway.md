@@ -3,6 +3,7 @@ title: 'nginx 502 Bad Gatewayエラーの原因と解決方法'
 date: '2026-05-20'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
+description: 'nginx 502 Bad Gatewayエラーの原因調査と解決方法を解説。バックエンドサービスの起動確認・プロキシ設定ミスの特定方法を紹介します。'
 ---
 
 ## 症状

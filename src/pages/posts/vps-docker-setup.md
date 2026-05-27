@@ -3,6 +3,7 @@ title: 'VPSにDockerをインストールして本番環境を構築する方法
 date: '2026-05-21'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'VPS（ConoHa・XServer等）にDockerとdocker-composeをインストールして本番環境を構築する手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと

@@ -3,6 +3,7 @@ title: 'WindowsにGitをインストールして初期設定する方法'
 date: '2026-05-07'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsにGit for Windowsをインストールしてgit config・SSH設定まで行う初期設定手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと

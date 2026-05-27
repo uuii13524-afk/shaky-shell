@@ -3,6 +3,7 @@ title: 'git stashで作業を一時退避する方法'
 date: '2026-05-20'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git stashで作業中の変更を一時退避する方法を解説。stash保存・復元・一覧確認・削除コマンドの基本的な使い方をまとめて紹介します。'
 ---
 
 ## 基本的な使い方

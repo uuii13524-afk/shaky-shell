@@ -3,6 +3,7 @@ title: 'WindowsにDockerをインストールして動かすまでの手順'
 date: '2026-05-10'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsにDocker Desktopをインストールして動かすまでの手順を解説。WSL2の有効化・インストール・動作確認までステップごとに紹介します。'
 ---
 
 ## 手順

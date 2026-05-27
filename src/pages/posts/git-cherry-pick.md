@@ -5,6 +5,7 @@ category: 'Git'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Git', 'cherry-pick', 'バージョン管理']
 en_tags: ['Git', 'cherry-pick', 'version control']
+description: 'git cherry-pickコマンドで特定のコミットだけを別ブランチに適用する方法を解説。複数コミットの指定方法やコンフリクト時の対処法も紹介します。'
 ---
 
 ## やりたかったこと

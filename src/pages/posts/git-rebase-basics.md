@@ -5,6 +5,7 @@ category: 'Git'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Git', 'rebase', 'バージョン管理']
 en_tags: ['Git', 'rebase', 'version control']
+description: 'git rebaseの基本的な使い方を解説。mainブランチへのrebase方法・インタラクティブrebaseでコミットを整理する手順を紹介します。'
 ---
 
 ## やりたかったこと

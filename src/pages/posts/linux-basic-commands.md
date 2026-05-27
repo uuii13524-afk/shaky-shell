@@ -3,6 +3,7 @@ title: 'Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ'
 date: '2026-05-10'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのls・cd・mkdir・rm・cpなどファイル操作に必要な基本コマンドの使い方をまとめました。初心者向けにオプションもわかりやすく解説します。'
 ---
 
 ## ファイル・フォルダの確認

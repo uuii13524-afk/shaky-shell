@@ -3,6 +3,7 @@ title: 'npmとyarnの違いと使い分け'
 date: '2026-05-11'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'npmとyarnのコマンド対応表・速度・lockファイルの違いを解説。インストール・アンインストール・スクリプト実行コマンドを比較して紹介します。'
 ---
 
 ## コマンド比較

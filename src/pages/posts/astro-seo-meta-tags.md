@@ -3,6 +3,7 @@ title: 'AstroでSEOに必要なmetaタグを設定する方法'
 date: '2026-05-18'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroサイトにSEOに必要なtitle・description・OGPなどのmetaタグを設定する方法を解説。BaseHeadコンポーネントを使った管理方法も紹介します。'
 ---
 
 ## 基本的なmetaタグ

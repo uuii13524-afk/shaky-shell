@@ -3,6 +3,7 @@ title: 'Windowsのターミナルでパスにスペースがある時の対処�
 date: '2026-05-08'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'Windowsのターミナルでパスにスペースが含まれる場合のエラー対処法を解説。引用符でパスを囲む方法とスペースを含むパスの扱い方を紹介します。'
 ---
 
 ## 症状

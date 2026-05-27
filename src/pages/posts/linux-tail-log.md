@@ -3,6 +3,7 @@ title: 'Linuxでログをリアルタイム監視するtail -fの使い方'
 date: '2026-05-17'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'tail -fコマンドでLinuxのログファイルをリアルタイムに監視する方法を解説。複数ファイルの同時監視・grepとの組み合わせ方も紹介します。'
 ---
 
 ## 基本的な使い方

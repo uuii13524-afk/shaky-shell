@@ -3,6 +3,7 @@ title: 'Linuxでpermission deniedエラーが出た時の対処法'
 date: '2026-05-14'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxでpermission deniedエラーが出た時の原因と解決方法を解説。chmodやchownによるパーミッション修正・sudoでの実行方法を紹介します。'
 ---
 
 ## 症状

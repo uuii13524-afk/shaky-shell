@@ -3,6 +3,7 @@ title: 'WindowsでWSL2をインストールする方法'
 date: '2026-05-11'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsでWSL2をインストールしてLinux環境を構築する手順を解説。wsl --installコマンドの使い方・Ubuntuの初期設定方法を紹介します。'
 ---
 
 ## 手順

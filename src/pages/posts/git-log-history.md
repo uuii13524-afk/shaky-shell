@@ -3,6 +3,7 @@ title: 'git logでコミット履歴を確認する方法'
 date: '2026-05-17'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git logコマンドでコミット履歴を確認する方法を解説。--oneline・--graph・--since等のオプションを使った見やすいログ表示方法をまとめて紹介します。'
 ---
 
 ## 基本的な使い方

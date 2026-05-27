@@ -3,6 +3,7 @@ title: 'nginxの基本的な設定ファイルの書き方'
 date: '2026-05-12'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
+description: 'nginxの設定ファイルの基本的な書き方を解説。server・location・listen・rootなどの基本ディレクティブとHTTPサーバー設定の要点を紹介します。'
 ---
 
 ## 基本的な設定ファイル

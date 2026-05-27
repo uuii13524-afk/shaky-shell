@@ -3,6 +3,7 @@ title: 'Cloudflare AnalyticsをAstroサイトに設定する方法'
 date: '2026-05-19'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare AnalyticsをAstroサイトに設置する方法を解説。Cookieなし・無料で使えるアクセス解析ツールのスクリプト設置手順を紹介します。'
 ---
 
 ## Cloudflare Analyticsとは

@@ -3,6 +3,7 @@ title: 'Linuxでディスク使用量を確認する方法（df/du）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのdf・duコマンドでディスク使用量を確認する方法を解説。サーバーの空き容量確認・大きなファイルの特定方法をわかりやすく紹介します。'
 ---
 
 ## やりたかったこと

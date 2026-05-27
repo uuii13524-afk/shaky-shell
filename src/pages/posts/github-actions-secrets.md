@@ -3,6 +3,7 @@ title: 'GitHub ActionsでSecretsを使って秘密情報を管理する方法'
 date: '2026-05-13'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub ActionsでSecretsにAPIキーなどの秘密情報を登録してワークフロー内で安全に使う方法を解説。登録手順と参照方法を紹介します。'
 ---
 
 ## Secretsの設定手順

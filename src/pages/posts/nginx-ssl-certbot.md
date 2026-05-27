@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
+description: 'nginxにcertbotでSSL証明書を取得・設定してHTTPS化する手順を解説。無料SSL証明書の自動更新設定方法もわかりやすく紹介します。'
 ---
 
 ## やりたかったこと

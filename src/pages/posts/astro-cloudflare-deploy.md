@@ -3,6 +3,7 @@ title: 'AstroをCloudflare Pagesにデプロイする手順'
 date: '2026-05-03'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解説。GitHubとの連携設定・ビルドコマンドの指定・カスタムドメインの設定方法までわかりやすく紹介します。'
 ---
 
 ## やりたかったこと

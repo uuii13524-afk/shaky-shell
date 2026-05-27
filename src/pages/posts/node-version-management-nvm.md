@@ -3,6 +3,7 @@ title: 'Node.jsのバージョンをnvmで管理する方法（Windows/Mac）'
 date: '2026-05-07'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'nvmを使ってNode.jsの複数バージョンをインストール・切り替える方法をWindows・Macそれぞれ解説。プロジェクト別の.nvmrcファイル設定も紹介します。'
 ---
 
 ## やりたかったこと

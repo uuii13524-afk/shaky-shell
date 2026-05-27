@@ -3,6 +3,7 @@ title: 'Linuxのファイルパーミッション（chmod/chown）完全ガイ�
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのchmod・chownコマンドでファイルのパーミッションとオーナーを設定する方法を解説。数値表記と記号表記の使い方も紹介します。'
 ---
 
 ## やりたかったこと

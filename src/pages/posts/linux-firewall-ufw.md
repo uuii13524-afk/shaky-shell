@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'UFW', 'ファイアウォール', 'セキュリティ', 'VPS']
 en_tags: ['Linux', 'UFW', 'Firewall', 'Security', 'VPS']
+description: 'LinuxのUFWファイアウォールの基本設定を解説。UFWの有効化・ポート許可・SSH接続の設定・ステータス確認など、VPS構築時の必須手順を紹介します。'
 ---
 
 ## やりたかったこと
