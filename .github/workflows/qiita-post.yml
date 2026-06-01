@@ -1,0 +1,21 @@
+name: Post to Qiita
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'src/pages/posts/*.md'
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Post to Qiita
+        env:
+          QIITA_TOKEN: ${{ secrets.QIITA_TOKEN }}
+        run: python3 .github/scripts/post_qiita.py
