@@ -39,7 +39,9 @@ def parse_frontmatter(filepath):
     return data, body
 
 def clean_body(body):
-    # アフィリエイトリンク（A8.netのHTMLタグ）を除去
+    # おすすめVPS/ドメイン/スクールセクションごと削除
+    body = re.sub(r'## おすすめの.*$', '', body, flags=re.DOTALL)
+    # 念のためA8.netのHTMLタグも除去
     body = re.sub(r'<a href="https://px\.a8\.net/.*?</a>', '', body)
     body = re.sub(r'<img[^>]*a8\.net[^>]*>', '', body)
     # 内部リンクを絶対URLに変換
