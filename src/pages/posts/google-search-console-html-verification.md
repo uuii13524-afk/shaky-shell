@@ -3,6 +3,7 @@ title: 'Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pages�
 date: '2026-05-04'
 category: 'SEO'
 layout: '../../layouts/PostLayout.astro'
+description: 'Google Search ConsoleにAstro+Cloudflare Pagesのサイトを登録するHTMLファイル認証の手順を解説。ファイルの設置方法から確認まで紹介します。'
 ---
 
 ## やりたかったこと
@@ -53,6 +54,8 @@ git push
 - HTMLファイルは `public/` に置く（`src/` では動かない）
 - デプロイ完了前に「確認」を押しても失敗する
 - 確認後もHTMLファイルを削除しないこと
+
+Search Consoleへの登録が完了したら、[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)でサイトマップを作成して送信しておくとクロールが促進される。
 
 ## 関連記事
 

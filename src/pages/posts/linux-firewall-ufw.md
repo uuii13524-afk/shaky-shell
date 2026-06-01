@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'UFW', 'ファイアウォール', 'セキュリティ', 'VPS']
 en_tags: ['Linux', 'UFW', 'Firewall', 'Security', 'VPS']
+description: 'LinuxのUFWファイアウォールの基本設定を解説。UFWの有効化・ポート許可・SSH接続の設定・ステータス確認など、VPS構築時の必須手順を紹介します。'
 ---
 
 ## やりたかったこと
@@ -109,6 +110,8 @@ To                         Action      From
 - `ufw reset` するとSSHの設定も消えるので要注意
 - Dockerを使っている場合、UFWのルールをDockerが迂回することがある（`DOCKER-USER` チェーンの設定が必要）
 - デフォルトで incoming は deny になっているので、必要なポートだけ明示的に許可する
+
+UFWを設定する前に、[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)でSSHポートの設定を確認しておくと、誤ってSSH接続を遮断するリスクを減らせる。
 
 ## 関連記事
 

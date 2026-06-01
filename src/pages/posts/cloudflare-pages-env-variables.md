@@ -3,6 +3,7 @@ title: 'Cloudflare Pagesで環境変数を設定する方法'
 date: '2026-05-13'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Pagesのダッシュボードで環境変数（APIキーなど）を設定する手順を解説。本番環境とプレビュー環境への設定方法も紹介します。'
 ---
 
 ## 設定手順
@@ -31,6 +32,8 @@ MY_API_KEY=ローカル用のキー
 
 - 環境変数を追加したら再デプロイが必要
 - `.env` をGitHubにpushしないよう注意
+
+`.env` ファイルをGitにコミットしてしまわないよう、[Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)で `.env` を除外しておくと安全だ。
 
 ## 関連記事
 

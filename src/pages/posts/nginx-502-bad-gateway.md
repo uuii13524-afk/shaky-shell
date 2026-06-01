@@ -3,6 +3,7 @@ title: 'nginx 502 Bad Gatewayエラーの原因と解決方法'
 date: '2026-05-20'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
+description: 'nginx 502 Bad Gatewayエラーの原因調査と解決方法を解説。バックエンドサービスの起動確認・プロキシ設定ミスの特定方法を紹介します。'
 ---
 
 ## 症状
@@ -51,6 +52,8 @@ tail -f /var/log/nginx/error.log
 
 - Docker環境では `localhost` ではなくサービス名でアクセスする
 - バックエンドが起動していない場合が一番多い
+
+バックエンドサービスが起動していない原因を調べるには[systemdでサービスを管理する方法](/posts/linux-systemd-service)の `systemctl status` でサービスの状態を確認するのが確実だ。
 
 ## 関連記事
 

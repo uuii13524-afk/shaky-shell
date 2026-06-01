@@ -3,6 +3,7 @@ title: 'Linuxでpermission deniedエラーが出た時の対処法'
 date: '2026-05-14'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxでpermission deniedエラーが出た時の原因と解決方法を解説。chmodやchownによるパーミッション修正・sudoでの実行方法を紹介します。'
 ---
 
 ## 症状
@@ -40,6 +41,8 @@ chmod 755 ファイル名   # 所有者：読み書き実行、他：読み実�
 chmod 644 ファイル名   # 所有者：読み書き、他：読みのみ
 chmod +x ファイル名    # 実行権限を追加
 ```
+
+chmodの数値の意味やよく使う設定値については[Linuxのファイルパーミッション（chmod/chown）完全ガイド](/posts/linux-file-permissions)で詳しく解説している。
 
 ## 関連記事
 

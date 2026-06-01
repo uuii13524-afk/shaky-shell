@@ -3,6 +3,7 @@ title: 'Linuxでディスク使用量を確認する方法（df/du）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのdf・duコマンドでディスク使用量を確認する方法を解説。サーバーの空き容量確認・大きなファイルの特定方法をわかりやすく紹介します。'
 ---
 
 ## やりたかったこと
@@ -60,6 +61,8 @@ docker system prune -a
 - `df` はファイルシステム全体、`du` は特定フォルダのサイズを調べる
 - `-h` オプションで人間が読みやすい形式（GB/MB）になる
 - Dockerを使っている場合は `/var/lib/docker` が大きくなりやすい
+
+VPSのRAMが少なくてメモリ不足になっている場合は、[Linuxでswapを設定する方法](/posts/linux-swap-setup)でスワップ領域を追加してメモリ不足を緩和できる。
 
 ## 関連記事
 

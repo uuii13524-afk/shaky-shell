@@ -3,6 +3,7 @@ title: 'AstroでSEOに必要なmetaタグを設定する方法'
 date: '2026-05-18'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroサイトにSEOに必要なtitle・description・OGPなどのmetaタグを設定する方法を解説。BaseHeadコンポーネントを使った管理方法も紹介します。'
 ---
 
 ## 基本的なmetaタグ
@@ -45,6 +46,8 @@ const { title, description } = Astro.props;
 
 - `description` は120〜160文字程度が推奨
 - `canonical` タグを設定しないと重複コンテンツとみなされることがある
+
+SEOをさらに強化したい場合は、[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)と組み合わせることで検索エンジンへのクロールを適切に制御できる。
 
 ## 関連記事
 

@@ -3,6 +3,7 @@ title: 'Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ'
 date: '2026-05-10'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのls・cd・mkdir・rm・cpなどファイル操作に必要な基本コマンドの使い方をまとめました。初心者向けにオプションもわかりやすく解説します。'
 ---
 
 ## ファイル・フォルダの確認
@@ -42,6 +43,8 @@ tail -f logfile.log  # リアルタイム表示
 
 - `rm -rf` は元に戻せない
 - Linuxはファイル名の大文字小文字を区別する
+
+ファイルの中身を検索したい場合は[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)も覚えておくと便利だ。
 
 ## ConoHa VPSでDockerを本番環境で使う
 

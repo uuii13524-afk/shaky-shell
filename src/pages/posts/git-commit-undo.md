@@ -3,6 +3,7 @@ title: 'Gitで間違えてcommitした時の取り消し方'
 date: '2026-05-06'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitで間違えてcommitした時の取り消し方を解説。git reset --softやgit revertを使ったコミットの取り消し・修正方法をまとめて紹介します。'
 ---
 
 ## 症状
@@ -44,6 +45,8 @@ git revert HEAD
 ```
 git log --oneline
 ```
+
+コミット履歴をもっと詳しく確認したい場合は[git logでコミット履歴を確認する方法](/posts/git-log-history)を参照。`.gitignore` の設定ミスでコミットしてしまった場合は[Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)も合わせて確認してほしい。
 
 ## 関連記事
 

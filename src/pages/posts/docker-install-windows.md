@@ -3,6 +3,7 @@ title: 'WindowsにDockerをインストールして動かすまでの手順'
 date: '2026-05-10'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsにDocker Desktopをインストールして動かすまでの手順を解説。WSL2の有効化・インストール・動作確認までステップごとに紹介します。'
 ---
 
 ## 手順
@@ -34,6 +35,8 @@ docker run hello-world
 
 - BIOSで仮想化（Intel VT-x / AMD-V）を有効にする
 - WSL2のインストールが必要：`wsl --install`
+
+WSL2のセットアップが初めての場合は[WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)の手順を先に確認しておくと迷わずに進められる。
 
 ## ConoHa VPSでDockerを本番環境で使う
 

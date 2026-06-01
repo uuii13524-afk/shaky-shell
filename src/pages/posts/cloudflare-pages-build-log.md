@@ -3,6 +3,7 @@ title: 'Cloudflare Pagesのビルドログの見方とエラーの対処法'
 date: '2026-05-09'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Pagesのビルドログの確認方法とよくあるビルドエラーの原因・解決策を解説。ダッシュボードからログを開く手順も紹介します。'
 ---
 
 ## ビルドログの開き方
@@ -44,6 +45,8 @@ git push
 
 - `Failed` の直前にエラーの原因が書いてある
 - Ctrl+F で「ERROR」を検索すると原因を見つけやすい
+
+デプロイが全く来ない場合はビルドエラーではなくGitHubとの接続切れが原因のこともある。その場合は[Cloudflare PagesがGitHubと切断された時の対処法](/posts/cloudflare-github-disconnect)を確認してほしい。
 
 ## 関連記事
 

@@ -3,6 +3,7 @@ title: 'Dockerでポートが既に使用中エラーが出た時の対処法'
 date: '2026-05-14'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'Dockerでポートが既に使用中エラーが発生した時の原因調査と解決方法を解説。使用中のポートを確認してプロセスを終了する手順を紹介します。'
 ---
 
 ## 症状
@@ -47,6 +48,8 @@ docker stop コンテナID
 
 - 以前起動したコンテナが残っていてポートを占有していることが多い
 - `docker ps -a` で停止中のコンテナも確認する
+
+ポートを使っているプロセスを特定して終了する方法は[Linuxでプロセスを確認・終了する方法（ps/kill）](/posts/linux-process-management)も参考になる。
 
 ## 関連記事
 

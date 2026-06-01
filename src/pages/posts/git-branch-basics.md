@@ -3,6 +3,7 @@ title: 'GitのブランチをCLIで作成・切り替える基本コマンド'
 date: '2026-05-08'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitのブランチをCLIで作成・切り替え・削除する基本コマンドを解説。git branch・git checkout・git switchの使い方をまとめて紹介します。'
 ---
 
 ## 基本コマンド
@@ -30,6 +31,8 @@ git branch -d feature/new-function
 
 - 古いGitでは `git checkout`。新しいGitでは `git switch` が推奨
 - マージ前に必ずmainに切り替える
+
+ブランチの操作に慣れたら、[git rebaseで履歴を整理する方法](/posts/git-rebase-basics)も覚えておくと便利だ。
 
 ## 関連記事
 

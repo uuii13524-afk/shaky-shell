@@ -3,6 +3,7 @@ title: 'LinuxのSSH接続の基本（VPSに接続する方法）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'LinuxのSSHコマンドでVPSやリモートサーバーに接続する基本手順を解説。ポート番号の指定・鍵認証・ssh_configの設定方法も紹介します。'
 ---
 
 ## やりたかったこと
@@ -81,6 +82,8 @@ PasswordAuthentication no
 - 接続できない場合はファイアウォールのポート22が開いているか確認する
 - SSHキーのパーミッションは600でないと使えない（`chmod 600 ~/.ssh/id_ed25519`）
 - VPSは初回接続時にフィンガープリントの確認が出る
+
+ファイアウォールの設定でSSHポートが閉じていないか確認する方法は[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)を参照してほしい。
 
 ## 関連記事
 

@@ -5,6 +5,7 @@ category: 'Git'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Git', 'rebase', 'バージョン管理']
 en_tags: ['Git', 'rebase', 'version control']
+description: 'git rebaseの基本的な使い方を解説。mainブランチへのrebase方法・インタラクティブrebaseでコミットを整理する手順を紹介します。'
 ---
 
 ## やりたかったこと
@@ -103,6 +104,8 @@ git push --force-with-lease origin feature/my-feature
 - mainブランチを直接rebaseすると履歴が壊れる。featureブランチ側でやる
 - コンフリクトが多いときは `git rebase --abort` してmergeに切り替えるのもあり
 - squashしすぎるとどこで何を変えたか分からなくなる
+
+rebase前に一時的に変更を退避したい場合は[git stashで作業を一時退避する方法](/posts/git-stash-usage)が便利だ。
 
 ## 関連記事
 

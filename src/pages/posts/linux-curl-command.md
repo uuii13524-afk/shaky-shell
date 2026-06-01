@@ -3,6 +3,7 @@ title: 'curlコマンドの基本的な使い方（APIテストに使える）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'curlコマンドでHTTPリクエストを送る基本的な使い方を解説。GET・POST・ヘッダー指定・認証・ファイルダウンロードのオプションをまとめて紹介します。'
 ---
 
 ## やりたかったこと
@@ -62,6 +63,8 @@ curl -H "Authorization: Bearer トークン" https://api.example.com
 - Windowsのコマンドプロンプトではシングルクォートが使えない。Git Bashを使う
 - `-s` と `-o` を組み合わせると進捗なしでファイルに保存できる
 - JSONを整形して表示するには `| python3 -m json.tool` をパイプで繋ぐ
+
+APIテストでレスポンスが正しく返ってくるか確認したら、その結果を[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)と組み合わせてパイプで絞り込む使い方も覚えておくと便利だ。
 
 ## 関連記事
 

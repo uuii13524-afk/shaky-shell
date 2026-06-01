@@ -3,6 +3,7 @@ title: 'GitHubのIssueとPull Requestの基本的な使い方'
 date: '2026-05-21'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHubのIssueでタスク管理しPull Requestでコードレビューを行うチーム開発の基本的なワークフローを解説します。'
 ---
 
 ## やりたかったこと
@@ -79,6 +80,8 @@ resolves #123
 - Issueの番号はPRと自動紐付けできる
 - レビューなしでmainに直接pushするのは避ける
 - ブランチ名はわかりやすく付ける
+
+Pull Requestのブランチ管理に慣れたら、[git rebaseの基本的な使い方](/posts/git-rebase-basics)でコミット履歴を整理してからPRを出すと、レビュワーが変更内容を追いやすくなる。
 
 ## 関連記事
 

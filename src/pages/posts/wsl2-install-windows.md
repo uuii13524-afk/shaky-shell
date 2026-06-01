@@ -3,6 +3,7 @@ title: 'WindowsでWSL2をインストールする方法'
 date: '2026-05-11'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsでWSL2をインストールしてLinux環境を構築する手順を解説。wsl --installコマンドの使い方・Ubuntuの初期設定方法を紹介します。'
 ---
 
 ## 手順
@@ -39,6 +40,8 @@ wsl --list --verbose   # インストール済み一覧
 
 - BIOSでIntel VT-x / AMD-Vを有効にする
 - Windows Updateで最新版にしてから実行する
+
+WSL2がインストールできたら[Linuxの基本コマンド（ls/cd/mkdir/rm）まとめ](/posts/linux-basic-commands)でLinuxの操作方法を覚えておくと作業効率が上がる。
 
 ## XServer VPSで本番環境を用意する
 

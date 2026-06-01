@@ -3,6 +3,7 @@ title: 'WindowsにGitをインストールして初期設定する方法'
 date: '2026-05-07'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'WindowsにGit for Windowsをインストールしてgit config・SSH設定まで行う初期設定手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと
@@ -39,6 +40,8 @@ git config --global user.email "メールアドレス"
 - インストール後にターミナルを再起動する
 - user.nameとuser.emailを設定しないとcommit時にエラーになる
 - デフォルトブランチ名を `main` にする
+
+GitをインストールしたらGitHubにSSH鍵を登録しておくと毎回パスワードを入力しなくて済む。[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)で設定しておくと便利だ。
 
 ## 関連記事
 

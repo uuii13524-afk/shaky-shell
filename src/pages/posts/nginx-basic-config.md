@@ -3,6 +3,7 @@ title: 'nginxの基本的な設定ファイルの書き方'
 date: '2026-05-12'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
+description: 'nginxの設定ファイルの基本的な書き方を解説。server・location・listen・rootなどの基本ディレクティブとHTTPサーバー設定の要点を紹介します。'
 ---
 
 ## 基本的な設定ファイル
@@ -46,6 +47,8 @@ nginx -s reload   # リロード
 
 - 設定変更後は必ず `nginx -t` してから `nginx -s reload`
 - セミコロン `;` が抜けるとエラー
+
+nginxを外部に公開する前に[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)でポート80・443を開放しておくことを忘れずに。
 
 ## ConoHa VPSでDockerを本番環境で使う
 

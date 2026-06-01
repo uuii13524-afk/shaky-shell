@@ -3,6 +3,7 @@ title: 'git pullでコンフリクトが発生した時の解決方法'
 date: '2026-05-13'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git pullでコンフリクトが発生した時の原因と解決方法を解説。コンフリクトを手動で解消してコミットする手順をわかりやすく紹介します。'
 ---
 
 ## 症状
@@ -49,6 +50,8 @@ git merge --abort
 
 - 記号を残したままコミットしないように注意
 - こまめにpullしてコンフリクトを小さくする
+
+コンフリクトを避けるためにも、[git rebaseの基本的な使い方](/posts/git-rebase-basics)を覚えておくと履歴を整理しながら作業できる。
 
 ## 関連記事
 

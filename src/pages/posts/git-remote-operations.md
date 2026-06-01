@@ -3,6 +3,7 @@ title: 'Gitのリモートリポジトリ操作まとめ（remote/fetch/pull/pus
 date: '2026-05-14'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'Gitのremote・fetch・pull・pushコマンドでリモートリポジトリを操作する方法を解説。originの確認・追加・変更手順もまとめて紹介します。'
 ---
 
 ## リモートリポジトリの確認
@@ -32,6 +33,8 @@ git push -u origin main  # 上流ブランチを設定してpush
 
 - `git push --force` は共有リポジトリでは使わない
 - `-u` フラグで上流ブランチを設定すると次回から `git push` だけで済む
+
+GitHubにSSH接続している場合は[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)でリモートURLをSSH形式にしておくと認証が楽になる。
 
 ## 関連記事
 

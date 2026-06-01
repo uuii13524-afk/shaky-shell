@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'rsync', 'バックアップ', 'SSH']
 en_tags: ['Linux', 'rsync', 'backup', 'SSH']
+description: 'rsyncコマンドでファイルをリモートサーバーに同期・バックアップする方法を解説。SSH経由でのファイル転送オプションと実用的な使い方を紹介します。'
 ---
 
 ## やりたかったこと
@@ -79,6 +80,8 @@ crontab -e
 - `--delete`は強力なので、最初は`--dry-run`で確認してから実行する
 - SSHの公開鍵認証が設定されていないとCronでの自動実行が止まる
 - rsyncはデフォルトで変更のないファイルをスキップするので、自動的に差分転送になる
+
+SSHの公開鍵認証が未設定の場合は[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)の `~/.ssh/config` の設定も合わせて確認してほしい。
 
 ## 関連記事
 

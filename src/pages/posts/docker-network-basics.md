@@ -3,6 +3,7 @@ title: 'Dockerのネットワーク設定の基本（bridge/host/none）'
 date: '2026-05-21'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'Dockerのbridge・host・noneネットワークの違いと使い方を解説。カスタムネットワークの作成やdocker-composeでのネットワーク設定方法も紹介します。'
 ---
 
 ## やりたかったこと
@@ -94,6 +95,8 @@ docker network connect mynetwork コンテナ名  # コンテナをネットワ�
 - docker-composeは自動でカスタムネットワークを作成する
 - 同じネットワーク内でないとコンテナ名で通信できない
 - nginx 502エラーはネットワーク設定が原因のことが多い
+
+nginx 502エラーが出た場合は[nginx 502 Bad Gatewayエラーの原因と解決方法](/posts/nginx-502-bad-gateway)でホスト名の設定ミスを確認してほしい。
 
 ## 関連記事
 

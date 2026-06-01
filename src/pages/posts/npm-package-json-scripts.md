@@ -3,6 +3,7 @@ title: 'package.jsonのscriptsを活用して作業を効率化する方法'
 date: '2026-05-17'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'package.jsonのscriptsフィールドにカスタムコマンドを登録してnpm runで実行する方法を解説。よく使うスクリプト設定の例を紹介します。'
 ---
 
 ## scriptsの基本
@@ -36,6 +37,8 @@ npm run build
 
 - `&&` はWindowsで動かない場合がある
 - `npm start` と `npm test` は `run` が不要
+
+スクリプトをCI/CDで自動実行したい場合は[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)と組み合わせると `npm run build` などをワークフローに組み込める。
 
 ## 関連記事
 

@@ -3,6 +3,7 @@ title: 'Linuxのファイルパーミッション（chmod/chown）完全ガイ�
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのchmod・chownコマンドでファイルのパーミッションとオーナーを設定する方法を解説。数値表記と記号表記の使い方も紹介します。'
 ---
 
 ## やりたかったこと
@@ -66,6 +67,8 @@ chown -R ユーザー名 フォルダ名   # 再帰的に変更
 - SSHキーは必ず `chmod 600` にする（600でないと接続拒否される）
 - Webサーバーのファイルは777にしない（セキュリティリスク）
 - `chmod -R` で再帰的に変更する時は慎重に
+
+パーミッション設定後もアクセスできない場合は[Linuxでpermission deniedエラーが出た時の対処法](/posts/linux-permission-denied)で所有者の設定も確認してほしい。
 
 ## 関連記事
 

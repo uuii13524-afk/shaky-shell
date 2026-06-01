@@ -3,6 +3,7 @@ title: 'GitHub Actionsでスケジュール実行（定期実行）を設定す�
 date: '2026-05-19'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub ActionsのcronスケジュールでワークフローをUTC基準で定期実行する設定方法を解説。JST変換のポイントも合わせて紹介します。'
 ---
 
 ## 基本的な設定
@@ -43,6 +44,8 @@ on:
 
 - cronはUTCなのでJSTと9時間ずれる
 - リポジトリにアクティビティがないと無効化されることがある
+
+Linuxのcronジョブとの使い分けについては[LinuxでCronジョブを設定して定期実行する方法](/posts/linux-cron-setup)も参考にしてほしい。GitHub Actionsのスケジュールはリポジトリへのアクセスが必要な処理に、サーバー側の処理はcronで使い分けるのが一般的だ。
 
 ## 関連記事
 

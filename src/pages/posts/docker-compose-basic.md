@@ -3,6 +3,7 @@ title: 'docker-composeの基本的な使い方'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'docker-compose.ymlの基本的な書き方とdocker compose up/downコマンドの使い方を解説。複数コンテナをまとめて管理する方法を紹介します。'
 ---
 
 ## docker-compose.ymlの基本構成
@@ -34,6 +35,8 @@ docker compose exec web bash  # コンテナに入る
 
 - `docker-compose`（ハイフンあり）は古い書き方
 - `down` はコンテナを削除する。ボリュームも消す場合は `-v`
+
+データベースなどのデータを永続化したい場合は[Dockerのボリュームでデータを永続化する方法](/posts/docker-volume-basics)も合わせて確認してほしい。
 
 ## ConoHa VPSでDockerを本番環境で使う
 

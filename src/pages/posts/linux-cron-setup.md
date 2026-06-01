@@ -3,6 +3,7 @@ title: 'LinuxでCronジョブを設定して定期実行する方法'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'LinuxのcrontabでCronジョブを設定してスクリプトを定期実行する方法を解説。cron式の書き方と実行ログの確認方法も紹介します。'
 ---
 
 ## やりたかったこと
@@ -80,6 +81,8 @@ tail -f /var/log/cron.log
 - 環境変数はCronでは引き継がれない
 - `2>&1` をつけるとエラーもログに記録できる
 - `*/5` は「5の倍数分ごと」という意味
+
+Cronのログを確認する際は[Linuxでログをリアルタイム監視するtail -fの使い方](/posts/linux-tail-log)を使うとリアルタイムで確認できる。
 
 ## 関連記事
 

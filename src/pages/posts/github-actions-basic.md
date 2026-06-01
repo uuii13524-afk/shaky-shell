@@ -3,6 +3,7 @@ title: 'GitHub Actionsで自動デプロイする基本的な設定方法'
 date: '2026-05-10'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub Actionsを使ってpush時に自動デプロイを実行する基本的なワークフロー設定を解説。YAMLファイルの書き方と実行の仕組みを紹介します。'
 ---
 
 ## 基本的な仕組み
@@ -38,6 +39,8 @@ jobs:
 - `.github/workflows/` のフォルダ名は正確に
 - YAMLはインデントが重要（スペース2つ）
 - Actionsタブでログを確認できる
+
+APIキーなどの秘密情報をワークフロー内で使う場合は[GitHub ActionsでSecretsを使って秘密情報を管理する方法](/posts/github-actions-secrets)を参照。
 
 ## 関連記事
 

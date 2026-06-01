@@ -3,6 +3,7 @@ title: 'git logでコミット履歴を確認する方法'
 date: '2026-05-17'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git logコマンドでコミット履歴を確認する方法を解説。--oneline・--graph・--since等のオプションを使った見やすいログ表示方法をまとめて紹介します。'
 ---
 
 ## 基本的な使い方
@@ -34,6 +35,8 @@ git diff HEAD~1
 
 - `git log` は `q` キーで終了する
 - `--oneline` が一番見やすい
+
+特定のコミットを他のブランチに持っていきたい場合は[git cherry-pickで特定のコミットだけ別ブランチに適用する](/posts/git-cherry-pick)も参考にしてほしい。
 
 ## 関連記事
 

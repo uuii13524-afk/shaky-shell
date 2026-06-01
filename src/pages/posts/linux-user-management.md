@@ -3,6 +3,7 @@ title: 'Linuxでユーザーを追加・削除する方法（useradd/userdel）'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのuseradd・userdelコマンドでユーザーを追加・削除する方法を解説。sudoグループへの追加やパスワード設定手順もわかりやすく紹介します。'
 ---
 
 ## やりたかったこと
@@ -43,6 +44,8 @@ userdel -r ユーザー名       # ホームディレクトリごと削除
 - `-m` オプションを付けないとホームディレクトリが作成されない
 - sudoを使うには `sudo` グループへの追加が必要
 - rootログインを無効にする前に必ずsudo権限を持つユーザーを作成する
+
+一般ユーザーを作成したら[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)のセキュリティ設定でrootログインを無効にして、新しいユーザーでSSH接続できることを確認してほしい。
 
 ## 関連記事
 

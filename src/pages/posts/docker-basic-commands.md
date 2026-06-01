@@ -3,6 +3,7 @@ title: 'Dockerの基本コマンドまとめ（run/stop/rm/ps）'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'Dockerのrun・stop・rm・psなど基本的なコマンドの使い方をまとめました。コンテナの起動・停止・削除・確認に必要なオプションも解説します。'
 ---
 
 ## コンテナの操作
@@ -30,6 +31,8 @@ docker build -t myapp .      # Dockerfileからビルド
 
 - `-d` をつけないとフォアグラウンドで起動してターミナルが占有される
 - ポートは `-p ホスト側:コンテナ側` の順番
+
+複数のコンテナをまとめて管理したい場合は[docker-composeの基本的な使い方](/posts/docker-compose-basic)を使うと `up` / `down` で一括操作できる。
 
 ## 関連記事
 

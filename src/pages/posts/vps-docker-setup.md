@@ -3,6 +3,7 @@ title: 'VPSにDockerをインストールして本番環境を構築する方法
 date: '2026-05-21'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'VPS（ConoHa・XServer等）にDockerとdocker-composeをインストールして本番環境を構築する手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと
@@ -82,6 +83,8 @@ ufw enable
 - `curl | sh` でインストールすると最新版が入る
 - rootでDockerを使うのはセキュリティリスクがある
 - UFWとDockerの相性に注意が必要
+
+VPSを使い始めたらrootのSSH接続を無効にして一般ユーザーで運用するのが安全だ。[Linuxでユーザーを追加・削除する方法（useradd/userdel）](/posts/linux-user-management)で一般ユーザーを作成してから設定を進めてほしい。
 
 ## VPSを選ぶなら
 

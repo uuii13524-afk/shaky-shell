@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'systemd', 'サービス管理']
 en_tags: ['Linux', 'systemd', 'service management']
+description: 'systemctlコマンドでsystemdサービスをstart・stop・enable・disableする方法を解説。自作サービスのユニットファイル作成方法も紹介します。'
 ---
 
 ## やりたかったこと
@@ -132,6 +133,8 @@ sudo systemctl cat nginx
 - `ExecStart` にはフルパスで指定する（`/usr/bin/python3` など）
 - `Restart=always` を設定するとクラッシュ時に自動で再起動する
 - ログが溜まってディスクを圧迫する場合は `journalctl --vacuum-time=7d` で削除できる
+
+サービスのリアルタイムログを確認したい場合は `journalctl -u サービス名 -f` か、[Linuxでログをリアルタイム監視するtail -fの使い方](/posts/linux-tail-log)を使う方法もある。
 
 ## 関連記事
 

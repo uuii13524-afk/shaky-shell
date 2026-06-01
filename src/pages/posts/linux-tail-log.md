@@ -3,6 +3,7 @@ title: 'Linuxでログをリアルタイム監視するtail -fの使い方'
 date: '2026-05-17'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'tail -fコマンドでLinuxのログファイルをリアルタイムに監視する方法を解説。複数ファイルの同時監視・grepとの組み合わせ方も紹介します。'
 ---
 
 ## 基本的な使い方
@@ -34,6 +35,8 @@ docker logs -f --tail 100 コンテナID
 /var/log/syslog              # システムログ
 /var/log/auth.log            # 認証ログ
 ```
+
+特定のキーワードだけを絞り込んで監視したい場合は、`tail -f` のパイプ先で[Linuxでファイルを検索するgrep・findコマンドの使い方](/posts/linux-grep-find)を組み合わせると効率よくエラーを確認できる。
 
 ## 関連記事
 

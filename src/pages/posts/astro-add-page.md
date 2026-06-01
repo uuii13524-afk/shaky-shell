@@ -3,6 +3,7 @@ title: 'Astroで新しいページを追加する基本的な方法'
 date: '2026-05-08'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroでHTMLやMarkdownを使って新しいページを追加する方法を解説。ファイルの配置場所・ルーティングの仕組み・リンクの貼り方もわかりやすく紹介します。'
 ---
 
 ## やりたかったこと
@@ -37,6 +38,8 @@ date: '2026-05-08'
 
 - `src/pages/` 以外に置いてもページにならない
 - ファイル名がそのままURLになる
+
+ページが増えてきたら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとよい。
 
 ## 関連記事
 

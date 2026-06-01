@@ -3,6 +3,7 @@ title: 'Windowsでnpmコマンドが動かない時の対処法'
 date: '2026-05-06'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'Windowsでnpmコマンドが認識されない・動かない時の原因と解決方法を解説。PATHの確認・Node.jsの再インストール手順を紹介します。'
 ---
 
 ## 症状
@@ -37,7 +38,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 ### 原因4：ターミナルを再起動していない
 
-インストール後にターミナルを再起動する。
+インストール後にターミナルを再起動する。[Windows Terminalをインストールして使いやすくする方法](/posts/windows-terminal-setup)で快適なターミナル環境を整えておくと開発がしやすくなる。
 
 ## 関連記事
 

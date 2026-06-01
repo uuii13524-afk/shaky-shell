@@ -3,6 +3,7 @@ title: 'VSCodeのおすすめ拡張機能10選（開発効率化）'
 date: '2026-05-21'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'VSCodeのPrettier・GitLens・GitHub Copilotなど開発効率を上げるおすすめ拡張機能10選を紹介。各拡張機能の特徴と使い方も解説します。'
 ---
 
 ## やりたかったこと
@@ -111,6 +112,8 @@ VSCodeのUIを日本語化する。
 - 拡張機能を入れすぎるとVSCodeが重くなる
 - Prettierを使う場合はESLintと設定を合わせる必要がある
 - Remote - SSHは開発効率が大幅に上がるのでVPSを使う人には必須
+
+Remote - SSHを使うにはVPS側でSSH接続が設定されている必要がある。[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)の `~/.ssh/config` を設定しておくとVSCodeからもワンクリックで接続できる。
 
 ## 関連記事
 

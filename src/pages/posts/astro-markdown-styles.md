@@ -3,6 +3,7 @@ title: 'AstroでMarkdownのスタイルを設定する方法'
 date: '2026-05-15'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'AstroでMarkdownコンテンツにCSSスタイルを適用する方法を解説。グローバルCSSを使う方法とTailwindのtypographyプラグインを使う方法を紹介します。'
 ---
 
 ## 方法1：グローバルCSSを使う
@@ -37,6 +38,8 @@ layout: '../../layouts/PostLayout.astro'
 
 - Markdownから生成されたHTMLには自動でクラスが付かない
 - レイアウトファイルのパスはMarkdownファイルからの相対パス
+
+スタイルを整えたら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も設定しておくとSEO対策が一通り揃う。
 
 ## 関連記事
 

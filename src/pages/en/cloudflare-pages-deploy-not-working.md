@@ -49,3 +49,7 @@ Open the build log from the Deployments tab and look for lines starting with `[E
 
 - [Cloudflare Pages Build Log Guide](/posts/cloudflare-pages-build-log)
 - [How to Deploy Astro to Cloudflare Pages](/en/docker-install-windows)
+
+## Recommended Services
+
+- <a href="https://www.awin1.com/cread.php?awinmid=6288&awinaffid=2909773&ued=https%3A%2F%2Fwww.fiverr.com" target="_blank" rel="sponsored">Fiverr</a> - Find freelance developers and tech experts

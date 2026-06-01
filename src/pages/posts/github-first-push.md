@@ -3,6 +3,7 @@ title: 'GitHubで初めてリポジトリを作ってpushする手順'
 date: '2026-05-06'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHubでリポジトリを新規作成してローカルの既存プロジェクトを初めてpushするまでの手順をステップごとに解説します。'
 ---
 
 ## やりたかったこと
@@ -37,6 +38,8 @@ git push -u origin main
 
 - リポジトリ作成時にREADMEを追加するとpushで競合が起きる
 - パスワード認証は廃止。Personal Access Token（PAT）またはSSH鍵が必要
+
+SSH鍵を使って認証すると毎回パスワードを入力しなくて済む。[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)で設定しておくと便利だ。
 
 ## 関連記事
 

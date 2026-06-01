@@ -3,6 +3,7 @@ title: 'Astroでrobots.txtとsitemapを自動生成する方法'
 date: '2026-05-05'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+description: 'Astroサイトに@astrojs/sitemapプラグインでsitemap.xmlを自動生成し、robots.txtを手動で設置する方法を解説します。'
 ---
 
 ## やりたかったこと
@@ -56,6 +57,8 @@ Sitemap: https://あなたのドメイン.com/sitemap-index.xml
 - `site` を設定しないとsitemapが生成されない
 - robots.txtは `public/` に置く
 - Cloudflareがrobots.txtを上書きすることがあるが問題ない
+
+sitemapの設置が完了したら、[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も一緒に対応しておくとSEO対策が一通り揃う。
 
 ## 関連記事
 

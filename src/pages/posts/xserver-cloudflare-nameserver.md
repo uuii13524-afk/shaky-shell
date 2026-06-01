@@ -3,6 +3,7 @@ title: 'XserverドメインのネームサーバーをCloudflareに変更する�
 date: '2026-05-02'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'XserverのドメインのネームサーバーをCloudflareに変更する手順を解説。Cloudflareへのドメイン追加・ネームサーバー設定の確認方法を紹介します。'
 ---
 
 ## やりたかったこと
@@ -28,6 +29,8 @@ Cloudflare PagesにカスタムドメインをXserverで取得したドメイン
 - CloudflareにはWorkers用とPages用の画面が別にあって迷った
 - 反映まで時間がかかるので焦らず待つ
 - Activeになってから改めてCustom domainsでドメインを設定する必要がある
+
+ネームサーバーがActiveになったら[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)の続きの手順でカスタムドメインを有効化してほしい。
 
 ## 関連記事
 

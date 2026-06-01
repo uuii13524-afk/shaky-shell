@@ -3,6 +3,7 @@ title: 'Dockerfileの基本的な書き方'
 date: '2026-05-18'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'DockerfileのFROM・RUN・COPY・CMD・EXPOSEなど基本的な命令の書き方を解説。イメージのビルド手順と実践的なサンプルも紹介します。'
 ---
 
 ## Dockerfileの基本構成
@@ -39,6 +40,8 @@ docker run -d -p 3000:3000 myapp
 
 - `COPY package*.json ./` してから `RUN npm ci` を分けるとキャッシュが効く
 - `.dockerignore` がないと `node_modules` がコピーされてイメージが巨大になる
+
+DockerfileでビルドしたイメージをCI/CDで自動デプロイしたい場合は[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)と組み合わせると効率が上がる。
 
 ## 関連記事
 

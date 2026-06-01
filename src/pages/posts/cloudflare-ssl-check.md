@@ -3,6 +3,7 @@ title: 'Cloudflareで独自ドメインのSSL設定を確認する方法'
 date: '2026-05-07'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflareで独自ドメインのSSL設定を確認する方法を解説。HTTPSで正しく表示されない場合の確認ポイントとSSLモードの設定方法を紹介します。'
 ---
 
 ## やりたかったこと
@@ -25,6 +26,8 @@ layout: '../../layouts/PostLayout.astro'
 - 「安全ではない」→SSL/TLSを「Full」に変更
 - 証明書エラー→15分〜24時間待つ
 - Mixed Contentエラー→URLをHTTPSに変更
+
+SSL設定が完了したら、不要なポートを閉じるために[Cloudflareでリダイレクトルールを設定する方法](/posts/cloudflare-redirect-rules)でHTTP→HTTPSのリダイレクトも合わせて確認しておくとよい。
 
 ## 関連記事
 

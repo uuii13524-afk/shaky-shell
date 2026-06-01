@@ -3,6 +3,7 @@ title: 'Node.jsのバージョンをnvmで管理する方法（Windows/Mac）'
 date: '2026-05-07'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'nvmを使ってNode.jsの複数バージョンをインストール・切り替える方法をWindows・Macそれぞれ解説。プロジェクト別の.nvmrcファイル設定も紹介します。'
 ---
 
 ## やりたかったこと
@@ -40,6 +41,8 @@ nvm alias default 22
 - Windowsでは `nvm-windows` を使う
 - インストール前に既存のNode.jsをアンインストール
 - `nvm alias default` でデフォルトを設定しないとターミナルを開くたびに設定が必要
+
+nvmでNode.jsを切り替えた後でも `npm` コマンドが使えない場合は[Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)も参考にしてほしい。
 
 ## 関連記事
 

@@ -5,6 +5,7 @@ category: 'Git'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Git', 'cherry-pick', 'バージョン管理']
 en_tags: ['Git', 'cherry-pick', 'version control']
+description: 'git cherry-pickコマンドで特定のコミットだけを別ブランチに適用する方法を解説。複数コミットの指定方法やコンフリクト時の対処法も紹介します。'
 ---
 
 ## やりたかったこと
@@ -72,6 +73,8 @@ git reset --hard HEAD~1
 - 範囲指定 `A..B` はAを含まずBを含む（rebaseと同じ挙動）
 - 同じ変更を複数回cherry-pickするとコンフリクトが起きやすい
 - push済みのコミットを取り消すときは `reset` ではなく `revert` を使う
+
+特定コミットのハッシュを調べる際は[git logでコミット履歴を確認する方法](/posts/git-log-history)が参考になる。また、作業中の変更を一時退避したい場合は[git stashで作業を一時退避する方法](/posts/git-stash-usage)も活用できる。
 
 ## 関連記事
 

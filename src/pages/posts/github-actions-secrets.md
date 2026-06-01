@@ -3,6 +3,7 @@ title: 'GitHub ActionsでSecretsを使って秘密情報を管理する方法'
 date: '2026-05-13'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub ActionsでSecretsにAPIキーなどの秘密情報を登録してワークフロー内で安全に使う方法を解説。登録手順と参照方法を紹介します。'
 ---
 
 ## Secretsの設定手順
@@ -25,6 +26,8 @@ steps:
 - Secretsの値はログにマスクされる
 - 一度登録すると値を確認できない（上書きのみ）
 - フォークされたリポジトリからのPRではSecretsは使えない
+
+Cloudflare Pagesで同様に環境変数を管理したい場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)を参照。`.gitignore` で `.env` ファイルを除外しておくことも重要で、[Gitで.gitignoreを設定してファイルを管理対象から外す方法](/posts/git-gitignore-setup)が参考になる。
 
 ## 関連記事
 

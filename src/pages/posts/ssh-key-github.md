@@ -3,6 +3,7 @@ title: 'SSHキーを生成してGitHubに登録する方法'
 date: '2026-05-11'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'SSH鍵ペアを生成してGitHubアカウントに公開鍵を登録する手順を解説。~/.ssh/configの設定方法とSSH接続の確認コマンドも紹介します。'
 ---
 
 ## 手順
@@ -40,6 +41,8 @@ git remote set-url origin git@github.com:ユーザー名/リポジトリ名.git
 
 - 公開鍵（.pub）をGitHubに登録する。秘密鍵は共有しない
 - 既存リポジトリのURLをSSHに変えないとHTTPSのままになる
+
+SSHキーはGitHubだけでなくVPSへの接続にも使える。[LinuxのSSH接続の基本（VPSに接続する方法）](/posts/linux-ssh-basics)と同じ鍵を使い回すか、用途別に鍵を分けて管理すると便利だ。
 
 ## 関連記事
 

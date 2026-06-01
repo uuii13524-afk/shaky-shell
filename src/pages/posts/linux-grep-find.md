@@ -3,6 +3,7 @@ title: 'Linuxでファイルを検索するgrep・findコマンドの使い方'
 date: '2026-05-16'
 category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
+description: 'Linuxのgrepコマンドでファイル内のテキストを検索し、findコマンドでファイルを探す方法を解説。正規表現や絞り込みオプションも紹介します。'
 ---
 
 ## grep：ファイルの中身を検索
@@ -33,6 +34,8 @@ find . -name "*.js" | xargs grep "console.log"
 
 - `grep -r` はnode_modulesも検索する。フォルダを絞ること
 - `find /` はルートから検索するので時間がかかる
+
+ログファイルをリアルタイムで監視しながらgrepで絞り込む使い方については[Linuxでログをリアルタイム監視するtail -fの使い方](/posts/linux-tail-log)も参考にしてほしい。
 
 ## 関連記事
 

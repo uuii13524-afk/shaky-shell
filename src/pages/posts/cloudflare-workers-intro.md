@@ -3,6 +3,7 @@ title: 'Cloudflare Workers入門：サーバーレス関数を作る方法'
 date: '2026-05-21'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+description: 'Cloudflare Workersでサーバーレス関数を作る方法をハンズオンで解説。wranglerのセットアップからデプロイまでの基本的な流れを紹介します。'
 ---
 
 ## やりたかったこと
@@ -113,6 +114,8 @@ export default {
 - Workersは Node.js ではなくWeb標準APIを使う
 - `wrangler dev` でローカルテストができる
 - 無料枠でも十分な用途が多い
+
+WorkersにAPIキーなどのシークレットを渡す場合は、[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)と同様にwrangler secretを使って安全に管理できる。
 
 ## 関連記事
 

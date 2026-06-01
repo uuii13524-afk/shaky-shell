@@ -3,6 +3,7 @@ title: 'Windowsで環境変数を設定・確認する方法'
 date: '2026-05-18'
 category: 'Windows'
 layout: '../../layouts/PostLayout.astro'
+description: 'Windowsでシステム・ユーザー環境変数をGUIとコマンドプロンプトで設定・確認する方法を解説。PATHへの追加手順もわかりやすく紹介します。'
 ---
 
 ## GUIで設定する方法
@@ -29,6 +30,8 @@ set MY_KEY=my_value          # コマンドプロンプト
 
 - 変更後はターミナルを再起動しないと反映されない
 - ユーザー環境変数はそのユーザーのみ有効
+
+環境変数を設定してもnpmコマンドが動かない場合は[Windowsでnpmコマンドが動かない時の対処法](/posts/windows-npm-not-working)でPATHの設定を確認してほしい。
 
 ## 関連記事
 

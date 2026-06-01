@@ -3,6 +3,7 @@ title: 'npmのキャッシュをクリアして問題を解決する方法'
 date: '2026-05-09'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'npmのキャッシュをクリアしてパッケージのインストールエラーや不具合を解決する方法を解説。npm cache cleanコマンドの使い方と手順を紹介します。'
 ---
 
 ## 症状
@@ -27,6 +28,8 @@ npm install
 
 - `--force` なしではキャッシュがクリアされない場合がある
 - `node_modules` を削除して再インストールが最も確実
+
+それでも解決しない場合はNode.jsのバージョン自体が問題のことがある。[Node.jsのバージョンをnvmで管理する方法](/posts/node-version-management-nvm)でバージョンを切り替えて試してみると解決することがある。
 
 ## 関連記事
 

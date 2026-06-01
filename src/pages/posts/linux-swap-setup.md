@@ -5,6 +5,7 @@ category: 'Linux'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Linux', 'swap', 'VPS']
 en_tags: ['Linux', 'swap', 'VPS']
+description: 'Linuxでswapfileを作成してスワップを有効化する方法を解説。swapの作成・有効化・永続化・使用量確認までの手順をステップごとに紹介します。'
 ---
 
 ## やりたかったこと
@@ -120,6 +121,8 @@ sudo vim /etc/fstab
 - スワップのサイズはRAMの1〜2倍が目安（RAM 1GBなら2GBのスワップ）
 - SSDのVPSでは書き込み回数を増やすので `swappiness` を低くする（10前後）がおすすめ
 - `free -h` で Swap行が `0` のままなら `swapon` ができていない
+
+スワップを設定してもディスク容量が足りない場合は[Linuxでディスク使用量を確認する方法（df/du）](/posts/linux-disk-usage)で大きなファイルを探して削除するとよい。
 
 ## 関連記事
 

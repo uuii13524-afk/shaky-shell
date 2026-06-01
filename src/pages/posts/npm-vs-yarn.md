@@ -3,6 +3,7 @@ title: 'npmとyarnの違いと使い分け'
 date: '2026-05-11'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'npmとyarnのコマンド対応表・速度・lockファイルの違いを解説。インストール・アンインストール・スクリプト実行コマンドを比較して紹介します。'
 ---
 
 ## コマンド比較
@@ -23,6 +24,8 @@ layout: '../../layouts/PostLayout.astro'
 
 - npmとyarnを同じプロジェクトで混在させない
 - チームで開発する場合はどちらかに統一する
+
+GitHub Actionsのキャッシュはnpmかyarnかによって設定が変わる。[GitHub ActionsでNode.jsのキャッシュを使ってビルドを高速化する方法](/posts/github-actions-node-cache)で `cache: 'npm'` か `cache: 'yarn'` を使い分けてほしい。
 
 ## 関連記事
 

@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
+description: 'nginxにcertbotでSSL証明書を取得・設定してHTTPS化する手順を解説。無料SSL証明書の自動更新設定方法もわかりやすく紹介します。'
 ---
 
 ## やりたかったこと
@@ -102,6 +103,8 @@ sudo systemctl reload nginx
 - `www.`ありとなしの両方を`-d`で指定しないと、片方がHTTPSにならない
 - `server_name`が正しく設定されていないとcertbotがnginxを認識しない
 - VPSのIPとドメインのDNS設定が一致していないと失敗する
+
+certbot実行前にUFWでポート80を開放しておく必要がある。[LinuxのUFWファイアウォール設定の基本](/posts/linux-firewall-ufw)で `sudo ufw allow 80` を確認してほしい。
 
 ## 関連記事
 

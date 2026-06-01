@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'gzip', 'パフォーマンス']
 en_tags: ['nginx', 'gzip', 'performance']
+description: 'nginxのgzip圧縮を有効にしてWebページの転送量を削減し表示速度を改善する設定方法を解説。gzip_typesやgzip_levelの最適な設定値を紹介します。'
 ---
 
 ## やりたかったこと
@@ -107,6 +108,8 @@ server {
 - `gzip_comp_level` を9にすると圧縮率は上がるがCPU負荷も上がる。6で十分
 - Cloudflare経由のサイトはCloudflare側でも圧縮されるので、nginxでの設定が上書きされることがある
 - `gzip_vary on` を忘れるとCDNがgzip版と非gzip版を区別できずキャッシュがおかしくなる
+
+gzip設定の後は `sudo nginx -t` と `sudo systemctl reload nginx` で反映する。systemdの使い方に不慣れな場合は[systemdでサービスを管理する方法](/posts/linux-systemd-service)を参照してほしい。
 
 ## 関連記事
 

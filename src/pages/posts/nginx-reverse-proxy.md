@@ -5,6 +5,7 @@ category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['nginx', 'リバースプロキシ', 'Node.js', 'VPS']
 en_tags: ['nginx', 'reverse proxy', 'Node.js', 'VPS']
+description: 'nginxのリバースプロキシ設定でNode.jsやPythonアプリをポート80/443で公開する方法を解説。proxy_passの書き方とヘッダー設定を紹介します。'
 ---
 
 ## やりたかったこと
@@ -147,6 +148,8 @@ Certbotが `proxy_pass` の設定はそのままにしてSSLの設定だけ追�
 - `proxy_pass http://localhost:3000/;` の末尾スラッシュの有無でパスの扱いが変わる（末尾スラッシュありだとlocationのパス部分が除去される）
 - Node.jsアプリが127.0.0.1でlistenしていないと `502 Bad Gateway` になる
 - `nginx -t` でテストしてからreloadしないと設定ミスで本番が落ちる
+
+リバースプロキシの設定後にHTTPSも対応させたい場合は[nginxにLet's EncryptのSSL証明書を設定する方法（certbot）](/posts/nginx-ssl-certbot)で無料のSSL証明書を取得できる。
 
 ## 関連記事
 

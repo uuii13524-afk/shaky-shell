@@ -3,6 +3,7 @@ title: 'Dockerのボリュームでデータを永続化する方法'
 date: '2026-05-16'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'Dockerのボリュームを使ってコンテナのデータを永続化する方法を解説。ボリュームの作成・マウント・バックアップの基本的な使い方を紹介します。'
 ---
 
 ## ボリュームとは
@@ -41,6 +42,8 @@ docker volume prune
 
 - `docker compose down -v` はボリュームも削除する（注意）
 - ボリュームなしでコンテナを削除するとデータが全部消える
+
+ボリュームを使ったdocker-composeの構成については[docker-composeの基本的な使い方](/posts/docker-compose-basic)でまとめて確認できる。
 
 ## 関連記事
 
