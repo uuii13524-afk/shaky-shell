@@ -1,50 +1,40 @@
 import os
-import json
 import re
+import json
 import subprocess
 import urllib.request
+import urllib.error
 
-QIITA_TOKEN = os.environ['QIITA_TOKEN']
+QIITA_TOKEN = os.environ.get('QIITA_TOKEN', '')
 
 CATEGORY_TAGS = {
-    'Docker':         ['Docker', 'コンテナ', 'Linux'],
-    'Git':            ['Git', 'GitHub', 'バージョン管理'],
-    'Linux':          ['Linux', 'コマンド', 'シェル'],
-    'nginx':          ['nginx', 'Linux', 'インフラ'],
-    'Cloudflare':     ['Cloudflare', 'CDN', 'DNS'],
-    'Astro':          ['Astro', '静的サイトジェネレーター', 'Web'],
-    'GitHub Actions': ['GitHubActions', 'CI/CD', '自動化'],
-    'Node.js':        ['Node.js', 'npm', 'JavaScript'],
-    'Windows':        ['Windows', '開発環境', 'Git'],
-    'SEO':            ['SEO', 'Web', 'マーケティング'],
+    'Git': ['Git', 'GitHub', 'バージョン管理', 'プログラミング', 'エラー解決'],
+    'Linux': ['Linux', 'Ubuntu', 'コマンド', 'プログラミング', 'エラー解決'],
+    'Docker': ['Docker', 'コンテナ', 'DevOps', 'プログラミング', 'エラー解決'],
+    'Node.js': ['Node.js', 'JavaScript', 'npm', 'プログラミング', 'エラー解決'],
+    'Cloudflare': ['Cloudflare', 'CDN', 'インフラ', 'プログラミング', 'エラー解決'],
+    'Astro': ['Astro', 'フロントエンド', 'JavaScript', 'プログラミング', 'エラー解決'],
 }
 
 def parse_frontmatter(filepath):
     with open(filepath, encoding='utf-8') as f:
         content = f.read()
-    data = {'title': '', 'category': '', 'description': ''}
-    body = content
+    info = {'title': '', 'category': '', 'date': '', 'layout': ''}
     if content.startswith('---'):
-        end = content.find('---', 3)
-        if end > 0:
-            fm = content[3:end]
+        parts = content.split('---', 2)
+        if len(parts) >= 3:
+            fm = parts[1]
+            body = parts[2]
             for line in fm.splitlines():
-                if line.startswith('title:'):
-                    data['title'] = line[6:].strip().strip('"\'')
-                elif line.startswith('category:'):
-                    data['category'] = line[9:].strip().strip('"\'')
-                elif line.startswith('description:'):
-                    data['description'] = line[12:].strip().strip('"\'')
-            body = content[end+3:].strip()
-    return data, body
+                for key in info:
+                    if line.startswith(f'{key}:'):
+                        info[key] = line.split(':', 1)[1].strip().strip('"\'')
+            return info, body
+    return info, content
 
 def clean_body(body):
-    # おすすめVPS/ドメイン/スクールセクションごと削除
-    body = re.sub(r'## おすすめの.*$', '', body, flags=re.DOTALL)
-    # 念のためA8.netのHTMLタグも除去
-    body = re.sub(r'<a href="https://px\.a8\.net/.*?</a>', '', body)
+    body = re.sub(r'<a[^>]*a8\.net[^>]*>.*?</a>', '', body, flags=re.DOTALL)
     body = re.sub(r'<img[^>]*a8\.net[^>]*>', '', body)
-    # 内部リンクを絶対URLに変換
     body = re.sub(r'\(/posts/([^)]+)\)', r'(https://errsolved.com/posts/\1/)', body)
     body = re.sub(r'\(/en/([^)]+)\)', r'(https://errsolved.com/en/\1/)', body)
     return body.strip()
@@ -54,7 +44,7 @@ def post_to_qiita(title, body, tags, slug):
     footer = f'\n\n---\n\n> この記事は [errsolved.com]({original_url}) にも掲載しています。'
     full_body = body + footer
 
-    qiita_tags = [{'name': t} for t in tags[:5]]  # Qiitaは最大5タグ
+    qiita_tags = [{'name': t} for t in tags[:5]]
 
     payload = json.dumps({
         'title': title,
@@ -70,6 +60,7 @@ def post_to_qiita(title, body, tags, slug):
         headers={
             'Content-Type': 'application/json',
             'Authorization': f'Bearer {QIITA_TOKEN}',
+            'User-Agent': 'errsolved-auto-poster/1.0 (https://errsolved.com)',
         }
     )
     try:
@@ -78,12 +69,11 @@ def post_to_qiita(title, body, tags, slug):
         print(f'Posted to Qiita: {result["url"]}')
         return result['url']
     except urllib.error.HTTPError as e:
-        body = e.read().decode()
+        body_resp = e.read().decode()
         print(f'HTTPError: {e.code} {e.reason}')
-        print(f'Response: {body}')
+        print(f'Response: {body_resp}')
         raise
 
-# 新規追加されたmdファイルを検出
 result = subprocess.run(
     ['git', 'diff', '--name-only', '--diff-filter=A', 'HEAD~1', 'HEAD', '--', 'src/pages/posts/*.md'],
     capture_output=True, text=True
