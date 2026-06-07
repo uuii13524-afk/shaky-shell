@@ -33,8 +33,14 @@ def parse_frontmatter(filepath):
     return info, content
 
 def clean_body(body):
+    # アフィリエイトセクションを丸ごと削除
+    body = re.sub(r'\n## おすすめの.*', '', body, flags=re.DOTALL)
+    body = re.sub(r'\n## ドメイン取得はこちら.*', '', body, flags=re.DOTALL)
+    body = re.sub(r'\n## Recommended.*', '', body, flags=re.DOTALL)
+    # 念のため残ったa8.netタグも削除
     body = re.sub(r'<a[^>]*a8\.net[^>]*>.*?</a>', '', body, flags=re.DOTALL)
     body = re.sub(r'<img[^>]*a8\.net[^>]*>', '', body)
+    # 内部リンクを絶対URLに変換
     body = re.sub(r'\(/posts/([^)]+)\)', r'(https://errsolved.com/posts/\1/)', body)
     body = re.sub(r'\(/en/([^)]+)\)', r'(https://errsolved.com/en/\1/)', body)
     return body.strip()
