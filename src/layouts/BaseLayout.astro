@@ -8,7 +8,6 @@ const { title, description } = Astro.props;
     <title>{title}</title>
     {description && <meta name="description" content={description} />}
     <link rel="stylesheet" href="/styles/global.css" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3348501480039832" crossorigin="anonymous"></script>
   </head>
   <body>
     <header class="site-header">
@@ -18,9 +17,6 @@ const { title, description } = Astro.props;
           <a href="/">記事</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
-          <a href="/regex-tester">RegEx</a>
-          <a href="/jwt-decoder">JWT</a>
-          <a href="/cron-checker">Cron</a>
           <a href="/en">English</a>
         </nav>
       </div>
@@ -30,7 +26,10 @@ const { title, description } = Astro.props;
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
+        <a href="/about">このサイトについて</a>
+        &nbsp;·&nbsp;
         <a href="/privacy">プライバシーポリシー</a>
+        &nbsp;·&nbsp;
         <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
       </div>
     </footer>

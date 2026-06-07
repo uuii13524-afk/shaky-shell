@@ -8,7 +8,6 @@ const { frontmatter } = Astro.props;
     <title>{frontmatter.title} - ErrNotes</title>
     <meta name="description" content={frontmatter.title + ' - ErrNotesの技術解決ログ'} />
     <link rel="stylesheet" href="/styles/global.css" />
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-3348501480039832" crossorigin="anonymous"></script>
   </head>
   <body>
     <header class="site-header">
@@ -18,10 +17,6 @@ const { frontmatter } = Astro.props;
           <a href="/">記事</a>
           <a href="/base64">Base64</a>
           <a href="/json-formatter">JSON</a>
-          <a href="/regex-tester">RegEx</a>
-          <a href="/jwt-decoder">JWT</a>
-          <a href="/cron-checker">Cron</a>
-          <a href="/en">English</a>
         </nav>
       </div>
     </header>
@@ -41,9 +36,9 @@ const { frontmatter } = Astro.props;
       <div class="site-wrapper">
         <a href="/">← 記事一覧に戻る</a>
         &nbsp;·&nbsp;
-        <a href="/privacy">プライバシーポリシー</a>
+        <a href="/about">このサイトについて</a>
         &nbsp;·&nbsp;
-        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+        <a href="/privacy">プライバシーポリシー</a>
       </div>
     </footer>
   </body>
