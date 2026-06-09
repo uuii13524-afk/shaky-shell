@@ -8,58 +8,87 @@ description: 'XserverのドメインをCloudflare Pagesのカスタムドメイ�
 
 ## やりたかったこと
 
-Xserverで取得したドメインをCloudflare Pagesのカスタムドメインとして設定したかった。
+Xserverで取得したドメインをCloudflare Pagesで公開しているAstroサイトのカスタムドメインに設定したかった。`*.pages.dev`のURLから独自ドメインに変えるのが目的だったが、ネームサーバーの変更からActive待ち、カスタムドメインの有効化まで手順が複数あって全体像がつかめなかった。
 
 ## 環境
 
-- Xserverドメイン
-- Cloudflare Pages
-- Astro
+- Xserverドメイン（2026年5月時点）
+- Cloudflare Pages（Freeプラン）
+- Astro 5.2.3
+- 使用ドメイン：独自ドメイン（.com）
 
-## 全体の流れ
+## 試したこと・うまくいかなかったこと
+
+最初、Cloudflare PagesのプロジェクトからCustom domainsで直接ドメインを入力して進もうとした。ドメイン名を入力して「Continue」を押したら「ネームサーバーを変更してください」という画面になった。「後でネームサーバーを変更すればいいか」と「Activate domain」を押したら、ステータスがずっと「Pending」のままで先に進めなかった。
+
+ネームサーバーをXserverで変更しようとしたが、どこで変更するのかがわからなかった。Xserverのサーバーパネルを探したが見つからず、Xserverアカウント（旧インフォパネル）という別の管理画面にあることを調べてようやくわかった。
+
+変更後にCloudflareが「Active」になるまで何をすればいいのかもわからず、「Active後にもう一度Custom domainsから設定が必要」という2段階の手順になっているとは最初知らなかった。
+
+## 解決策
+
+全体の流れを先に把握しておくと迷わない。
 
 ```
-Cloudflareでネームサーバーを確認
-↓
-XserverでネームサーバーをCloudflareに変更
-↓
-CloudflareでActive確認
-↓
-Cloudflare PagesにカスタムドメインをActivate
+① Cloudflareでネームサーバーのアドレスを確認
+    ↓
+② XserverのネームサーバーをCloudflareに変更
+    ↓
+③ CloudflareがActiveになるまで待つ（数十分〜1時間）
+    ↓
+④ Cloudflare PagesのCustom domainsでドメインを有効化
+    ↓
+⑤ HTTPSが有効になって完了
 ```
 
-## 手順
+### 1. CloudflareにドメインをConnectしてネームサーバーを確認
 
-### 1. CloudflareにドメインをConnect
-
-1. 「Workers & Pages」→プロジェクト→「Custom domains」
-2. 「Set up a custom domain」→ドメイン入力→「Continue」
-3. 「Begin DNS transfer」→「Continue to activation」
-4. Cloudflareのネームサーバーが2つ表示される
+Cloudflareダッシュボードにログインして「Websites」→「Add a site」でドメイン名を入力する。プランはFreeを選択。「Continue」で進んでいくと画面に2つのネームサーバーが表示される。このアドレスをメモしておく（例：`vera.ns.cloudflare.com`のような形式）。
 
 ### 2. XserverでネームサーバーをCloudflareに変更
 
-1. Xserverドメイン管理画面にログイン
-2. 「ネームサーバー設定」→「その他のサービスで利用する」
-3. ネームサーバー1・2にCloudflareのアドレスを入力して保存
+Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログインする（サーバーパネルとは別のページ）。
 
-### 3. Cloudflareで確認・Active待ち
+「ドメイン」→「ドメイン設定一覧」→対象ドメインの「ネームサーバー設定」を開く。
 
-1. 「I updated my nameservers」を押す
-2. 数十分〜1時間待つ
-3. ステータスが「Active」になったら完了
+「その他のサービスで利用する」を選択して、Cloudflareから取得したネームサーバー1・2を入力して保存する。
 
-### 4. カスタムドメインをActivate
+### 3. CloudflareでActiveを確認する
 
-1. 「Custom domains」→ドメイン入力→「Continue」
-2. 「Activate domain」を押す
+Cloudflareに戻って「I updated my nameservers」ボタンを押す。ステータスが「Pending Nameserver Update」から「Active」に変わるまで待つ。だいたい30分〜1時間で変わる。
+
+メールで「Cloudflare is now protecting your site」という通知が来たらActive。
+
+```bash
+# コマンドラインで確認する場合
+nslookup -type=NS yourdomain.com
+```
+
+Cloudflareのネームサーバーが返ってくればOK。
+
+### 4. Cloudflare PagesのCustom domainsでドメインを有効化
+
+**Active確認後に**、Cloudflare PagesのプロジェクトからCustom domainsに進む。
+
+1. 「Workers & Pages」→プロジェクト→「Custom domains」タブ
+2. 「Set up a custom domain」→ドメイン名を入力→「Continue」
+3. DNS設定の確認画面が出たら「Activate domain」をクリック
+
+数分でHTTPSが有効になってカスタムドメインでサイトが見えるようになった。
+
+### 5. HTTPSの確認
+
+ブラウザで`https://yourdomain.com`にアクセスして、鍵マークが表示されていれば完了。
+
+詳細な確認方法は[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)を参照。
 
 ## ハマったポイント
 
-- ネームサーバー変更前にカスタムドメインを設定しようとしても進めない
-- Activeを確認してから改めてCustom domainsの設定をする（2段階）
-
-カスタムドメインが設定できたら[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)でHTTPS接続が正常に機能しているか確認しておくとよい。
+- ネームサーバーが「Active」になる前にCustom domainsでドメインを設定しようとしても進めない。ステータスがPendingのまま止まる。「Active後に改めてCustom domainsの設定をする」という2段階になっているとは最初知らなかった
+- Xserverはサーバーパネルとアカウントパネルが別々の管理画面で、ネームサーバー設定はアカウントパネル（`xapanel`）の方にある。サーバーパネルを1時間探し続けたのは完全に無駄だった
+- 「その他のサービスで利用する」に切り替えるとXserver側でのサイト表示ができなくなる。Xserverのホスティングでサイトを動かしている場合は注意が必要（今回はCloudflare Pagesで動かすので問題なし）
+- Activeになった後にCloudflare Pagesのプロジェクトでもう一度Custom domainsから「Activate domain」を押す必要がある。これを知らずに「Activeになったのになぜサイトが独自ドメインで見えないのか」と30分悩んだ
+- カスタムドメイン設定後、`*.pages.dev`のURLでもサイトが見え続ける。どちらでもアクセスできるが、Search ConsoleにはカスタムドメインのURLで登録する
 
 ## 関連記事
 

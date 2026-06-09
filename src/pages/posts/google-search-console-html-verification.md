@@ -8,54 +8,82 @@ description: 'Google Search ConsoleにAstro+Cloudflare Pagesのサイトを登�
 
 ## やりたかったこと
 
-Astro + Cloudflare Pagesで公開しているサイトをGoogle Search Consoleに登録したかった。
+Astro + Cloudflare Pagesで公開したブログをGoogle Search Consoleに登録しようとした。ドメイン認証とHTMLファイル認証の2種類が出てきて、HTMLファイル認証を選んだはいいが、Astroのどこにファイルを置けば本番URLでアクセスできるのかわからなかった。`src/`に置いたら404になって詰まった。
 
 ## 環境
 
-- Astro
-- Cloudflare Pages
-- Google Search Console
+- Astro 5.2.3
+- Cloudflare Pages（Freeプラン）
+- Google Search Console（2026年5月時点）
+- Windows 11
+- Node.js 20.11.0
 
-## 手順
+## 試したこと・うまくいかなかったこと
 
-### 1. Google Search Consoleで所有権確認を開始
+最初、認証ファイル（`googleXXXXXXXXXXXXXXXX.html`）をAstroの`src/pages/`に置いてみた。ローカルで`npm run dev`してURLにアクセスしたら「404 Not Found」が返ってきた。Astroのページは`.astro`拡張子じゃないといけないのかと思って、`.html`ファイルをそのまま置くのが正しいのかどうかわからなかった。
 
-1. https://search.google.com/search-console を開く
-2. 「URLプレフィックス」にサイトのURLを入力
-3. 「続行」→「HTMLファイル」の認証方法が表示される
-4. 認証用HTMLファイルをダウンロード
+次に`src/pages/`に置いたまま`npm run build`してdistフォルダの中を確認した。認証ファイルが含まれていなかったので、そもそも`src/pages/`でも`.html`は通らないのかと思って調べた。実は`src/pages/`にHTMLファイルを置けばビルドに含まれるが、Astroのページとして処理されてしまうことが後でわかった。
 
-### 2. HTMLファイルをpublicフォルダに配置
+「デプロイしてから確認ボタンを押せばいい」と思ってファイルを`src/pages/`に置いたままCloudflare Pagesにデプロイし、Search Consoleで確認ボタンを押したら「所有権を確認できませんでした」と出た。アクセスしてみたらAstroによって変換されたHTMLになっていて、Googleが期待するファイルの内容と変わっていたのが原因だった。
+
+## 解決策
+
+認証ファイルは`public/`フォルダに置く。`public/`に置いたファイルはAstroのビルド処理を通らずそのまま`dist/`にコピーされるので、ファイルの内容が変更されない。
+
+### 1. Google Search Consoleで認証ファイルをダウンロード
+
+1. `https://search.google.com/search-console` を開く
+2. 「URLプレフィックス」にサイトのURL（`https://yourdomain.com`）を入力して「続行」
+3. 「HTMLファイル」のタブを選択
+4. 認証用HTMLファイルをダウンロード（`googleXXXXXXXXXXXXXXXX.html` という名前）
+
+### 2. publicフォルダに配置する
 
 ```
-プロジェクト名/public/googleXXXXXXXXXXXXXXXX.html
+my-astro-site/
+├── public/
+│   └── googleXXXXXXXXXXXXXXXX.html  ← ここに置く
+├── src/
+│   └── pages/
+└── astro.config.mjs
 ```
 
-`src/` ではなく `public/` フォルダに置く。
+`src/pages/`ではなく`public/`に置くのがポイント。
 
-### 3. pushしてデプロイ
+### 3. ローカルで動作確認してからpush
 
+```bash
+npm run build
+ls dist/googleXXXXXXXXXXXXXXXX.html  # distに含まれているか確認
 ```
-git add .
+
+確認できたらpush。
+
+```bash
+git add public/googleXXXXXXXXXXXXXXXX.html
 git commit -m "add google search console verification"
 git push
 ```
 
-### 4. Google Search Consoleで確認
+### 4. Cloudflare Pagesのデプロイ完了後に確認
 
-デプロイ完了後に「確認」ボタンを押す。
+Deploymentsタブでビルドが完了したことを確認してから、Search Consoleの「確認」ボタンを押す。
 
-### 5. サイトマップを送信
+ブラウザで`https://yourdomain.com/googleXXXXXXXXXXXXXXXX.html`にアクセスして、認証コードが書かれた内容が表示されれば設置OK。
 
-左メニュー「サイトマップ」→ `sitemap-index.xml` と入力して「送信」。
+### 5. サイトマップを送信する
+
+所有権確認が完了したら、左メニュー「サイトマップ」で `sitemap-index.xml` を送信する。AstroのサイトマップはデフォルトでこのURLで生成される。
+
+サイトマップを事前に設定していない場合は[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)で設定してから送信する。
 
 ## ハマったポイント
 
-- HTMLファイルは `public/` に置く（`src/` では動かない）
-- デプロイ完了前に「確認」を押しても失敗する
-- 確認後もHTMLファイルを削除しないこと
-
-Search Consoleへの登録が完了したら、[Astroでrobots.txtとsitemapを自動生成する方法](/posts/astro-sitemap-robots)でサイトマップを作成して送信しておくとクロールが促進される。
+- HTMLファイルは`public/`に置く。`src/pages/`に置くとAstroが内容を変換してしまい、Googleの所有権確認に失敗する。これに気づくまで2回デプロイを無駄にした
+- デプロイ完了前に「確認」ボタンを押しても必ず失敗する。Cloudflare PagesのDeploymentsタブで「Success」になるまで待ってから押す必要がある
+- 確認後も認証HTMLファイルを削除してはいけない。Search ConsoleはURLにアクセスできるかを定期的に確認しているので、消すと「所有権を失効しました」という通知が来ることがある
+- 「URLプレフィックス」と「ドメイン」の2種類の登録方法があって、ドメイン認証の方がサブドメインも一括で管理できるが、DNS設定が必要で難しい。HTMLファイル認証は手順が明確で確実
+- サイトマップのURLを送信するとき、`sitemap.xml`と入力したら「読み取れませんでした」と出た。Astroが生成するのは`sitemap-index.xml`なのでそちらを入力する必要があった
 
 ## 関連記事
 
