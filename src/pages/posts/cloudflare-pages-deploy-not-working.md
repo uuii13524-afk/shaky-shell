@@ -15,6 +15,8 @@ This project is disconnected from your Git account.
 This may cause deployments to fail.
 ```
 
+という黄色いバナーがプロジェクトのトップに表示されていた。
+
 ## 環境
 
 - Cloudflare Pages（2026年5月時点）
@@ -24,11 +26,13 @@ This may cause deployments to fail.
 
 ## 試したこと・うまくいかなかったこと
 
-まず「何か変なコードを入れたか？」と思ってgit diffで確認したが、問題になりそうなコードはなかった。ローカルで`npm run build`したら正常に通った。
+まず「何か変なコードを入れたか？」と思ってgit diffで確認したが、問題になりそうなコードはなかった。ローカルで`npm run build`したら正常に通った。コードの問題ではないとわかったが、では何が原因なのか見当がつかなかった。
 
-次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが来ていなかった。ビルドエラーなら原因を探せるが、ビルドが始まっていないという状態でどこを見ればいいか最初わからなかった。
+次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが全く来ていなかった。ビルドエラーがあれば原因を探せるが、ビルドが始まっていない状態ではどこを見ればいいかわからなかった。
 
-「もう一度pushすれば直るかも」と空のコミット無しで`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを検知していないのだった。
+「もう一度pushすれば直るかも」と思って`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを全く検知していなかった。
+
+GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryに「Failed」の記録があった。HTTPステータスが`401 Unauthorized`だった。これはCloudflareとGitHubの認証が切れているサインだとわかった。
 
 ## 解決策
 
@@ -36,9 +40,11 @@ This may cause deployments to fail.
 
 ### 原因1：CloudflareとGitHubの接続が切れている
 
-これが一番多い。Cloudflareダッシュボードでプロジェクトを開き、「Settings」→「Git repository」の「Manage」をクリックする。GitHubの再認証画面が開くのでログインしてアクセスを許可する。
+これが一番多い。プロジェクトのトップに黄色いバナーが出ている場合はほぼこれ。
 
-再認証後は空のコミットをpushして強制的にデプロイをトリガーする。
+Cloudflareダッシュボードでプロジェクトを開き、「Settings」タブ（上部メニュー）→「Git repository」セクションの「Manage」をクリックする。GitHubのOAuth認証画面が開くのでログインしてアクセスを許可する。
+
+再認証後は空のコミットをpushして強制的にデプロイをトリガーする。再認証しただけでは過去のコミットが遡ってデプロイされない。
 
 ```bash
 git commit --allow-empty -m "force deploy"
@@ -47,16 +53,24 @@ git push
 
 これでDeploymentsタブにビルドが来て解決した。
 
-### 原因2：古いコミットが対象になっている
+### 原因2：監視ブランチの設定が合っていない
 
-Cloudflare Pagesは`main`ブランチのpushを監視している。別ブランチで作業してmainに向けていない場合はデプロイが走らない。
+Cloudflare Pagesは特定のブランチのpushしか監視しない。デフォルトは`main`ブランチだが、作業ブランチが違う場合はデプロイが走らない。
 
 ```bash
 git branch  # 現在のブランチを確認
+git status  # どのブランチにいるか確認
+```
+
+別ブランチで作業している場合はmainにマージしてpushする。
+
+```bash
 git checkout main
 git merge 作業ブランチ名
 git push origin main
 ```
+
+または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。
 
 ### 原因3：ビルドエラーが出ている
 
@@ -65,22 +79,29 @@ Deploymentsタブにビルド自体は来ているが「Failed」になってい
 Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を確認する。よくあるエラーと対処法：
 
 ```
-Error: Cannot find module '@astrojs/...'
+Error: Cannot find module '@astrojs/sitemap'
 ```
-→ `package.json`に依存が含まれているか確認。Cloudflare側でも`npm install`が走るが、devDependenciesに入っていると本番環境でインストールされないことがある。
+→ `package.json`のdependenciesに含まれているか確認。devDependenciesに入れてしまうと本番ビルド時にインストールされない。
 
 ```
 Error: Build failed with exit code 1
 ```
-→ ビルドコマンドやNode.jsのバージョンを確認。「Settings」→「Build configuration」で`NODE_VERSION`環境変数を明示的に指定する。
+→ ビルドコマンドやNode.jsのバージョンを確認。「Settings」→「Environment variables」で`NODE_VERSION`を`20`に指定する。
+
+```
+× Rendering /posts/xxx...
+  Error: Cannot read properties of undefined
+```
+→ Astroのレンダリングエラー。該当ページのMarkdownやコンポーネントの記述ミスが原因のことが多い。ローカルで`npm run build`して同じエラーが再現するか確認する。
 
 ## ハマったポイント
 
-- 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は意味のない1文字を追加してはコミットという無駄な操作をしていた
-- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に見ることが時間節約になる
-- 「Settings」の「Git repository」セクションに切断を示すバナーが出ているが、画面上部のプロジェクト概要画面を見ていると気づかないことがある。Settingsタブを開いて確認する習慣をつけた
-- 再認証だけでは足りなくて、空のコミットpushが別途必要だったことに最初気づかなかった。再認証後に「もうGitHubにpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に遡ってビルドを走らせてくれるわけではない
-- GitHubのOAuth許可設定を確認したらCloudflareへのアクセスが「Revoked」になっていた。GitHub側のSettings→Applications→Authorized OAuth Appsでも確認できる
+- 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
+- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった
+- Settings → Git repositoryの「Manage」ボタンは分かりにくい場所にある。Settingsタブを開いてかなり下にスクロールした先にある。プロジェクトのトップ画面では見えない
+- 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで時間がかかった
+- GitHubのSettings → Applications → Authorized OAuth Appsを確認したらCloudflareのアクセスが「Revoked」になっていた。GitHub側でも確認できるので、Cloudflare側だけでなくGitHub側のOAuth設定も確認する
+- デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがある
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 

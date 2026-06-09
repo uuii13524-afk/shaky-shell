@@ -8,7 +8,7 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 ## やりたかったこと
 
-ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとした。Gitは使っていたがGitHubへのpushは初めてで、認証周りでエラーが出て詰まった。「パスワードを入力してください」と言われてGitHubのログインパスワードを入れたら弾かれた。
+ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとした。Gitはローカルで使っていたが、GitHubへのpushは初めてで認証周りでエラーが出て詰まった。「パスワードを入力してください」と言われてGitHubのログインパスワードを入力したらエラーになった。パスワードが合っているのになぜ弾かれるのかが最初わからなかった。
 
 ## 環境
 
@@ -19,26 +19,29 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 ## 試したこと・うまくいかなかったこと
 
-GitHubにリポジトリを作って、表示されたコマンドをそのまま実行した。`git push -u origin main`まで進んだが、認証を求められてGitHubのログインパスワードを入力したら以下のエラーになった。
+GitHubにリポジトリを作って、表示された「…or push an existing repository from the command line」のコマンドをそのまま実行した。`git push -u origin main`まで進んだが、ユーザー名とパスワードを求められた。GitHubのログインに使っているパスワードを入力したら以下のエラーになった。
 
 ```
 remote: Support for password authentication was removed on August 13, 2021.
 remote: Please see https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories
-fatal: Authentication failed for 'https://github.com/...'
+fatal: Authentication failed for 'https://github.com/ユーザー名/リポジトリ名.git'
 ```
 
-2021年からパスワード認証が廃止されていたとは知らなかった。「じゃあどうやって認証するんだ」とGitHubのドキュメントを読んだが、Personal Access Token（PAT）とSSH鍵の2種類があって最初どちらを使えばいいか迷った。
+2021年にパスワード認証が廃止されていたとは知らなかった。「じゃあどうやって認証するんだ」とGitHubのドキュメントを読んだが、Personal Access Token（PAT）とSSH鍵の2種類があってどちらを使えばいいか迷った。
 
-PATを発行してパスワード欄に貼り付けたら通ったが、毎回長いトークンをコピペするのは面倒だった。そのためSSH鍵での認証を後から設定し直した。
+とりあえずPATを試した。GitHubのどこでPATを発行するのか最初わからなかった。Settingsに行ったが「Personal access tokens」という項目が見当たらなかった。実は「Settings」→「Developer settings」→「Personal access tokens」という3段階の階層にあって、「Developer settings」はSettingsページの一番下のリンクにある。ここを見つけるまで10分くらいかかった。
 
-リポジトリ作成時にREADMEを追加する設定にしてしまったので、最初のpushでこんなエラーが出た。
+PATを発行してパスワード欄に貼り付けたら通ったが、毎回長いトークンをコピペするのが面倒だった。
+
+また、リポジトリ作成時にREADMEを追加するチェックを入れてしまっていたので、最初のpushでこんなエラーが出た。
 
 ```
 error: failed to push some refs to 'https://github.com/...'
 hint: Updates were rejected because the remote contains work that you do not have locally.
+hint: Integrate the remote changes (e.g. hint: 'git pull ...') before pushing again.
 ```
 
-ローカルとリモートの両方にコミットがあってコンフリクトしていた。
+ローカルとリモートで別々のコミット履歴が存在していて競合していた。
 
 ## 解決策
 
@@ -50,6 +53,8 @@ hint: Updates were rejected because the remote contains work that you do not hav
 4. **「Add a README file」のチェックは外す**（ここをオンにすると最初のpushで競合が起きる）
 5. 「Create repository」
 
+空のリポジトリが作られると「Quick setup」画面が表示される。ここに表示されているコマンドを次の手順で使う。
+
 ### 2. ローカルでGitを初期化してコミット
 
 ```bash
@@ -58,9 +63,11 @@ git add .
 git commit -m "first commit"
 ```
 
+`git add .`でプロジェクト全体を追加するが、`.env`など機密ファイルは先に`.gitignore`に追加しておく。
+
 ### 3. GitHubと接続してpushする
 
-GitHubのリポジトリ作成後に表示されるコマンドをそのまま実行する。
+GitHubの「Quick setup」画面に表示されているコマンドをそのまま実行する。
 
 ```bash
 git remote add origin https://github.com/ユーザー名/リポジトリ名.git
@@ -68,17 +75,23 @@ git branch -M main
 git push -u origin main
 ```
 
-### 4. 認証を求められたらPATまたはSSH鍵で認証する
+### 4. 認証を求められたらPATで認証する
 
-**PATを使う場合：**
+GitHubはパスワード認証が廃止されているのでPersonal Access Token（PAT）を使う。
 
-GitHubの Settings → Developer settings → Personal access tokens → Tokens (classic) → 「Generate new token」でトークンを発行する。スコープは`repo`にチェックを入れる。
+1. GitHubの右上アイコン → 「Settings」
+2. 左サイドバーを一番下までスクロール → 「Developer settings」
+3. 「Personal access tokens」→「Tokens (classic)」→「Generate new token」
+4. 「Note」に用途を書く（例：「local development」）
+5. Expirationは適切な期間を選ぶ（90 daysなど）
+6. 「repo」スコープにチェックを入れる
+7. 「Generate token」でトークンを発行
 
-パスワード入力欄に発行されたトークンを貼り付けると認証が通る。
+発行されたトークンをコピーしてパスワード入力欄に貼り付けると認証が通る。トークンは一度しか表示されないので、コピーしてパスワードマネージャーなどに保存しておく。
 
-**SSH鍵を使う場合（推奨）：**
+**SSH鍵を使う場合（長期的には推奨）：**
 
-SSH鍵を使うと毎回トークンを入力しなくて済む。設定手順は[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)を参照。SSH接続に切り替えた後は`origin`のURLを変更する。
+SSH鍵を使うと毎回トークンを入力しなくて済む。設定手順は[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)を参照。SSH接続に切り替えた後はremoteのURLをSSH形式に変更する。
 
 ```bash
 git remote set-url origin git@github.com:ユーザー名/リポジトリ名.git
@@ -86,20 +99,24 @@ git remote set-url origin git@github.com:ユーザー名/リポジトリ名.git
 
 ### 5. READMEチェックありで作ってしまった場合
 
-リモートとローカルで別々のコミットが存在している場合は、先にリモートをpullして統合する。
+ローカルとリモートで別々のコミット履歴がある場合は、pullして統合してからpushする。
 
 ```bash
 git pull origin main --allow-unrelated-histories
+# コンフリクトが出た場合は解消してコミット
 git push -u origin main
 ```
 
+`--allow-unrelated-histories`オプションを付けないとpullが拒否される。
+
 ## ハマったポイント
 
-- リポジトリ作成時に「Add a README file」を有効にするとリモートにコミットが作られる。ローカルとリモートで別々のコミット履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方がトラブルが少ない
-- GitHubはパスワード認証を2021年に廃止している。ログインパスワードをそのまま入力しても絶対に通らない。PATかSSH鍵の設定が必要
-- PATはGitHubのどこから作るか最初わからなかった。「Settings」→「Developer settings」という場所にある。「Developer settings」はSettings画面の一番下のリンクにある
-- SSH鍵とPATの違いがわかっていなかった。HTTPSでcloneしたリポジトリにSSH鍵を設定しようとしてもremoteのURLがHTTPSのままなので意味がない。SSH接続にするにはremoteのURLをSSH形式（`git@github.com:...`）に変える必要があった
-- `git branch -M main`を実行するまで、ローカルのブランチが`master`になっていてGitHubの`main`と名前が合わなかった。このコマンドでローカルのブランチ名を`main`に変更できる
+- リポジトリ作成時に「Add a README file」を有効にするとリモートにコミットが作られる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少ない
+- GitHubはパスワード認証を2021年8月に廃止している。ログインパスワードをそのまま入力しても絶対に通らない。「認証に失敗した」と思ってパスワードを何度も入力し直す時間が無駄だった
+- PATを発行する「Developer settings」はSettingsページの一番下の小さいリンクにある。上のメニューをいくら探しても見つからない。Settings → ページ最下部 → Developer settings という手順
+- SSH鍵の設定を試みた時、HTTPSでcloneしたリポジトリにSSH鍵を設定してもremoteのURLがHTTPSのままでは機能しない。`git remote set-url`でSSH形式（`git@github.com:...`）のURLに変更するのが必要だった
+- `git branch -M main`を実行するまで、ローカルのブランチが`master`になっていてGitHubの`main`と名前が合わずにpushが失敗した。最近のGitHubはデフォルトブランチが`main`なので、ローカルとブランチ名を合わせる必要がある
+- PATのスコープで「repo」だけでなく全部チェックしてしまうと権限が広すぎる。コードのpushだけなら「repo」のみで十分。必要最小限のスコープにしておくのが安全
 
 ## 関連記事
 
