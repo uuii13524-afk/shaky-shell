@@ -8,7 +8,7 @@ description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解
 
 ## やりたかったこと
 
-Astroで作ったブログサイトをCloudflare Pagesで公開しようとした。Vercelは使ったことがあったが、Cloudflare PagesのUIが違いすぎて最初どこから設定するのかわからなかった。特に「Workers & Pages」からPagesの設定に入る導線が見つけにくくて詰まった。
+Astroで作ったブログサイトをCloudflare Pagesで公開しようとした。これまでVercelしか使ったことがなかったが、Cloudflareの方がCDNの速度が良いと聞いて移行を考えた。Cloudflare PagesのUIがVercelと全然違って、最初どこから設定を始めればいいのかわからなかった。「Workers & Pages」を開いたらWorkers用の画面しか見当たらず、Pagesの設定に入る場所が見つけにくくて詰まった。
 
 ## 環境
 
@@ -21,11 +21,13 @@ Astroで作ったブログサイトをCloudflare Pagesで公開しようとし�
 
 ## 試したこと・うまくいかなかったこと
 
-最初、Cloudflareのダッシュボードにログインして「Workers & Pages」→「Create application」を押したらWorkers用の画面が出てきた。「Create Worker」のボタンしか見当たらず、Pagesの設定がどこにあるのかわからなかった。Workers用の画面でAstroのリポジトリを繋ごうとしたが、そもそもPages用の設定項目がなかった。
+最初、Cloudflareのダッシュボードにログインして「Workers & Pages」→「Create application」を押したら、「Create a Worker」という画面が出てきた。「Connect to Git」のようなボタンが見当たらず、Pagesの設定がどこにあるのかわからなかった。Workersの設定画面でAstroのリポジトリを繋ごうと右往左往した。
 
-「Pages」という名前のメニュー項目があるかと左側のサイドバーを全部見たが見つからず、「Workers & Pages」が両方を兼ねた画面だとわかるまで10分くらいかかった。
+左側のサイドバーをすべて確認したが、「Pages」という独立したメニューはなかった。「Workers & Pages」が両方を兼ねているとわかるまで10分以上かかった。「Create application」を押した後の画面に**小さく**「Looking to deploy Pages?」というリンクがあって、それをクリックしないとPages用の画面に入れない作りだった。
 
-ビルドコマンドを手動で入力しようとして`npm run build`と入れたところ、Framework presetで「Astro」を選ぶと自動的に設定されることを後から知った。手動入力のまま進めると環境変数が足りなくてビルドが失敗することがあった。
+ビルドコマンドの設定で手動入力しようとして`npm run build`と`dist`を入れたが、Framework presetで「Astro」を選べば自動で入力されることを後から知った。手動でも問題ないが、Astroのpresetを使わないと`NODE_VERSION`などの推奨環境変数が設定されず、Cloudflare側のNode.jsバージョンが古くてビルドが失敗することがあった。
+
+最初のビルドが`Error: Cannot find module`で失敗したが、ログをよく見たら`node_modules`が正しくインストールされていなかった。ローカルでは`npm install`済みなのに、Cloudflareは毎回クリーンな状態からビルドするのでリポジトリの`package.json`に書かれた依存が正しくないと失敗する。
 
 ## 解決策
 
@@ -56,7 +58,7 @@ git push -u origin main
 
 1. Cloudflareダッシュボードで「Workers & Pages」を開く
 2. 「Create application」ボタンを押す
-3. **画面下部**にある「Looking to deploy Pages? Get started」をクリック（ここが見つけにくい）
+3. **画面下部**にある「Looking to deploy Pages? Get started」をクリック（これを見落としやすい）
 4. 「Import an existing Git repository」→「Get started」
 5. GitHubアカウントを認証してリポジトリを選択
 6. ビルド設定でFramework presetを「**Astro**」に変更する
@@ -72,19 +74,41 @@ Build output directory: dist
 
 初回ビルドは2〜3分かかる。Deploymentsタブでビルドログをリアルタイムで確認できる。
 
-### 4. デプロイ完了後の確認
+### 4. ビルドが失敗した時の対処
 
-`*.pages.dev` のURLが発行される。このURLでサイトが表示されれば成功。
+初回デプロイでビルドエラーになる場合は、Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を確認する。
+
+よくあるエラー：
+
+```
+Error: Cannot find module 'sharp'
+```
+→ `package.json`のdependenciesに`sharp`が入っているか確認する。`devDependencies`に入れてしまうと本番ビルドで読み込めない。
+
+```
+error: No matching version found for node@xx.x.x
+```
+→ Node.jsのバージョン不一致。Settings → Environment variablesで`NODE_VERSION`を`20`に指定する。
+
+```
+Build failed: 'astro' is not recognized
+```
+→ `npm install`が失敗している可能性。`package.json`の内容をローカルと比較して依存が正しいか確認する。
+
+### 5. デプロイ完了後の確認
+
+Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。ブラウザで開いてサイトが表示されれば成功。
 
 カスタムドメインを設定したい場合は[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)を参照。環境変数が必要な場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参考になる。
 
 ## ハマったポイント
 
-- 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started」から入る。上部だけ見ていると絶対に見つからない
-- Framework presetで「Astro」を選ぶとビルド設定が自動入力される。手動で`npm run build`と`dist`を入れても動くが、presetを使う方が確実
-- GitHubの認証ページで「All repositories」ではなく「Only select repositories」を選ぶと、後から追加したリポジトリが一覧に出てこないことがある。その場合はGitHub側のOAuth設定でリポジトリを追加する
-- 初回デプロイのビルドが失敗した場合、エラーメッセージはDeploymentsタブ→「View build logs」で確認できる。「Build failed」の赤いアイコンをクリックしてからログを展開する手順がわかりにくかった
-- `npm run build`でローカルは通るのに、Cloudflare側でビルドエラーになるのはNode.jsのバージョン違いが原因のことが多い。ビルド設定の「Environment variables」で`NODE_VERSION=20`を指定すると直った
+- 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started」という目立たないリンクから入る。ページの上部だけ見ていると絶対に見つからない
+- Framework presetで「Astro」を選ぶとビルド設定が自動入力されるだけでなく、推奨のNode.jsバージョンも適用される。手動で`npm run build`と`dist`を入れても一応動くが、Node.jsのバージョン差異でビルドが失敗しやすい
+- GitHubの認証ページで「Only select repositories」を選ぶと、後から新しいリポジトリを追加した時にCloudflareの一覧に出てこない。その場合はGitHubのSettings → Applications → Cloudflare Pages → Repositoriesから追加できる
+- ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが違う可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
+- 「Build failed」の赤いアイコンをクリックした後にビルドログを展開する操作がわかりにくかった。Deploymentsタブ→ビルドのリンクをクリック→「Build logs」タブという手順で確認できる
+- デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある
 
 ## 関連記事
 
