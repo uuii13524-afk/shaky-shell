@@ -8,7 +8,9 @@ description: 'Astroサイトに@astrojs/sitemapプラグインでsitemap.xmlを�
 
 ## やりたかったこと
 
-AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録したら、サイトマップを送信するよう求められた。`sitemap.xml`は手動でXMLを書くものだと思っていたが、Astroにはプラグインで自動生成できる仕組みがあった。また`robots.txt`はどこに置けばいいかも最初わからず、`src/pages/`に置いたらAstroがそれを処理してしまって想定外の挙動になった。
+AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録したら、サイトマップを送信するよう求められた。`sitemap.xml`は手動でXMLを書くものだと思っていたが、Astroにはプラグインで自動生成できる仕組みがあった。
+
+また`robots.txt`はどこに置けばいいかも最初わからず、`src/pages/`に置いたらAstroがそれを処理してしまって想定外の挙動になった。さらに`astro.config.mjs`の`site`プロパティを書き忘れてビルドが止まるエラーも踏んだ。一通り動くまでに複数の詰まりポイントがあったので、まとめて残しておく。
 
 ## 環境
 
@@ -19,7 +21,7 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 
 ## 試したこと・うまくいかなかったこと
 
-最初、`public/sitemap.xml`にXML形式のファイルを手動で作った。記事のURLを1件ずつ書いていく作業で、10記事くらいまでは良かったが30記事を超えたあたりから管理しきれなくなった。記事を追加するたびにsitemap.xmlも手動で更新しないといけないし、URLを書き間違えることもあった。
+最初、`public/sitemap.xml`にXML形式のファイルを手動で作った。記事のURLを1件ずつ書いていく作業で、10記事くらいまでは良かったが30記事を超えたあたりから管理しきれなくなった。記事を追加するたびにsitemap.xmlも手動で更新しないといけないし、URLを書き間違えることもあった。`<loc>`の中にtypoがあってもGoogleはエラーを教えてくれないので、しばらくURLが間違ったまま放置されていた。
 
 `@astrojs/sitemap`というプラグインがあると知ってインストールしたが、`astro.config.mjs`に`site`プロパティを書かずに追加してビルドしたらエラーになった。
 
@@ -30,7 +32,9 @@ A site URL is required to generate a sitemap.
 
 `site`を追加すればいいとわかったが、今度はローカルURLを書いてしまった。`site: 'http://localhost:4321'`にしてビルドしたら、生成された`sitemap-0.xml`の中のURLが全部`http://localhost:4321/...`になっていた。Search Consoleに送信しても意味がないので本番URLに書き直した。
 
-`robots.txt`は最初`src/pages/robots.txt`として置いた。Astroが処理して`/robots.txt`にアクセスできるようになるかと思ったが、テキストファイルはAstroのページとして認識されなかった。`robots.ts`でエンドポイントを作る方法もあるが、静的なファイルを置くだけなら`public/`が正解だとわかった。
+`robots.txt`は最初`src/pages/robots.txt`として置いた。Astroが処理して`/robots.txt`にアクセスできるようになるかと思ったが、テキストファイルはAstroのページとして認識されなかった。`robots.ts`でエンドポイントを作る方法もあると知って試みたが、静的なファイルを置くだけなら`public/`が正解だとわかってやり直した。
+
+また、Search Consoleにサイトマップを送信する時に`sitemap.xml`と入力したら「フェッチできませんでした」というエラーが出た。`sitemap-index.xml`と`sitemap.xml`は別のファイルで、Astroが生成するのは`sitemap-index.xml`の方だとわかるまで詰まった。
 
 ## 解決策
 
@@ -71,6 +75,8 @@ ls dist/sitemap*.xml
 head -20 dist/sitemap-0.xml
 ```
 
+URLがlocalhostになっていないか、記事のURLが含まれているか、この2点を必ず確認しておく。
+
 ### 4. robots.txtをpublicフォルダに設置
 
 `public/robots.txt`として以下の内容で保存する。
@@ -83,6 +89,8 @@ Sitemap: https://yourdomain.com/sitemap-index.xml
 ```
 
 `Sitemap:`の行のURLは自分のドメインに書き換える。`public/`に置くことでビルド後に`dist/robots.txt`にそのままコピーされる。Astroによる変換処理は一切入らない。
+
+`robots.txt`に書く`Sitemap:`の値はCloudflareのカスタムドメインのURLを使う。`*.pages.dev`ではなく独自ドメインのURLを書く。
 
 ### 5. 両方をpushしてデプロイ
 
@@ -103,16 +111,18 @@ git push
 
 送信後すぐに「ステータス：成功」になれば完了。「フェッチできませんでした」が出る場合は、デプロイが完了しているか確認してから数分後に再送信する。
 
+「読み取り成功」と表示された後も「検出されたURL：0」になることがある。Search Consoleがサイトマップの中身を処理するまで数日かかるので、送信から1〜3日後に再確認する。
+
 Search Consoleへの登録がまだの場合は[Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順](/posts/google-search-console-html-verification)から先に設定する。
 
 ## ハマったポイント
 
-- `site`を設定しないとプラグインがエラーを出してビルドが止まる。必須プロパティなので忘れずに設定する
+- `site`を設定しないとプラグインがエラーを出してビルドが止まる。必須プロパティなので忘れずに設定する。エラーメッセージは明確なので原因はすぐわかるが、プラグインを追加したのに`site`の設定が必要とは思っていなかった
 - `site`にlocalhostを書いてしまうと`sitemap-0.xml`の中のURLが全部`http://localhost:4321/...`になる。Search Consoleで「フェッチできませんでした」が出たら`sitemap-0.xml`の中身を確認して、URLがlocalhostになっていないか確認するといい
-- サイトマップのファイル名が`sitemap.xml`ではなく`sitemap-index.xml`だった。Search Consoleで`sitemap.xml`を入力したら「フェッチできませんでした」というエラーが出た。`sitemap-index.xml`と書き直したら「ステータス：成功」になった
+- サイトマップのファイル名が`sitemap.xml`ではなく`sitemap-index.xml`だった。Search Consoleで`sitemap.xml`を入力したら「フェッチできませんでした」というエラーが出た。`sitemap-index.xml`と書き直したら「ステータス：成功」になった。これは見落としやすい
 - Cloudflareがrobots.txtを自動生成して上書きする、という情報をどこかで見て心配したが、実際には`public/robots.txt`に置いたものが優先されて問題なかった
 - `src/pages/`に`.txt`ファイルを置いても機能しなかった。Astroは`.astro`・`.md`・`.mdx`・`.html`以外のファイルはページとして扱わない。テキストファイルはstatic assetとして`public/`に置くのが正解だった
-- プラグインをインストールするだけではサイトマップは生成されない。`astro.config.mjs`の`integrations`に追加するのを忘れると、ビルドしても`sitemap-index.xml`が生成されない。インストール後に設定ファイルへの追記が必要だった
+- プラグインをインストールするだけではサイトマップは生成されない。`astro.config.mjs`の`integrations`に追加するのを忘れると、ビルドしても`sitemap-index.xml`が生成されない。インストール後に設定ファイルへの追記が必要だった。「インストールは完了しているのになぜ生成されないのか」と30分以上調べた
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 

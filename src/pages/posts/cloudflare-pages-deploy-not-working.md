@@ -15,7 +15,9 @@ This project is disconnected from your Git account.
 This may cause deployments to fail.
 ```
 
-という黄色いバナーがプロジェクトのトップに表示されていた。
+という黄色いバナーがプロジェクトのトップに表示されていた。「May cause」と書いてあるので軽い警告だと思ってしばらく無視していたが、実際には完全にデプロイが止まっていた。
+
+自動デプロイが止まる原因は複数あって、「ビルドが来ない」「ビルドは来るが失敗する」「デプロイは成功するがサイトに反映されない」の3パターンに分けて考えると原因を絞り込みやすかった。
 
 ## 環境
 
@@ -28,19 +30,27 @@ This may cause deployments to fail.
 
 まず「何か変なコードを入れたか？」と思ってgit diffで確認したが、問題になりそうなコードはなかった。ローカルで`npm run build`したら正常に通った。コードの問題ではないとわかったが、では何が原因なのか見当がつかなかった。
 
-次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが全く来ていなかった。ビルドエラーがあれば原因を探せるが、ビルドが始まっていない状態ではどこを見ればいいかわからなかった。
+次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが全く来ていなかった。ビルドエラーがあれば原因を探せるが、ビルドが始まっていない状態ではどこを見ればいいかわからなかった。「ビルドが失敗している」と「ビルド自体が来ていない」は全く別の問題で、診断の入口が変わってくる。
 
 「もう一度pushすれば直るかも」と思って`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを全く検知していなかった。
 
-GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryに「Failed」の記録があった。HTTPステータスが`401 Unauthorized`だった。これはCloudflareとGitHubの認証が切れているサインだとわかった。
+GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryを確認できた。直近のdeliveryを開いてレスポンスを見たら、HTTPステータスが`401 Unauthorized`になっていた。
+
+```
+POST https://api.cloudflare.com/client/v4/pages/webhooks/deploy/...
+Response: 401
+{"result":null,"success":false,"errors":[{"code":10000,"message":"Authentication error"}],"messages":[]}
+```
+
+これはCloudflareとGitHubの認証が切れているサインだとわかった。CloudflareがGitHubのWebhookを受け取り拒否している状態で、OAuthトークンの有効期限が切れていた。
 
 ## 解決策
 
-原因は3パターンある。上から順に確認していくのが早い。
+原因は3パターンある。「Deploymentsタブにビルドが来ているか来ていないか」を最初に確認して、上から順に確認していくのが早い。
 
 ### 原因1：CloudflareとGitHubの接続が切れている
 
-これが一番多い。プロジェクトのトップに黄色いバナーが出ている場合はほぼこれ。
+**Deploymentsタブにビルドが全く来ていない場合はほぼこれ。** プロジェクトのトップに黄色いバナーが出ている場合も同様。
 
 Cloudflareダッシュボードでプロジェクトを開き、「Settings」タブ（上部メニュー）→「Git repository」セクションの「Manage」をクリックする。GitHubのOAuth認証画面が開くのでログインしてアクセスを許可する。
 
@@ -51,7 +61,7 @@ git commit --allow-empty -m "force deploy"
 git push
 ```
 
-これでDeploymentsタブにビルドが来て解決した。
+これでDeploymentsタブにビルドが来て解決した。GitHubのSettings → Applications → Authorized OAuth Appsも確認して、Cloudflareのエントリが「Revoked」になっていないか確認しておく。
 
 ### 原因2：監視ブランチの設定が合っていない
 
@@ -70,7 +80,7 @@ git merge 作業ブランチ名
 git push origin main
 ```
 
-または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。
+または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。`main`でpushしているのに`master`と設定されていると動かない。
 
 ### 原因3：ビルドエラーが出ている
 
@@ -92,16 +102,37 @@ Error: Build failed with exit code 1
 × Rendering /posts/xxx...
   Error: Cannot read properties of undefined
 ```
-→ Astroのレンダリングエラー。該当ページのMarkdownやコンポーネントの記述ミスが原因のことが多い。ローカルで`npm run build`して同じエラーが再現するか確認する。
+→ Astroのレンダリングエラー。該当ページのMarkdownやコンポーネントの記述ミスが原因のことが多い。ローカルで`npm run build`して同じエラーが再現するか確認する。ローカルで再現すれば原因のファイルが特定できる。
+
+```
+Build exceeded the time limit of 20 minutes
+```
+→ ビルド時間超過。画像の最適化処理や大量ページのビルドで発生することがある。`npm run build`のローカル実行時間を計測して、異常に時間がかかるページを探す。
+
+### ビルドログの見方
+
+Deploymentsタブ→対象ビルドのリンクをクリック→「Build logs」タブを開くと、ビルドの全ログが確認できる。
+
+```
+Installing dependencies...
+npm warn deprecated xxx
+...
+✓ Completed
+Building Astro site...
+  → 26 pages built in 3.21s
+✓ Build completed in 4.5s
+```
+
+この形で「Build completed」が出れば成功。途中でエラーが出ている行を探すと原因を特定しやすい。
 
 ## ハマったポイント
 
 - 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
-- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった
+- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった。「Failed」が来ていれば原因3、何も来ていなければ原因1か2
 - Settings → Git repositoryの「Manage」ボタンは分かりにくい場所にある。Settingsタブを開いてかなり下にスクロールした先にある。プロジェクトのトップ画面では見えない
-- 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで時間がかかった
-- GitHubのSettings → Applications → Authorized OAuth Appsを確認したらCloudflareのアクセスが「Revoked」になっていた。GitHub側でも確認できるので、Cloudflare側だけでなくGitHub側のOAuth設定も確認する
-- デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがある
+- 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
+- GitHubのWebhookのdeliveryログを見ると、Cloudflareへの通知が成功しているか失敗しているかがわかる。Settings → Webhooksから各deliveryのレスポンスを確認できる。`401`が出ていたらOAuth切れ、`200`が出ていたらCloudflare側のビルド設定の問題
+- デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 

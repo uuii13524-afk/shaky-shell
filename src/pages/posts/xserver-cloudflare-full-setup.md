@@ -8,7 +8,9 @@ description: 'XserverのドメインをCloudflare Pagesのカスタムドメイ�
 
 ## やりたかったこと
 
-Xserverで取得したドメインをCloudflare Pagesで公開しているAstroサイトのカスタムドメインに設定したかった。`*.pages.dev`のURLから独自ドメインに変えるのが目的だったが、手順が複数ステップにわたっていて全体像がつかめなかった。ネームサーバーの変更・Active待ち・カスタムドメインの有効化が別々の作業として必要で、どこまで済んでいてどこが残っているかわからなくなった。
+Xserverで取得したドメインをCloudflare Pagesで公開しているAstroサイトのカスタムドメインに設定したかった。`*.pages.dev`のURLから独自ドメインに変えるのが目的だったが、手順が複数ステップにわたっていて全体像がつかめなかった。
+
+ネームサーバーの変更・Active待ち・カスタムドメインの有効化が別々の作業として必要で、どこまで済んでいてどこが残っているかわからなくなった。特に「ネームサーバーの変更」と「Custom domainsでのActivate」が2段階になっているのを知らず、1段階目で終わったと思って待ち続けた時間があった。
 
 ## 環境
 
@@ -24,6 +26,8 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 次にネームサーバーをXserverで変更しようとしたが、サーバーパネルのどこを探してもネームサーバーの設定が見つからなかった。「DNS設定」というメニューはあったが、これはAレコードやCNAMEを編集するもので、ネームサーバー自体の変更ではなかった。Xserverのサポートページを調べてようやく「Xserverアカウント（旧インフォパネル）という別の管理画面」にあることがわかった。
 
 ネームサーバーをCloudflareに変更してActive待ちの間、「これでカスタムドメインの設定は完了したのでは」と思っていたが、実はActiveになってから**もう一度Cloudflare PagesのCustom domainsで操作が必要**だとわかって、作業が2段階になっているとは最初知らなかった。
+
+Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。
 
 ## 解決策
 
@@ -65,6 +69,8 @@ Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログイ�
 
 この時点でXserverでホスティングしているサイトは表示されなくなる（ドメインの向き先がCloudflareに変わるため）。今回はCloudflare Pagesでホスティングするので問題ない。
 
+詳細な手順は[XserverドメインのネームサーバーをCloudflareに変更する方法](/posts/xserver-cloudflare-nameserver)にまとめた。
+
 ### 3. CloudflareでActiveを確認する
 
 Cloudflareに戻って「I updated my nameservers」ボタンを押す。ステータスが「Pending Nameserver Update」から「Active」に変わるまで待つ。だいたい30分〜1時間で変わるが、DNS伝播には最長72時間かかることもある。
@@ -96,6 +102,8 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 
 数分でHTTPSが有効になってカスタムドメインでサイトが見えるようになった。
 
+ステータスが「Active」になったことをCustom domainsのページで確認する。「Initializing」や「Pending」のままの場合は数分待ってからページをリロードする。
+
 ### 5. HTTPSの確認
 
 ブラウザで`https://yourdomain.com`にアクセスして鍵マークが表示されていれば完了。
@@ -103,6 +111,10 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 `http://`でアクセスしても`https://`にリダイレクトされるのを確認しておく。HTTP→HTTPSの自動リダイレクトはCloudflareのSSL/TLS設定でデフォルトで有効になっている。
 
 詳細な確認方法は[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)を参照。
+
+### 6. Search ConsoleをカスタムドメインURLで登録
+
+`*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になるが、Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
 
 ## ハマったポイント
 
