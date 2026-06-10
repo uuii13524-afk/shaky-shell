@@ -10,6 +10,8 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとした。Gitはローカルで使っていたが、GitHubへのpushは初めてで認証周りでエラーが出て詰まった。「パスワードを入力してください」と言われてGitHubのログインパスワードを入力したらエラーになった。パスワードが合っているのになぜ弾かれるのかが最初わからなかった。
 
+何度パスワードを入れ直してもエラーが出続けて、「GitHubのアカウントが制限されているのかも」と思って設定画面を確認しに行ったりと、30分以上迷走した。
+
 ## 環境
 
 - Git 2.44.0
@@ -29,9 +31,9 @@ fatal: Authentication failed for 'https://github.com/ユーザー名/リポジ�
 
 2021年にパスワード認証が廃止されていたとは知らなかった。「じゃあどうやって認証するんだ」とGitHubのドキュメントを読んだが、Personal Access Token（PAT）とSSH鍵の2種類があってどちらを使えばいいか迷った。
 
-とりあえずPATを試した。GitHubのどこでPATを発行するのか最初わからなかった。Settingsに行ったが「Personal access tokens」という項目が見当たらなかった。実は「Settings」→「Developer settings」→「Personal access tokens」という3段階の階層にあって、「Developer settings」はSettingsページの一番下のリンクにある。ここを見つけるまで10分くらいかかった。
+とりあえずPATを試した。GitHubのどこでPATを発行するのか最初わからなかった。Settingsに行ったが「Personal access tokens」という項目が見当たらなかった。実は「Settings」→「Developer settings」→「Personal access tokens」という3段階の階層にあって、「Developer settings」はSettingsページの一番下の小さいリンクにある。ここを見つけるまで10分くらいかかった。
 
-PATを発行してパスワード欄に貼り付けたら通ったが、毎回長いトークンをコピペするのが面倒だった。
+PATを発行してパスワード欄に貼り付けたら通ったが、毎回長いトークンをコピペするのが面倒だった。Windowsの場合は資格情報マネージャーに保存されるので2回目以降は入力不要だが、それを知らなくてPATを何度も貼り直していた。
 
 また、リポジトリ作成時にREADMEを追加するチェックを入れてしまっていたので、最初のpushでこんなエラーが出た。
 
@@ -41,7 +43,7 @@ hint: Updates were rejected because the remote contains work that you do not hav
 hint: Integrate the remote changes (e.g. hint: 'git pull ...') before pushing again.
 ```
 
-ローカルとリモートで別々のコミット履歴が存在していて競合していた。
+ローカルとリモートで別々のコミット履歴が存在していて競合していた。「pushに失敗した」というエラーで焦ったが、単純にリモートにREADMEのコミットがあっただけだった。
 
 ## 解決策
 
@@ -64,6 +66,16 @@ git commit -m "first commit"
 ```
 
 `git add .`でプロジェクト全体を追加するが、`.env`など機密ファイルは先に`.gitignore`に追加しておく。
+
+```bash
+# .gitignoreに書いておくもの（最低限）
+node_modules/
+.env
+dist/
+.DS_Store
+```
+
+`.gitignore`がない場合は`git add .`の前に作成する。後から追加しても既に追跡中のファイルは対象外になるので、最初に設定する方がトラブルが少ない。
 
 ### 3. GitHubと接続してpushする
 
@@ -89,12 +101,21 @@ GitHubはパスワード認証が廃止されているのでPersonal Access Toke
 
 発行されたトークンをコピーしてパスワード入力欄に貼り付けると認証が通る。トークンは一度しか表示されないので、コピーしてパスワードマネージャーなどに保存しておく。
 
+Windowsの場合、一度認証が通ると「Windows 資格情報マネージャー」に保存される。次回以降は入力不要になるので、PATは発行したら安全な場所に保管しておく。
+
 **SSH鍵を使う場合（長期的には推奨）：**
 
 SSH鍵を使うと毎回トークンを入力しなくて済む。設定手順は[SSHキーを生成してGitHubに登録する方法](/posts/ssh-key-github)を参照。SSH接続に切り替えた後はremoteのURLをSSH形式に変更する。
 
 ```bash
 git remote set-url origin git@github.com:ユーザー名/リポジトリ名.git
+```
+
+変更後に`git remote -v`で確認する。
+
+```
+origin  git@github.com:ユーザー名/リポジトリ名.git (fetch)
+origin  git@github.com:ユーザー名/リポジトリ名.git (push)
 ```
 
 ### 5. READMEチェックありで作ってしまった場合
@@ -107,16 +128,26 @@ git pull origin main --allow-unrelated-histories
 git push -u origin main
 ```
 
-`--allow-unrelated-histories`オプションを付けないとpullが拒否される。
+`--allow-unrelated-histories`オプションを付けないとpullが拒否される。コンフリクトが発生した場合はファイルを開いて`<<<<<<<`マークを探し、どちらの変更を残すか選択してから`git add`と`git commit`を実行する。
+
+### 6. pushが成功したか確認する
+
+```bash
+git log --oneline -5  # ローカルのコミット履歴
+git status  # 変更の状態
+```
+
+GitHubのリポジトリをブラウザで開いて、コミットが反映されているか確認する。リポジトリのトップページのコミット数とローカルの`git log`のコミット数が一致していればOK。
 
 ## ハマったポイント
 
 - リポジトリ作成時に「Add a README file」を有効にするとリモートにコミットが作られる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少ない
-- GitHubはパスワード認証を2021年8月に廃止している。ログインパスワードをそのまま入力しても絶対に通らない。「認証に失敗した」と思ってパスワードを何度も入力し直す時間が無駄だった
+- GitHubはパスワード認証を2021年8月に廃止している。ログインパスワードをそのまま入力しても絶対に通らない。「認証に失敗した」と思ってパスワードを何度も入力し直す時間が無駄だった。エラーメッセージをよく読めば原因が書いてある
 - PATを発行する「Developer settings」はSettingsページの一番下の小さいリンクにある。上のメニューをいくら探しても見つからない。Settings → ページ最下部 → Developer settings という手順
 - SSH鍵の設定を試みた時、HTTPSでcloneしたリポジトリにSSH鍵を設定してもremoteのURLがHTTPSのままでは機能しない。`git remote set-url`でSSH形式（`git@github.com:...`）のURLに変更するのが必要だった
 - `git branch -M main`を実行するまで、ローカルのブランチが`master`になっていてGitHubの`main`と名前が合わずにpushが失敗した。最近のGitHubはデフォルトブランチが`main`なので、ローカルとブランチ名を合わせる必要がある
 - PATのスコープで「repo」だけでなく全部チェックしてしまうと権限が広すぎる。コードのpushだけなら「repo」のみで十分。必要最小限のスコープにしておくのが安全
+- Windowsの場合、PATを一度使って認証が通ると「資格情報マネージャー」に保存される。次回からは入力不要になるが、PATの有効期限が切れた後は再入力が必要になる。期限切れのトークンが保存されていると「認証エラー」が出るので、その場合は資格情報マネージャーからGitHubのエントリを削除して再認証する
 
 ## 関連記事
 
