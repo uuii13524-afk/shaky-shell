@@ -36,6 +36,8 @@ A site URL is required to generate a sitemap.
 
 また、Search Consoleにサイトマップを送信する時に`sitemap.xml`と入力したら「フェッチできませんでした」というエラーが出た。`sitemap-index.xml`と`sitemap.xml`は別のファイルで、Astroが生成するのは`sitemap-index.xml`の方だとわかるまで詰まった。
 
+`@astrojs/sitemap`をインストールするだけでサイトマップが生成されると思っていたのも間違いだった。パッケージのインストール後に`astro.config.mjs`の`integrations`配列に追加する設定が別途必要で、この設定を書き忘れると`npm install`後にビルドしても`sitemap-index.xml`は一切生成されない。30分以上「なぜ生成されないのか」を調べてようやく気づいた。
+
 ## 解決策
 
 ### 1. sitemapプラグインをインストール
@@ -58,6 +60,16 @@ export default defineConfig({
 
 `site`には本番環境のURL（`https://`付き）を書く。末尾のスラッシュはあってもなくてもOK。**ここでlocalhostを書いてしまうと生成されるサイトマップのURLが全部localhostになる**ので注意。
 
+特定のページをサイトマップから除外したい場合は`filter`オプションが使える。
+
+```js
+integrations: [sitemap({
+  filter: (page) => !page.includes('/draft/') && !page.includes('/private/'),
+})],
+```
+
+`/draft/`や`/private/`を含むページをサイトマップから除外する例。検索にヒットさせたくない下書きページや管理ページをsitemapに含めたくない場合に使った。
+
 ### 3. ビルドして動作確認
 
 ```bash
@@ -77,6 +89,14 @@ head -20 dist/sitemap-0.xml
 
 URLがlocalhostになっていないか、記事のURLが含まれているか、この2点を必ず確認しておく。
 
+xmllintが使える環境であればサイトマップのXMLが正しいかバリデーションもできる。
+
+```bash
+xmllint --noout dist/sitemap-0.xml
+```
+
+エラーが出なければXMLの構造は正しい。Googleへの送信前に一応確認しておくと安心だった。
+
 ### 4. robots.txtをpublicフォルダに設置
 
 `public/robots.txt`として以下の内容で保存する。
@@ -91,6 +111,17 @@ Sitemap: https://yourdomain.com/sitemap-index.xml
 `Sitemap:`の行のURLは自分のドメインに書き換える。`public/`に置くことでビルド後に`dist/robots.txt`にそのままコピーされる。Astroによる変換処理は一切入らない。
 
 `robots.txt`に書く`Sitemap:`の値はCloudflareのカスタムドメインのURLを使う。`*.pages.dev`ではなく独自ドメインのURLを書く。
+
+特定のディレクトリをクローラーから除外したい場合はDisallowを追加する。
+
+```
+User-agent: *
+Allow: /
+Disallow: /draft/
+Disallow: /private/
+
+Sitemap: https://yourdomain.com/sitemap-index.xml
+```
 
 ### 5. 両方をpushしてデプロイ
 
@@ -123,6 +154,7 @@ Search Consoleへの登録がまだの場合は[Google Search ConsoleのHTMLフ�
 - Cloudflareがrobots.txtを自動生成して上書きする、という情報をどこかで見て心配したが、実際には`public/robots.txt`に置いたものが優先されて問題なかった
 - `src/pages/`に`.txt`ファイルを置いても機能しなかった。Astroは`.astro`・`.md`・`.mdx`・`.html`以外のファイルはページとして扱わない。テキストファイルはstatic assetとして`public/`に置くのが正解だった
 - プラグインをインストールするだけではサイトマップは生成されない。`astro.config.mjs`の`integrations`に追加するのを忘れると、ビルドしても`sitemap-index.xml`が生成されない。インストール後に設定ファイルへの追記が必要だった。「インストールは完了しているのになぜ生成されないのか」と30分以上調べた
+- `npm run build`の後に`dist/`を確認する習慣をつけると、デプロイ前に問題を発見できる。`ls dist/sitemap*.xml`と`ls dist/robots.txt`が1コマンドで確認できるので、push前のチェックに組み込んでおくとよかった
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 

@@ -44,6 +44,8 @@ Response: 401
 
 これはCloudflareとGitHubの認証が切れているサインだとわかった。CloudflareがGitHubのWebhookを受け取り拒否している状態で、OAuthトークンの有効期限が切れていた。
 
+「もしかしてブランチ名の問題かも」とも思って`git branch`で確認したら、作業中のブランチが`main`ではなく`feature/update`になっていたこともあった。Cloudflare PagesはデフォルトでProduction branchとして`main`しか監視しないので、別ブランチにpushしても本番デプロイは走らない。これは別のケースでハマった話だが、同じ「デプロイが来ない」症状で出るので最初に確認すべきポイントだった。
+
 ## 解決策
 
 原因は3パターンある。「Deploymentsタブにビルドが来ているか来ていないか」を最初に確認して、上から順に確認していくのが早い。
@@ -63,6 +65,8 @@ git push
 
 これでDeploymentsタブにビルドが来て解決した。GitHubのSettings → Applications → Authorized OAuth Appsも確認して、Cloudflareのエントリが「Revoked」になっていないか確認しておく。
 
+GitHubのWebhookのdeliveryログを診断に使う方法もある。Settings → Webhooks → 対象のWebhookをクリックして「Recent Deliveries」タブを開くと、push通知の成否とレスポンスが全件確認できる。`401`が出ていたらOAuth切れ、`200`が出ているのにデプロイが来ない場合はCloudflare側の設定問題、deliveryそのものが来ていない場合はブランチ設定の問題。
+
 ### 原因2：監視ブランチの設定が合っていない
 
 Cloudflare Pagesは特定のブランチのpushしか監視しない。デフォルトは`main`ブランチだが、作業ブランチが違う場合はデプロイが走らない。
@@ -81,6 +85,8 @@ git push origin main
 ```
 
 または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。`main`でpushしているのに`master`と設定されていると動かない。
+
+「Production branchはmainなのにデプロイが来ない」という場合、別ブランチへのpushはPreview Deploymentとして扱われる。Settings → Builds → 「Preview deployments」の設定でPreviewが有効になっていれば、feature/xxx ブランチへのpushで別URLにPreviewが建つ。ここも確認しておくと動きが理解しやすい。
 
 ### 原因3：ビルドエラーが出ている
 
@@ -125,6 +131,8 @@ Building Astro site...
 
 この形で「Build completed」が出れば成功。途中でエラーが出ている行を探すと原因を特定しやすい。
 
+ビルドログが大量に出る場合は「Download logs」でローカルに落としてテキストエディタで検索するのが速かった。ブラウザでスクロールしながら探すより`Error:`で全文検索した方が圧倒的に早い。
+
 ## ハマったポイント
 
 - 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
@@ -133,6 +141,7 @@ Building Astro site...
 - 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
 - GitHubのWebhookのdeliveryログを見ると、Cloudflareへの通知が成功しているか失敗しているかがわかる。Settings → Webhooksから各deliveryのレスポンスを確認できる。`401`が出ていたらOAuth切れ、`200`が出ていたらCloudflare側のビルド設定の問題
 - デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
+- ビルドログが長い場合はブラウザでスクロールして探すより「Download logs」でテキストファイルとして落として検索した方が速かった。`Error:`や`error:`でファイル検索すると即座に問題箇所を見つけられた
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 

@@ -37,6 +37,15 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 
 このエラーが出た時は`sharp`を`dependencies`ではなく`devDependencies`に入れていたのが原因だった。本番ビルドでは`devDependencies`はインストールされないので、使うパッケージは必ず`dependencies`に入れる必要があった。
 
+また、`astro.config.mjs`に`site`プロパティを書いていなかったために、sitemapプラグインがビルドを止めたことがあった。
+
+```
+[@astrojs/sitemap] No `site` option is set in your Astro config.
+A site URL is required to generate a sitemap.
+```
+
+ローカルでは問題なかったのに（ローカル実行時はsitemapが生成されないだけで止まらない）、Cloudflareのビルドではエラーになった。
+
 ## 解決策
 
 ### 1. Astroをインストールして動作確認
@@ -110,6 +119,11 @@ Build failed: 'astro' is not recognized
 ```
 → `astro.config.mjs`に`site`プロパティがない。`site: 'https://yourdomain.com'`を追加する。
 
+```
+Build exceeded the time limit of 20 minutes
+```
+→ ビルド時間超過。画像の最適化処理や大量ページのビルドで発生することがある。`sharp`の画像処理が全ページに走っている場合などに起きた。
+
 環境変数を設定したい場合はSettings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
 
 ### 5. デプロイ完了後の確認
@@ -131,6 +145,16 @@ git push
 
 pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。ビルドが来ない場合は[Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)を確認する。
 
+### 7. 直前のデプロイに戻したい場合
+
+デプロイ後にサイトが壊れた場合、CloudflareのDeploymentsタブから以前のデプロイに戻せる。
+
+1. Deploymentsタブを開く
+2. 戻したいデプロイの右側「…」→「Rollback to this deployment」を選択
+3. 確認ダイアログで「Rollback」をクリック
+
+1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。
+
 ## ハマったポイント
 
 - 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。ページの上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計だった
@@ -139,6 +163,7 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 - ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが16や18の可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
 - デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
+- `astro.config.mjs`の`site`プロパティを書き忘れていた。sitemapプラグインを入れていると`site`がないとビルドエラーになる。ローカルでは気づかず、Cloudflareにpushして初めてエラーになった。ローカルで`npm run build`をしてからpushするクセをつけると防げる失敗だった
 
 ## 関連記事
 

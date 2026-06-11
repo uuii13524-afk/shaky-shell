@@ -48,6 +48,8 @@ GitHubはpushをCloudflareに通知しようとしているが、Cloudflareが�
 
 GitHubのSettings → Applications → Authorized OAuth Apps でCloudflareのエントリを確認したら、アクセスの状態が「Revoked」になっていた。GitHubのセキュリティ設定で2段階認証を変更した後、OAuthアプリの権限がリセットされていたのが根本原因だった。
 
+「GitHub Appsと何が違うのか」も気になって調べた。Cloudflare PagesはOAuth Appを使って接続しているので、GitHubのSettings → Applicationsの「Authorized OAuth Apps」タブを確認する。「Installed GitHub Apps」タブではなく「Authorized OAuth Apps」の方。両方存在していてどちらを見ればいいかわからず混乱したが、Cloudflare Pagesの接続はOAuth App側にある。
+
 ## 解決策
 
 CloudflareとGitHubのOAuth接続が切れていたのが原因だった。GitHubのOAuthトークンには有効期限があり、長期間放置したプロジェクトや、GitHubのセキュリティ設定を変更した後は自動的に切断される。
@@ -73,7 +75,15 @@ git push
 
 これでDeploymentsタブに新しいビルドが来て、1〜2分でデプロイが完了した。2ヶ月分の記事の更新がまとめて最新コミットの内容として反映された。
 
-### 3. 再認証できない場合の対処
+空コミットを作りたくない場合は、CloudflareのDeploymentsタブ右上にある「Create deployment」→「Deploy production」でも手動トリガーできる。ただし「Create deployment」はUIが変わることがあって表示されない場合もあるので、`--allow-empty`の方が確実。
+
+### 3. GitHubのWebhookをリデリバリする
+
+GitHub側でWebhookの再送も試せる。Settings → Webhooks → 対象のWebhook → 「Recent Deliveries」タブを開くと過去のdeliveryが一覧で出てくる。失敗しているdeliveryの右側にある「…」→「Redeliver」で再送信ができる。
+
+ただしこれは「接続が切れる前の最後のWebhookを再送する」操作なので、OAuthが切れたままだと401で再び失敗する。**まず再認証してから**Redeliverする順番が正しい。
+
+### 4. 再認証できない場合の対処
 
 「Manage」を押しても認証画面が開かない、または認証後にまた同じバナーが出る場合は、プロジェクトのGitHubとの接続を一度完全に切断して再設定する方法がある。
 
@@ -81,9 +91,11 @@ Cloudflare PagesのSettings → Git repositoryで「Disconnect Git repository」
 
 切断後の再接続時、GitHubのリポジトリ一覧にプロジェクトが表示されない場合は、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから対象リポジトリへのアクセスを許可する。
 
-### 4. 再発防止
+### 5. 再発防止
 
 GitHubのセキュリティ設定（2段階認証・SSHキー・パスワード変更など）を変えた後は、Cloudflare PagesのDeploymentsタブを必ず確認する癖をつけると早期発見できる。設定変更後に一度テストコミットをpushして、1〜2分以内にビルドが来るかどうか確認するだけでいい。
+
+長期間プロジェクトを触らない場合は、月1回でも`git commit --allow-empty -m "keep alive" && git push`をしておくとトークンの有効期限切れを防ぎやすい。
 
 ## ハマったポイント
 
@@ -92,8 +104,9 @@ GitHubのセキュリティ設定（2段階認証・SSHキー・パスワード�
 - GitHubのリポジトリ自体には問題なくpushできていたので、「Gitの問題」ではなく「CloudflareとGitHubの間の接続の問題」だと理解するまでに時間がかかった。コミット履歴はちゃんと積まれているのにデプロイが動かない場合は、接続の問題を最初に疑う
 - 再認証後に「もうpushしてあるから大丈夫」と思って待っていたら何も起きなかった。再認証はあくまで接続の修復で、過去のコミットをCloudflareが遡って処理してくれるわけではなかった。`git commit --allow-empty -m "force deploy" && git push` の空コミットを追加でpushするのが必要だった
 - GitHubのWebhookのdeliveryログを確認したら、HTTPレスポンスが `401 Unauthorized` になっていた。CloudflareがGitHubのWebhookを弾いている状態で、これが「OAuthが切れている」の具体的な証拠だった。診断に迷ったらGitHub側のWebhookログを確認すると原因がはっきりする
-- GitHubのSettings → Applications → Authorized OAuth Appsでもアクセス状況を確認できる。ここでCloudflareのエントリが「Revoked」になっていたら再認証が必要なサインだった
+- GitHubのSettings → Applications → Authorized OAuth Appsでもアクセス状況を確認できる。ここでCloudflareのエントリが「Revoked」になっていたら再認証が必要なサインだった。「Installed GitHub Apps」タブではなく「Authorized OAuth Apps」タブを見る。間違えて違うタブを見てCloudflareのエントリがないと混乱した
 - 長期間放置したプロジェクトで起きやすい。月に1回以上触っているプロジェクトではほとんど起きないが、数ヶ月単位で放置するとOAuthトークンが期限切れになることがある。GitHubのセキュリティ設定変更後にも起きる
+- Preview Deploymentsのビルドも同様に止まる。mainブランチ以外のブランチへのpushもCloudflareが検知しなくなるので、ブランチ作業中でも同じ症状が出る
 
 デプロイが反映されない時はまずDeploymentsタブのログを確認する。ビルドログの読み方については[Cloudflare Pagesのビルドログの見方とエラーの対処法](/posts/cloudflare-pages-build-log)が参考になる。
 
