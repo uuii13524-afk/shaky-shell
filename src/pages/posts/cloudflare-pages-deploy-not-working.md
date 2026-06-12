@@ -44,6 +44,8 @@ Response: 401
 
 これはCloudflareとGitHubの認証が切れているサインだとわかった。CloudflareがGitHubのWebhookを受け取り拒否している状態で、OAuthトークンの有効期限が切れていた。
 
+別のケースでは、ビルドは来ているのに「Deploymentsタブに新しいビルドは来るが、本番サイトが更新されない」という状況も経験した。原因を調べたら、本番ブランチの設定が`main`のままなのに、作業していたブランチが`master`だったことが判明した。Cloudflareは指定されたブランチのpushしかデプロイのトリガーにしないので、ブランチ名が合っていないとビルド自体が来ない。
+
 ## 解決策
 
 原因は3パターンある。「Deploymentsタブにビルドが来ているか来ていないか」を最初に確認して、上から順に確認していくのが早い。
@@ -63,6 +65,8 @@ git push
 
 これでDeploymentsタブにビルドが来て解決した。GitHubのSettings → Applications → Authorized OAuth Appsも確認して、Cloudflareのエントリが「Revoked」になっていないか確認しておく。
 
+再認証後にDeploymentsタブでビルドが来ない場合は、GitHubのWebhooksページで「Recent Deliveries」の最新エントリを確認する。`200`が返っているか確認して、`401`や`403`が返っている場合はまだ認証が通っていない。
+
 ### 原因2：監視ブランチの設定が合っていない
 
 Cloudflare Pagesは特定のブランチのpushしか監視しない。デフォルトは`main`ブランチだが、作業ブランチが違う場合はデプロイが走らない。
@@ -81,6 +85,8 @@ git push origin main
 ```
 
 または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。`main`でpushしているのに`master`と設定されていると動かない。
+
+リポジトリのデフォルトブランチ名はGitHubのSettings → Default branchから確認できる。ローカルとCloudflareとGitHubのすべてで同じブランチ名になっているか確認するのが確実。
 
 ### 原因3：ビルドエラーが出ている
 
@@ -123,7 +129,9 @@ Building Astro site...
 ✓ Build completed in 4.5s
 ```
 
-この形で「Build completed」が出れば成功。途中でエラーが出ている行を探すと原因を特定しやすい。
+この形で「Build completed」が出れば成功。途中でエラーが出ている行を探すと原因を特定しやすい。ビルドログは下から上に読むと最終的なエラーメッセージが先に見つかることが多い。
+
+ビルドが途中で止まってログが「Timed out waiting for build to start」になっている場合は、Cloudflare側のビルドキューが詰まっていることがある。数分後に「Retry deployment」ボタンで再試行してみる。
 
 ## ハマったポイント
 
@@ -133,6 +141,7 @@ Building Astro site...
 - 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
 - GitHubのWebhookのdeliveryログを見ると、Cloudflareへの通知が成功しているか失敗しているかがわかる。Settings → Webhooksから各deliveryのレスポンスを確認できる。`401`が出ていたらOAuth切れ、`200`が出ていたらCloudflare側のビルド設定の問題
 - デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
+- `master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らなかったことがあった。ブランチ名の不一致は気づきにくいので、接続時に設定したブランチ名を定期的に確認しておくといい
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 

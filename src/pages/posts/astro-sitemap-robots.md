@@ -58,6 +58,16 @@ export default defineConfig({
 
 `site`には本番環境のURL（`https://`付き）を書く。末尾のスラッシュはあってもなくてもOK。**ここでlocalhostを書いてしまうと生成されるサイトマップのURLが全部localhostになる**ので注意。
 
+特定のページをサイトマップから除外したい場合は`filter`オプションを使う。管理画面やプレビューページなどnoindexにしたいページがある場合に役立つ。
+
+```js
+integrations: [
+  sitemap({
+    filter: (page) => !page.includes('/admin/') && !page.includes('/preview/'),
+  }),
+],
+```
+
 ### 3. ビルドして動作確認
 
 ```bash
@@ -92,6 +102,14 @@ Sitemap: https://yourdomain.com/sitemap-index.xml
 
 `robots.txt`に書く`Sitemap:`の値はCloudflareのカスタムドメインのURLを使う。`*.pages.dev`ではなく独自ドメインのURLを書く。
 
+ビルドしてrobots.txtが正しく出力されているか確認する。
+
+```bash
+cat dist/robots.txt
+```
+
+`Sitemap:`の行に設定したURLが表示されていればOK。
+
 ### 5. 両方をpushしてデプロイ
 
 ```bash
@@ -123,6 +141,7 @@ Search Consoleへの登録がまだの場合は[Google Search ConsoleのHTMLフ�
 - Cloudflareがrobots.txtを自動生成して上書きする、という情報をどこかで見て心配したが、実際には`public/robots.txt`に置いたものが優先されて問題なかった
 - `src/pages/`に`.txt`ファイルを置いても機能しなかった。Astroは`.astro`・`.md`・`.mdx`・`.html`以外のファイルはページとして扱わない。テキストファイルはstatic assetとして`public/`に置くのが正解だった
 - プラグインをインストールするだけではサイトマップは生成されない。`astro.config.mjs`の`integrations`に追加するのを忘れると、ビルドしても`sitemap-index.xml`が生成されない。インストール後に設定ファイルへの追記が必要だった。「インストールは完了しているのになぜ生成されないのか」と30分以上調べた
+- robots.txtの`Sitemap:`行に`*.pages.dev`のURLを書いてしまっていた。カスタムドメインを設定した後もrobots.txtを更新し忘れていて、Googlebot向けのサイトマップURLが`*.pages.dev`のままになっていた。カスタムドメイン設定後は必ずrobots.txtの内容も更新する
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 

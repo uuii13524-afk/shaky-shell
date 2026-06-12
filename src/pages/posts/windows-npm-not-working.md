@@ -42,6 +42,8 @@ npm : このシステムではスクリプトの実行が無効になってい�
 
 「コマンドプロンプトで試してみよう」とcmdで`npm -v`を実行したら、今度は正常にバージョンが返ってきた。つまり問題はNode.jsのインストールではなく、VS CodeのターミナルがPowerShellを使っているせいだとわかった。
 
+別の日に、Microsoft StoreからインストールしたNode.jsとnodejs.orgからインストールしたNode.jsが両方入っていて干渉し合うケースも経験した。`where node`を実行したら複数のパスが返ってきて、「どちらのNodeが使われているのか」が混乱した。Microsoft Storeのバージョンは更新管理がStore経由になるので、開発用途にはnodejs.orgからのインストールまたはnvmを使うほうが制御しやすかった。
+
 ## 解決策
 
 原因は4パターン。上から順に確認していくのが早い。
@@ -113,6 +115,8 @@ Get-ExecutionPolicy
 
 インストール後は必ずターミナルを再起動してから確認する。
 
+Microsoft Storeからもインストールできるが、パスの管理方法が通常のインストーラー版と異なる。`where node`を実行した時にStoreのパス（`C:\Users\ユーザー名\AppData\Local\Microsoft\WindowsApps\node.exe`のような形式）が返ってくる場合はStore版が優先されている。開発用途には`nodejs.org`のLTS版を使うほうがトラブルが少ない。
+
 ### nvmを使っている場合の注意
 
 nvm（Node Version Manager）を使ってNode.jsを管理している場合、`nvm use`コマンドを実行するまでnpmが使えないことがある。
@@ -125,12 +129,15 @@ npm -v           # 確認
 
 nvm経由でインストールしたNodeはシステムのPATHではなく、nvmの管理下のパスに入る。`nvm use`でアクティブにしていない状態ではnpmが見つからない。
 
+Windowsでnvmを使う場合は`nvm-windows`（`github.com/coreybutler/nvm-windows`）を使う。LinuxやmacOS用のnvmとは別のツールで、インストール方法も管理方法も異なる。両方を混同していたために設定が壊れたことがあった。
+
 ## ハマったポイント
 
 - インストールし直しても同じターミナルで実行したままでは絶対に直らない。環境変数はターミナル起動時にしか読み込まれないので、インストール後は必ずターミナルを完全に閉じて開き直す。これが一番多い原因だった。2回再インストールして2回とも同じターミナルで試すという無駄をやった
 - Windows 11の「環境変数」設定がどこにあるか最初わからなかった。スタートメニューで「環境変数」と検索するのが一番早い。コントロールパネルを辿る方法は手順が多くて時間がかかる
 - PowerShellとコマンドプロンプトでエラーの内容が違う。「スクリプトの実行が無効」エラーはPowerShell特有で、コマンドプロンプトでは出ない。VS CodeのターミナルはデフォルトでPowerShellを使うので気づきにくかった。「VS Codeでだけ動かない」という場合はこのパターンを疑う
 - `npm`だけエラーになって`node`は動く場合がある。Node.jsのインストールパス（`C:\Program Files\nodejs\`）とnpmのグローバルパス（`C:\Users\ユーザー名\AppData\Roaming\npm`）は別々にPATHに登録されているので、npmのパスだけ欠けていることがある
+- Microsoft Storeからインストールしたnode.exeが優先されてしまい、`nodejs.org`からインストールした方が使われない状態になっていたことがあった。`where node`で複数のパスが返ってくる場合はStore版を削除するか、Windowsの「アプリの実行エイリアス」でStoreのNode.jsを無効にする
 - nvmを使ってNode.jsのバージョンを切り替えた後に`npm`が使えなくなることがある。`nvm use 20`で明示的にバージョンを指定すると直る。nvmの使い方は[Node.jsのバージョンをnvmで管理する方法](/posts/node-version-management-nvm)を参照
 - `where npm`コマンドでnpmのパスを確認できる。何も出力されない場合はPATHが通っていない。パスが出力される場合は実行ポリシーや権限の問題を疑う。PowerShellでは`Get-Command npm`でも確認できる
 

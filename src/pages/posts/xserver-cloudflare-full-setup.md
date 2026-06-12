@@ -27,7 +27,7 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 ネームサーバーをCloudflareに変更してActive待ちの間、「これでカスタムドメインの設定は完了したのでは」と思っていたが、実はActiveになってから**もう一度Cloudflare PagesのCustom domainsで操作が必要**だとわかって、作業が2段階になっているとは最初知らなかった。
 
-Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。
+Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。Custom domainsでActivateボタンを押してから5分後に再アクセスしたら正常に表示された。
 
 ## 解決策
 
@@ -67,7 +67,7 @@ Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログイ�
 
 「その他のサービスで利用する」を選択。入力欄が2つ表示されるので、Cloudflareで確認したネームサーバー1・2のアドレスをそれぞれ入力して「確認」→「設定する」で保存する。
 
-この時点でXserverでホスティングしているサイトは表示されなくなる（ドメインの向き先がCloudflareに変わるため）。今回はCloudflare Pagesでホスティングするので問題ない。
+この時点でXserverでホスティングしているサイトは表示されなくなる（ドメインの向き先がCloudflareに変わるため）。今回はCloudflare Pagesに完全移行するので問題ない。
 
 詳細な手順は[XserverドメインのネームサーバーをCloudflareに変更する方法](/posts/xserver-cloudflare-nameserver)にまとめた。
 
@@ -110,9 +110,17 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 
 `http://`でアクセスしても`https://`にリダイレクトされるのを確認しておく。HTTP→HTTPSの自動リダイレクトはCloudflareのSSL/TLS設定でデフォルトで有効になっている。
 
+Cloudflare SSL/TLSのEncryption Modeは「Flexible」と「Full」がある。Cloudflare PagesではデフォルトでHTTPSが有効なので「Full」に設定するのが正しい。「Flexible」のままにしておくとセキュリティ上の問題が出ることがある。SSL/TLSの設定はCloudflareダッシュボードの左メニュー「SSL/TLS」から確認できる。
+
 詳細な確認方法は[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)を参照。
 
-### 6. Search ConsoleをカスタムドメインURLで登録
+### 6. wwwありURLの設定
+
+`www.yourdomain.com`でもアクセスできるようにしたい場合は、Custom domainsに`www.yourdomain.com`も追加する。追加するとCloudflare側でCNAMEレコードが自動設定される。
+
+ただし`www.yourdomain.com`を追加した場合、どちらを正規URLにするかを決めておく必要がある。Search Consoleにはどちらか一方のURLで登録して、もう一方はリダイレクト設定にするのが一般的。Cloudflare Pages側ではどちらも同じコンテンツを返すだけなので、Cloudflareのリダイレクトルールで`www`なし→`www`あり（またはその逆）を設定する。
+
+### 7. Search ConsoleをカスタムドメインURLで登録
 
 `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になるが、Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
 
@@ -121,7 +129,8 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 - ネームサーバーが「Active」になる前にCustom domainsでドメインを設定しようとしても「Pending」のまま何も進まない。「Active後に改めてCustom domainsの設定をする」という2段階になっているとは最初知らなかった。Activeになってからもう一度Pagesの設定に戻る手順がある
 - Xserverはサーバーパネル（`xapanel/server`）とアカウントパネル（`xapanel`）が別々の管理画面で、ネームサーバー設定はアカウントパネルの方にある。「ドメイン管理はサーバーパネルにある」という思い込みで1時間以上無駄にした
 - 「その他のサービスで利用する」に切り替えるとXserver上のWebサイトが表示されなくなる。Xserverでホスティングしている別のサイトがある場合は注意が必要。今回はCloudflare Pagesに完全移行するので問題なかった
-- Activeになった後にCloudflare Pagesのプロジェクトで「Custom domains」からもう一度「Activate domain」を押す必要があった。「Activeになったのになぜ独自ドメインで見えないのか」と30分近く悩んだが、Pages側のCustom domainsの設定が別途必要だった
+- Activeになった後にCloudflare Pagesのプロジェクトで「Custom domains」からもう一度「Activate domain」を押す必要があった。「Activeになったのになぜ独自ドメインで見えないのか」と30分近く悩んだが、Pages側のCustom domainsの設定が別途必要だった。その間「522 Connection Timed Out」が出続けていた
+- Cloudflare SSL/TLSのEncryption Modeが「Flexible」になっていると、HTTPSが有効のように見えても実際はCloudflare→オリジン間がHTTPになる問題がある。Cloudflare PagesはフルHTTPSなので「Full」に設定しておく
 - `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になる。Search ConsoleにはカスタムドメインのURLで登録する
 - ネームサーバーのアドレスはCloudflareアカウントごとに割り当てが異なる。他の記事に書いてある`ns1.cloudflare.com`などを入力しても動かない。自分のCloudflareダッシュボードに表示されたアドレスを使う必要があった
 

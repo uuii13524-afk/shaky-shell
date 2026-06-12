@@ -29,6 +29,8 @@ Xserverで取得したドメインをCloudflare Pagesのカスタムドメイン
 
 また、「Active待ち最大72時間」という記述を見て「変更したら3日間サイトが見えなくなるかも」とも恐れた。実際には30分〜1時間で変わったが、最悪のケースを想定して二の足を踏んでいた。
 
+もう1つ詰まったのは、Cloudflareが表示するネームサーバーのアドレスが「vera.ns.cloudflare.com」のような形式だった点。ネットの記事には「ns1.cloudflare.com」などと書いてあるものが多く、「どちらが正しいのか」と混乱した。アカウントごとに割り当てが違うので、自分のダッシュボードに表示されたアドレス以外は使えないと後から知った。
+
 ## 解決策
 
 Cloudflareが指定するネームサーバー2つをXserverアカウントパネルに登録する。
@@ -56,7 +58,7 @@ Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログイ�
 
 「その他のサービスで利用する」に切り替えても、Xserverのサーバー上にあるファイルやデータベースは消えない。ただし**ドメインの向き先がCloudflareに変わるので、Xserver上でホスティングしているサイトはそのままでは表示されなくなる**。今回はCloudflare Pagesでホスティングするので問題ない。
 
-Xserverのメールサービスを使っている場合は、Cloudflare側のDNS管理画面でMXレコードをXserverの値に設定し直す必要がある。ドメインを追加した直後にCloudflareがスキャンした既存レコードの中にMXレコードが含まれているはずなので、それが残っていれば問題ない。
+Xserverのメールサービス（`info@yourdomain.com` 等）を使っている場合は要注意。ネームサーバーをCloudflareに変更するとMXレコードも含めてDNS管理がCloudflareに移る。Cloudflareがスキャン時に既存のMXレコードを自動インポートしていることが多いが、変更直後にメールの送受信を確認しておく。もしMXレコードが引き継がれていなかった場合はCloudflareのDNS管理画面でXserver側のMXレコードを手動追加する必要がある。
 
 ### 3. CloudflareでActiveになるまで待つ
 
@@ -83,6 +85,16 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 
 `nslookup`がWindowsにない場合は、`Resolve-DnsName yourdomain.com -Type NS` をPowerShellで実行しても同様に確認できる。
 
+Linuxの場合は`dig NS yourdomain.com`でも確認できる。
+
+```bash
+dig NS yourdomain.com +short
+```
+
+`vera.ns.cloudflare.com.`と`bob.ns.cloudflare.com.`が返ってきたら伝播完了。
+
+DNS伝播の速度はIPアドレスのTTL（Time to Live）設定に依存する。XserverのデフォルトTTLは3600秒（1時間）に設定されていることが多いので、早くて1時間程度で切り替わる計算になる。焦って何度もnslookupで確認しても最初の30分は結果が変わらないことが多かった。
+
 ### 4. Activeになったらカスタムドメイン設定へ
 
 Activeになってから[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)の手順でカスタムドメインを設定する。Active前に進もうとすると「Pending」のままで先に進めない。ネームサーバーの変更だけではカスタムドメインの設定は完了していない。Active後にもう一度Cloudflare Pagesのプロジェクト設定で操作が必要になる。
@@ -92,9 +104,11 @@ Activeになってから[XserverドメインをCloudflare Pagesのカスタム�
 - ネームサーバーの設定はXserverの「サーバーパネル」ではなく「Xserverアカウント（アカウントパネル）」にある。URLが `xapanel/server` ではなく `xapanel` で終わる方が正解。これを知らずにサーバーパネルを1時間以上探し続けた。「ドメイン管理はサーバーパネルにある」という思い込みがあった
 - Xserverアカウントのドメインメニューにある「DNS設定」は、AレコードやCNAMEなどのDNSレコードを編集する画面で、ネームサーバーそのものを変更する画面ではない。「DNS設定」ではなく「ネームサーバー設定」が目的の画面だった。「DNS設定に行けばネームサーバーも変えられる」と思い込んでいた
 - 「その他のサービスで利用する」を選んでもXserverのサーバーデータ（ファイル・データベース）は消えない。ただしドメインの向き先がXserverからCloudflareに変わるので、Xserverでホスティングしていたサイトは表示されなくなる。「切り替えたら全部消える」と勘違いして踏み切れない時間が長かった
+- Xserverでメールを使っていた場合、切り替え後にCloudflare側でMXレコードが正しく設定されているか確認が必要だった。CloudflareがDNSスキャン時に既存レコードをインポートしてくれることが多いが、必ず確認する。MXレコードが消えるとメールが届かなくなる
 - Active待ちの間にCloudflareのダッシュボードをリロードし続けたが、Pending→Activeへの変化は自動では変わらない。「I updated my nameservers」ボタンを押してもすぐに変わらないことがあり、メールを待つのが一番確実だった。自分の場合は約40分でActiveになった
 - Activeになってから「もうカスタムドメインの設定は完了している」と思い込んだが、Activeはあくまでネームサーバーの変更が反映されただけだった。Cloudflare Pages側でもう一度「Custom domains」から「Set up a custom domain」→「Activate domain」という操作が別途必要で、2段階の手順になっていた
 - Cloudflareが表示するネームサーバーのアドレスはアカウントごとに異なる。ネット上の記事に書いてある`ns1.cloudflare.com`や`ns2.cloudflare.com`は自分のアカウントでは使えない。必ず自分のCloudflareダッシュボードに表示されたアドレスを入力する。これを間違えると一向にActiveにならない
+- DNS伝播の速度はTTLに依存するため、切り替え直後の30分程度は変化が見られないことがある。何度`nslookup`で確認しても同じ結果が返ってきて「切り替えに失敗したかも」と焦ったが、単純に伝播待ちだった。1時間待ってから確認するくらいで十分だった
 
 ## 関連記事
 
