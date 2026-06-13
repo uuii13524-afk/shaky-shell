@@ -37,14 +37,7 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 
 このエラーが出た時は`sharp`を`dependencies`ではなく`devDependencies`に入れていたのが原因だった。本番ビルドでは`devDependencies`はインストールされないので、使うパッケージは必ず`dependencies`に入れる必要があった。
 
-また、`astro.config.mjs`に`site`プロパティを書いていなかったために、sitemapプラグインがビルドを止めたことがあった。
-
-```
-[@astrojs/sitemap] No `site` option is set in your Astro config.
-A site URL is required to generate a sitemap.
-```
-
-ローカルでは問題なかったのに（ローカル実行時はsitemapが生成されないだけで止まらない）、Cloudflareのビルドではエラーになった。
+さらに詰まったのが、Cloudflare PagesのGitHub認証画面で「Only select repositories」を選んでいたこと。後から新しいリポジトリを別に作ってCloudflareに接続しようとしたら、リポジトリの一覧に出てこなかった。「All repositories」に変更するか、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから個別に追加する必要があった。
 
 ## 解決策
 
@@ -60,7 +53,7 @@ npm run dev
 
 ### 2. GitHubにpush
 
-GitHubへの初回pushが初めての場合は、[GitHubへの初回pushの手順](/posts/github-first-push)も参考に。
+GitHubへの初回pushが初めての場合は、[GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)も参考に。
 
 ```bash
 git init
@@ -122,7 +115,7 @@ Build failed: 'astro' is not recognized
 ```
 Build exceeded the time limit of 20 minutes
 ```
-→ ビルド時間超過。画像の最適化処理や大量ページのビルドで発生することがある。`sharp`の画像処理が全ページに走っている場合などに起きた。
+→ ビルド時間超過。画像の最適化処理が重い場合に起きやすい。`sharp`による画像変換を無効にするか、ビルドするページ数を絞る。
 
 環境変数を設定したい場合はSettings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
 
@@ -132,7 +125,19 @@ Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行さ�
 
 カスタムドメインを設定したい場合は[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)を参照。環境変数が必要な場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参考になる。
 
-### 6. 以降のpushの流れ
+### 6. プレビューデプロイの活用
+
+Cloudflare Pagesは`main`ブランチ以外のpushに対しても自動でプレビューURLを発行する。`feature/`ブランチでコードを書いてpushすると、本番とは別の`xxxxxxxx.プロジェクト名.pages.dev`という形のURLでプレビューが確認できる。
+
+```bash
+git checkout -b feature/add-new-section
+# 変更を加えた後
+git push origin feature/add-new-section
+```
+
+プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。
+
+### 7. 以降のpushの流れ
 
 一度設定が完了すれば、あとは`git push`するだけで自動デプロイが走る。
 
@@ -163,7 +168,7 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 - ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが16や18の可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
 - デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
-- `astro.config.mjs`の`site`プロパティを書き忘れていた。sitemapプラグインを入れていると`site`がないとビルドエラーになる。ローカルでは気づかず、Cloudflareにpushして初めてエラーになった。ローカルで`npm run build`をしてからpushするクセをつけると防げる失敗だった
+- `npm run build`で生成される`dist/`フォルダの中身を確認すると、Cloudflareに転送されるファイルを把握できる。`ls dist/`でファイル構成を確認してから、意図しないファイルが含まれていないかチェックする習慣が付いた
 
 ## 関連記事
 

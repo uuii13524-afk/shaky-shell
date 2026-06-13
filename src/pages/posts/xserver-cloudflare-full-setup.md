@@ -27,7 +27,7 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 ネームサーバーをCloudflareに変更してActive待ちの間、「これでカスタムドメインの設定は完了したのでは」と思っていたが、実はActiveになってから**もう一度Cloudflare PagesのCustom domainsで操作が必要**だとわかって、作業が2段階になっているとは最初知らなかった。
 
-Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。
+Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。Custom domainsでActivateボタンを押してから5分後に再アクセスしたら正常に表示された。
 
 「HTTPSにするには証明書が必要では？」とも悩んだ。Cloudflareのデフォルトが「Flexible SSL」なのか「Full SSL」なのかわからず、設定を間違えるとサイトにアクセスできなくなるのではと心配した。実際にはCustom domainsの設定が完了した時点でHTTPSは自動で有効になって、SSLの設定を別途触る必要はなかった。
 
@@ -116,22 +116,15 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 
 `http://`でアクセスしても`https://`にリダイレクトされるのを確認しておく。HTTP→HTTPSの自動リダイレクトはCloudflareのSSL/TLS設定でデフォルトで有効になっている。
 
-SSL/TLSの暗号化モードはデフォルトで「Full」になっているはず。「Flexible」モードにすると ブラウザ→Cloudflare間はHTTPSだがCloudflare→オリジン間はHTTPになってしまう。Cloudflare Pagesの場合はCloudflare自身がオリジンなので「Full」で問題ない。
+Cloudflare SSL/TLSのEncryption Modeは「Flexible」と「Full」がある。Cloudflare PagesではデフォルトでHTTPSが有効なので「Full」に設定するのが正しい。「Flexible」のままにしておくとセキュリティ上の問題が出ることがある。SSL/TLSの設定はCloudflareダッシュボードの左メニュー「SSL/TLS」から確認できる。
 
 詳細な確認方法は[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)を参照。
 
-### 6. www付きとなしのリダイレクト設定
+### 6. wwwありURLの設定
 
-`yourdomain.com`でアクセスしても`www.yourdomain.com`でアクセスしても同じページが見えるようにしたい場合、どちらかからどちらかへリダイレクトする設定が必要。
+`www.yourdomain.com`でもアクセスできるようにしたい場合は、Custom domainsに`www.yourdomain.com`も追加する。追加するとCloudflare側でCNAMEレコードが自動設定される。
 
-CloudflareのRedirect Rulesで設定できる。Cloudflare「ルール」→「リダイレクトルール」から設定する。
-
-`www.yourdomain.com`を`yourdomain.com`にリダイレクトする場合：
-- ルールの一致条件：ホスト名が `www.yourdomain.com` と一致する
-- アクション：動的リダイレクト 301
-- 式：`concat("https://yourdomain.com", http.request.uri.path)`
-
-この設定をしないと、wwwあり・なしで別URLとしてGoogleにインデックスされてしまい、正規化の問題が起きることがある。
+ただし`www.yourdomain.com`を追加した場合、どちらを正規URLにするかを決めておく必要がある。Search Consoleにはどちらか一方のURLで登録して、もう一方はリダイレクト設定にするのが一般的。Cloudflare Pages側ではどちらも同じコンテンツを返すだけなので、Cloudflareのリダイレクトルールで`www`なし→`www`あり（またはその逆）を設定する。
 
 ### 7. Search ConsoleをカスタムドメインURLで登録
 
@@ -142,8 +135,8 @@ CloudflareのRedirect Rulesで設定できる。Cloudflare「ルール」→「�
 - ネームサーバーが「Active」になる前にCustom domainsでドメインを設定しようとしても「Pending」のまま何も進まない。「Active後に改めてCustom domainsの設定をする」という2段階になっているとは最初知らなかった。Activeになってからもう一度Pagesの設定に戻る手順がある
 - Xserverはサーバーパネル（`xapanel/server`）とアカウントパネル（`xapanel`）が別々の管理画面で、ネームサーバー設定はアカウントパネルの方にある。「ドメイン管理はサーバーパネルにある」という思い込みで1時間以上無駄にした
 - 「その他のサービスで利用する」に切り替えるとXserver上のWebサイトが表示されなくなる。Xserverでホスティングしている別のサイトがある場合は注意が必要。今回はCloudflare Pagesに完全移行するので問題なかった
-- Activeになった後にCloudflare Pagesのプロジェクトで「Custom domains」からもう一度「Activate domain」を押す必要があった。「Activeになったのになぜ独自ドメインで見えないのか」と30分近く悩んだが、Pages側のCustom domainsの設定が別途必要だった
-- Activeになって独自ドメインでアクセスしたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。このエラーはCloudflareがトラフィックを受け取ったが転送先が未設定の状態で出る。Custom domainsのActivateが終わっていないのが原因だった
+- Activeになった後にCloudflare Pagesのプロジェクトで「Custom domains」からもう一度「Activate domain」を押す必要があった。「Activeになったのになぜ独自ドメインで見えないのか」と30分近く悩んだが、Pages側のCustom domainsの設定が別途必要だった。その間「522 Connection Timed Out」が出続けていた
+- Cloudflare SSL/TLSのEncryption Modeが「Flexible」になっていると、HTTPSが有効のように見えても実際はCloudflare→オリジン間がHTTPになる問題がある。Cloudflare PagesはフルHTTPSなので「Full」に設定しておく
 - `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になる。Search ConsoleにはカスタムドメインのURLで登録する
 - ネームサーバーのアドレスはCloudflareアカウントごとに割り当てが異なる。他の記事に書いてある`ns1.cloudflare.com`などを入力しても動かない。自分のCloudflareダッシュボードに表示されたアドレスを使う必要があった
 - www付きとwwwなしの両方でアクセスできるが、Googleはどちらかを正規URLとして扱う。どちらに統一するかをRedirect Rulesで設定しないと、www有り・無しで別々にインデックスされる可能性がある。設定が完了したら`https://www.yourdomain.com`と`https://yourdomain.com`の両方でアクセスして期待通りにリダイレクトされるか確認した
