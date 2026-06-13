@@ -12,6 +12,8 @@ Astroで作ったブログサイトをCloudflare Pagesで公開しようとし�
 
 「Workers & Pages」を開いたらWorkers用の画面しか見当たらず、Pagesの設定に入る場所が見つけにくくて詰まった。Vercelだと「New Project」を押してGitHubリポジトリを選ぶだけで全部繋がるのに、Cloudflareは同じノリでやったら全然違う画面が出てきた。結果的に最初のデプロイ完了まで3時間近くかかったが、2回目以降は5分でできるようになった。
 
+Vercelとの比較で一番戸惑ったのは、Cloudflare Pagesの「Pages」という概念がWorkers & Pagesという一つの項目にまとまっていることだった。Vercelなら「Deploy」ボタンが一番目立つ場所にあるが、Cloudflareは「Create application」を押してからさらに「Pages」の画面を探す必要があった。
+
 ## 環境
 
 - Windows 11
@@ -38,6 +40,14 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 このエラーが出た時は`sharp`を`dependencies`ではなく`devDependencies`に入れていたのが原因だった。本番ビルドでは`devDependencies`はインストールされないので、使うパッケージは必ず`dependencies`に入れる必要があった。
 
 さらに詰まったのが、Cloudflare PagesのGitHub認証画面で「Only select repositories」を選んでいたこと。後から新しいリポジトリを別に作ってCloudflareに接続しようとしたら、リポジトリの一覧に出てこなかった。「All repositories」に変更するか、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから個別に追加する必要があった。
+
+ビルドログをDL（Download logs）して確認していたら、別のエラーが見つかった。
+
+```
+[@astrojs/sitemap] No `site` option is set in your Astro config.
+```
+
+ローカルでは`site`を設定していなくても動いていたが、Cloudflare上でビルドすると`@astrojs/sitemap`プラグインが`site`の設定を要求してビルドが止まった。ローカルのdevモードとCloudflareのproductionビルドで動きが違う箇所がいくつかあって、ローカルテストだけでは見つけられないバグがあった。
 
 ## 解決策
 
@@ -66,6 +76,14 @@ git push -u origin main
 
 pushする前に`.gitignore`に`node_modules/`と`.env`が含まれているか確認しておく。`node_modules`をpushしてしまうとCloudflareのビルドに時間がかかる上、ローカルとCloudflare側の環境差異で意図しない動作になることがある。
 
+`.gitignore`の確認は以下のコマンドで。
+
+```bash
+cat .gitignore
+```
+
+`node_modules/`、`.env`、`dist/`が含まれていればOK。なければ追加してから`git add .gitignore && git commit -m "add gitignore"`する。
+
 ### 3. Cloudflare PagesにGitHubリポジトリを接続する
 
 1. Cloudflareダッシュボードで「Workers & Pages」を開く
@@ -88,7 +106,7 @@ Build output directory: dist
 
 ### 4. ビルドが失敗した時の対処
 
-初回デプロイでビルドエラーになる場合は、Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を確認する。
+初回デプロイでビルドエラーになる場合は、Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を確認する。ビルドログは量が多い場合は「Download logs」でテキストファイルとして保存してから`Error:`で検索すると原因が見つけやすい。
 
 よくあるエラー：
 
@@ -119,6 +137,13 @@ Build exceeded the time limit of 20 minutes
 
 環境変数を設定したい場合はSettings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
 
+```
+Environment variables:
+NODE_VERSION = 20
+```
+
+Cloudflare PagesはデフォルトのNode.jsバージョンが古めに設定されていることがある。Astroは新しいNode.jsのAPIを使う箇所があるので、`NODE_VERSION`を明示的に指定するのがトラブル防止の基本だった。
+
 ### 5. デプロイ完了後の確認
 
 Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。ブラウザで開いてサイトが表示されれば成功。
@@ -135,7 +160,7 @@ git checkout -b feature/add-new-section
 git push origin feature/add-new-section
 ```
 
-プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。
+プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。プレビュー環境では本番の環境変数は引き継がれないので注意。必要に応じてSettings → Environment variables で「Preview」環境向けの値を別途設定する。
 
 ### 7. 以降のpushの流れ
 
@@ -150,7 +175,7 @@ git push
 
 pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。ビルドが来ない場合は[Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)を確認する。
 
-### 7. 直前のデプロイに戻したい場合
+### 8. 直前のデプロイに戻したい場合
 
 デプロイ後にサイトが壊れた場合、CloudflareのDeploymentsタブから以前のデプロイに戻せる。
 
@@ -158,7 +183,11 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 2. 戻したいデプロイの右側「…」→「Rollback to this deployment」を選択
 3. 確認ダイアログで「Rollback」をクリック
 
-1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。
+1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。Rollbackはデプロイを「特定のビルドの状態に戻す」操作で、GitのコミットやブランチはそのままになるのでGit側の作業は不要だった。
+
+### 9. Freeプランの制限を把握しておく
+
+Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅が上限になっている（2026年5月時点）。ブログサイトを個人で運営する分にはほとんど気にならない上限だが、毎日何度もpushするような開発フローでは消費が早まる。Deploymentsタブの「Build count」でその月の残りビルド回数を確認できる。
 
 ## ハマったポイント
 
@@ -168,7 +197,7 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 - ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが16や18の可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
 - デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
-- `npm run build`で生成される`dist/`フォルダの中身を確認すると、Cloudflareに転送されるファイルを把握できる。`ls dist/`でファイル構成を確認してから、意図しないファイルが含まれていないかチェックする習慣が付いた
+- ローカルのdevモードでは正常に動いていても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされてもビルド時に必須になる。全てのAstroプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
 
 ## 関連記事
 
