@@ -62,12 +62,21 @@ git diff HEAD~1  # 消える変更を確認してから
 git reset --hard HEAD~1
 ```
 
+実行後は`git log --oneline`でコミット履歴を確認して、意図した状態になっているか確認する。
+
 ### 3. commitメッセージだけ変更したい
 
 まだpushしていない場合のみ使う。pushした後に使うとforce pushが必要になる。
 
 ```bash
 git commit --amend -m "新しいメッセージ"
+```
+
+ファイルの変更も含めてamendしたい場合は、先にファイルをステージしてからamendする。
+
+```bash
+git add 修正したいファイル
+git commit --amend --no-edit  # メッセージはそのまま、内容だけ修正
 ```
 
 ### 4. pushした後に取り消したい場合
@@ -79,6 +88,13 @@ git revert HEAD
 ```
 
 エディタが開いてコミットメッセージを書く画面になる（Vimが開く場合は`:wq`で保存して閉じる）。取り消し用のコミットが作られたあと`git push`すれば完了。
+
+エディタを開かずにデフォルトメッセージでコミットしたい場合：
+
+```bash
+git revert HEAD --no-edit
+git push
+```
 
 `.env`を含むコミットをpushしてしまった場合は、`git revert`だけでは不十分。GitHubのコミット履歴にはまだ`.env`の内容が残っているので、**パスワードや秘密鍵はすぐに変更・再発行するのが先決**。その後、履歴から完全に削除するには`git filter-repo`コマンドを使う。
 
@@ -104,6 +120,20 @@ git reset --soft HEAD~3  # 3つ前まで取り消す場合
 ```
 
 コミット履歴の確認方法は[git logでコミット履歴を確認する方法](/posts/git-log-history)に詳しくまとめた。
+
+特定のコミットのハッシュで指定することもできる。
+
+```bash
+git log --oneline
+# d4e5f6g feature: 追加機能
+# a1b2c3d fix: バグ修正
+# 9z8y7x5 initial commit
+
+# a1b2c3dのコミットだけを取り消したい場合
+git revert a1b2c3d
+```
+
+この方法は途中のコミットだけを「なかったことにする」のに使える。`reset`と違って他のコミットは保持されたまま。
 
 ### 6. --hardで消してしまった変更を復元する
 

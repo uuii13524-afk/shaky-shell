@@ -36,6 +36,8 @@ A site URL is required to generate a sitemap.
 
 また、Search Consoleにサイトマップを送信する時に`sitemap.xml`と入力したら「フェッチできませんでした」というエラーが出た。`sitemap-index.xml`と`sitemap.xml`は別のファイルで、Astroが生成するのは`sitemap-index.xml`の方だとわかるまで詰まった。
 
+`@astrojs/sitemap`をインストールするだけでサイトマップが生成されると思っていたのも間違いだった。パッケージのインストール後に`astro.config.mjs`の`integrations`配列に追加する設定が別途必要で、この設定を書き忘れると`npm install`後にビルドしても`sitemap-index.xml`は一切生成されない。30分以上「なぜ生成されないのか」を調べてようやく気づいた。
+
 ## 解決策
 
 ### 1. sitemapプラグインをインストール
@@ -86,6 +88,14 @@ head -20 dist/sitemap-0.xml
 ```
 
 URLがlocalhostになっていないか、記事のURLが含まれているか、この2点を必ず確認しておく。
+
+xmllintが使える環境であればサイトマップのXMLが正しいかバリデーションもできる。
+
+```bash
+xmllint --noout dist/sitemap-0.xml
+```
+
+エラーが出なければXMLの構造は正しい。Googleへの送信前に一応確認しておくと安心だった。
 
 ### 4. robots.txtをpublicフォルダに設置
 

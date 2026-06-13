@@ -85,6 +85,14 @@ where npm
 
 パスが出力されれば通っている。何も出力されない場合はPATHが通っていない。
 
+PowerShellの場合は`Get-Command npm`で確認できる。
+
+```powershell
+Get-Command npm
+```
+
+`Source`の列にnpmのパスが表示されれば通っている。「コマンド 'npm' が見つかりません」というエラーが出る場合はPATHが通っていない。
+
 ### 原因3：PowerShellのスクリプト実行ポリシーが制限されている
 
 VS CodeのターミナルでPowerShellを使っている時に出るエラー。コマンドプロンプトでは出ないが、PowerShellでは`.ps1`スクリプトの実行が制限されていることがある。
@@ -103,7 +111,7 @@ Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 Get-ExecutionPolicy
 ```
 
-`Restricted`や`AllSigned`が返ってきた場合は上記のコマンドで変更する。
+`Restricted`や`AllSigned`が返ってきた場合は上記のコマンドで変更する。`RemoteSigned`が返ってくれば問題ない。
 
 コマンドプロンプトを使う場合はこのエラーは出ないので、VS CodeのターミナルをPowerShellからコマンドプロンプトに切り替えるのも手。VS Codeのターミナル右上の「v」ボタンから「Command Prompt」を選択できる。
 
@@ -140,6 +148,7 @@ Windowsでnvmを使う場合は`nvm-windows`（`github.com/coreybutler/nvm-windo
 - Microsoft Storeからインストールしたnode.exeが優先されてしまい、`nodejs.org`からインストールした方が使われない状態になっていたことがあった。`where node`で複数のパスが返ってくる場合はStore版を削除するか、Windowsの「アプリの実行エイリアス」でStoreのNode.jsを無効にする
 - nvmを使ってNode.jsのバージョンを切り替えた後に`npm`が使えなくなることがある。`nvm use 20`で明示的にバージョンを指定すると直る。nvmの使い方は[Node.jsのバージョンをnvmで管理する方法](/posts/node-version-management-nvm)を参照
 - `where npm`コマンドでnpmのパスを確認できる。何も出力されない場合はPATHが通っていない。パスが出力される場合は実行ポリシーや権限の問題を疑う。PowerShellでは`Get-Command npm`でも確認できる
+- Node.jsのインストール時に「Add to PATH」オプションをオフにしたまま進めてしまうとPATHが通らない。チェックを外したまま進んでしまった場合は、アンインストールしてから再インストールするのが一番速い。手動でPATHを追加するのは間違えやすい
 
 ## 関連記事
 

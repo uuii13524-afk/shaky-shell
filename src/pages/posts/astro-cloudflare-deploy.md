@@ -150,6 +150,16 @@ git push
 
 pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。ビルドが来ない場合は[Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)を確認する。
 
+### 7. 直前のデプロイに戻したい場合
+
+デプロイ後にサイトが壊れた場合、CloudflareのDeploymentsタブから以前のデプロイに戻せる。
+
+1. Deploymentsタブを開く
+2. 戻したいデプロイの右側「…」→「Rollback to this deployment」を選択
+3. 確認ダイアログで「Rollback」をクリック
+
+1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。
+
 ## ハマったポイント
 
 - 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。ページの上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計だった
