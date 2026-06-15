@@ -15,7 +15,9 @@ This project is disconnected from your Git account.
 This may cause deployments to fail.
 ```
 
-という黄色いバナーがプロジェクトのトップに表示されていた。
+という黄色いバナーがプロジェクトのトップに表示されていた。「May cause」と書いてあるので軽い警告だと思ってしばらく無視していたが、実際には完全にデプロイが止まっていた。
+
+自動デプロイが止まる原因は複数あって、「ビルドが来ない」「ビルドは来るが失敗する」「デプロイは成功するがサイトに反映されない」の3パターンに分けて考えると原因を絞り込みやすかった。最初にこの分類を知っていれば、診断にかかった1時間が半分以下で済んだと思う。
 
 ## 環境
 
@@ -28,19 +30,31 @@ This may cause deployments to fail.
 
 まず「何か変なコードを入れたか？」と思ってgit diffで確認したが、問題になりそうなコードはなかった。ローカルで`npm run build`したら正常に通った。コードの問題ではないとわかったが、では何が原因なのか見当がつかなかった。
 
-次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが全く来ていなかった。ビルドエラーがあれば原因を探せるが、ビルドが始まっていない状態ではどこを見ればいいかわからなかった。
+次にCloudflareのDeploymentsタブを全部見直したが、「Failed」のビルドがあるわけではなく、そもそも新しいビルドが全く来ていなかった。ビルドエラーがあれば原因を探せるが、ビルドが始まっていない状態ではどこを見ればいいかわからなかった。「ビルドが失敗している」と「ビルド自体が来ていない」は全く別の問題で、診断の入口が変わってくる。
 
 「もう一度pushすれば直るかも」と思って`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを全く検知していなかった。
 
-GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryに「Failed」の記録があった。HTTPステータスが`401 Unauthorized`だった。これはCloudflareとGitHubの認証が切れているサインだとわかった。
+GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryを確認できた。直近のdeliveryを開いてレスポンスを見たら、HTTPステータスが`401 Unauthorized`になっていた。
+
+```
+POST https://api.cloudflare.com/client/v4/pages/webhooks/deploy/...
+Response: 401
+{"result":null,"success":false,"errors":[{"code":10000,"message":"Authentication error"}],"messages":[]}
+```
+
+これはCloudflareとGitHubの認証が切れているサインだとわかった。CloudflareがGitHubのWebhookを受け取り拒否している状態で、OAuthトークンの有効期限が切れていた。
+
+別のケースでは、ビルドは来ているのに「Deploymentsタブに新しいビルドは来るが、本番サイトが更新されない」という状況も経験した。原因を調べたら、本番ブランチの設定が`main`のままなのに、作業していたブランチが`master`だったことが判明した。Cloudflareは指定されたブランチのpushしかデプロイのトリガーにしないので、ブランチ名が合っていないとビルド自体が来ない。
+
+また別の機会に、ビルドは来るし「Success」になるのにサイトが更新されないという現象もあった。ブラウザのキャッシュではなく、CloudflareのCDNキャッシュが古いものを返し続けていたのが原因だった。CloudflareのキャッシュはDeploymentsが成功してもすぐには更新されないことがあって、「Purge Cache」を手動で実行したら解決した。Cloudflareダッシュボードの「Caching」→「Configuration」→「Purge Everything」で全キャッシュを削除できる。
 
 ## 解決策
 
-原因は3パターンある。上から順に確認していくのが早い。
+原因は3パターンある。「Deploymentsタブにビルドが来ているか来ていないか」を最初に確認して、上から順に確認していくのが早い。
 
 ### 原因1：CloudflareとGitHubの接続が切れている
 
-これが一番多い。プロジェクトのトップに黄色いバナーが出ている場合はほぼこれ。
+**Deploymentsタブにビルドが全く来ていない場合はほぼこれ。** プロジェクトのトップに黄色いバナーが出ている場合も同様。
 
 Cloudflareダッシュボードでプロジェクトを開き、「Settings」タブ（上部メニュー）→「Git repository」セクションの「Manage」をクリックする。GitHubのOAuth認証画面が開くのでログインしてアクセスを許可する。
 
@@ -51,7 +65,11 @@ git commit --allow-empty -m "force deploy"
 git push
 ```
 
-これでDeploymentsタブにビルドが来て解決した。
+これでDeploymentsタブにビルドが来て解決した。GitHubのSettings → Applications → Authorized OAuth Appsも確認して、Cloudflareのエントリが「Revoked」になっていないか確認しておく。
+
+再認証後にDeploymentsタブでビルドが来ない場合は、GitHubのWebhooksページで「Recent Deliveries」の最新エントリを確認する。`200`が返っているか確認して、`401`や`403`が返っている場合はまだ認証が通っていない。
+
+詳細な切断・再接続の手順は[Cloudflare PagesがGitHubと切断された時の対処法](/posts/cloudflare-github-disconnect)にまとめた。
 
 ### 原因2：監視ブランチの設定が合っていない
 
@@ -70,7 +88,17 @@ git merge 作業ブランチ名
 git push origin main
 ```
 
-または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。
+または、Cloudflare PagesのSettings → Buildsで「Production branch」の設定を確認して、実際にpushしているブランチ名と一致しているか確認する。`main`でpushしているのに`master`と設定されていると動かない。
+
+リポジトリのデフォルトブランチ名はGitHubのSettings → Default branchから確認できる。ローカルとCloudflareとGitHubのすべてで同じブランチ名になっているか確認するのが確実。
+
+ブランチ名の確認は以下でも確認できる。
+
+```bash
+git remote show origin
+```
+
+`HEAD branch:`の行に表示されるブランチ名がリモートのデフォルトブランチ名。これがCloudflareの設定と合っているかを見る。
 
 ### 原因3：ビルドエラーが出ている
 
@@ -92,16 +120,57 @@ Error: Build failed with exit code 1
 × Rendering /posts/xxx...
   Error: Cannot read properties of undefined
 ```
-→ Astroのレンダリングエラー。該当ページのMarkdownやコンポーネントの記述ミスが原因のことが多い。ローカルで`npm run build`して同じエラーが再現するか確認する。
+→ Astroのレンダリングエラー。該当ページのMarkdownやコンポーネントの記述ミスが原因のことが多い。ローカルで`npm run build`して同じエラーが再現するか確認する。ローカルで再現すれば原因のファイルが特定できる。
+
+```
+Build exceeded the time limit of 20 minutes
+```
+→ ビルド時間超過。画像の最適化処理や大量ページのビルドで発生することがある。`npm run build`のローカル実行時間を計測して、異常に時間がかかるページを探す。
+
+```
+error Failed to load config from /opt/buildhome/repo/vite.config.ts
+```
+→ Viteの設定ファイルのパスが解決できない。Cloudflare Pagesのビルド環境でのパス解決が問題になっていることがある。`vite.config.ts`のalias設定を確認する。
+
+### ビルドログの見方
+
+Deploymentsタブ→対象ビルドのリンクをクリック→「Build logs」タブを開くと、ビルドの全ログが確認できる。
+
+```
+Installing dependencies...
+npm warn deprecated xxx
+...
+✓ Completed
+Building Astro site...
+  → 26 pages built in 3.21s
+✓ Build completed in 4.5s
+```
+
+この形で「Build completed」が出れば成功。途中でエラーが出ている行を探すと原因を特定しやすい。ビルドログは下から上に読むと最終的なエラーメッセージが先に見つかることが多い。
+
+ビルドが途中で止まってログが「Timed out waiting for build to start」になっている場合は、Cloudflare側のビルドキューが詰まっていることがある。数分後に「Retry deployment」ボタンで再試行してみる。
+
+ビルドログが大量に出る場合は「Download logs」でローカルに落としてテキストエディタで検索するのが速かった。ブラウザでスクロールしながら探すより`Error:`で全文検索した方が圧倒的に早い。
+
+### CDNキャッシュの問題
+
+ビルドが「Success」でも本番サイトが更新されていないように見える場合は、CDNキャッシュが残っていることがある。
+
+- Shift+Reload（ブラウザのハードリロード）でブラウザキャッシュをクリアして確認
+- それでも変わらなければCloudflareのキャッシュを削除する
+
+Cloudflareダッシュボードでドメインを選択→「Caching」→「Configuration」→「Purge Cache」→「Purge Everything」でCDNキャッシュを全削除できる。Purge後は次のアクセス時にオリジン（Cloudflare Pagesのサーバー）から新しいコンテンツを取得する。
 
 ## ハマったポイント
 
 - 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
-- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった
+- ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった。「Failed」が来ていれば原因3、何も来ていなければ原因1か2
 - Settings → Git repositoryの「Manage」ボタンは分かりにくい場所にある。Settingsタブを開いてかなり下にスクロールした先にある。プロジェクトのトップ画面では見えない
-- 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで時間がかかった
-- GitHubのSettings → Applications → Authorized OAuth Appsを確認したらCloudflareのアクセスが「Revoked」になっていた。GitHub側でも確認できるので、Cloudflare側だけでなくGitHub側のOAuth設定も確認する
-- デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがある
+- 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
+- GitHubのWebhookのdeliveryログを見ると、Cloudflareへの通知が成功しているか失敗しているかがわかる。Settings → Webhooksから各deliveryのレスポンスを確認できる。`401`が出ていたらOAuth切れ、`200`が出ていたらCloudflare側のビルド設定の問題
+- デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
+- `master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らなかったことがあった。ブランチ名の不一致は気づきにくいので、接続時に設定したブランチ名を定期的に確認しておくといい
+- デプロイ「Success」なのにサイトが更新されない場合はCDNキャッシュが原因のことがある。ブラウザのハードリロードで変わらなければCloudflareのPurge Cacheで解決した。「ビルドはできているのに反映されない」という現象はキャッシュを真っ先に疑う
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 
