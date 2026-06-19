@@ -19,6 +19,8 @@ This may cause deployments to fail.
 
 自動デプロイが止まる原因は複数あって、「ビルドが来ない」「ビルドは来るが失敗する」「デプロイは成功するがサイトに反映されない」の3パターンに分けて考えると原因を絞り込みやすかった。最初にこの分類を知っていれば、診断にかかった1時間が半分以下で済んだと思う。
 
+なお、「自動デプロイが動かない」という問題にはDeploymentsタブの状態によって2つの全然違う原因がある。「Deploymentsタブが静かなまま何もない」状態と「DeploymentsタブにビルドはあるがFailed」状態では、見るべき場所がまったく違う。最初にDeploymentsタブを開いて「ビルドが来ているかどうか」だけ確認する一手間が、診断時間を大幅に短縮する。
+
 ## 環境
 
 - Cloudflare Pages（2026年5月時点）
@@ -47,6 +49,8 @@ Response: 401
 別のケースでは、ビルドは来ているのに「Deploymentsタブに新しいビルドは来るが、本番サイトが更新されない」という状況も経験した。原因を調べたら、本番ブランチの設定が`main`のままなのに、作業していたブランチが`master`だったことが判明した。Cloudflareは指定されたブランチのpushしかデプロイのトリガーにしないので、ブランチ名が合っていないとビルド自体が来ない。
 
 また別の機会に、ビルドは来るし「Success」になるのにサイトが更新されないという現象もあった。ブラウザのキャッシュではなく、CloudflareのCDNキャッシュが古いものを返し続けていたのが原因だった。CloudflareのキャッシュはDeploymentsが成功してもすぐには更新されないことがあって、「Purge Cache」を手動で実行したら解決した。Cloudflareダッシュボードの「Caching」→「Configuration」→「Purge Everything」で全キャッシュを削除できる。
+
+さらに、Cloudflare PagesがGitHubのWebhookを受け付けているかを確認する前に、Cloudflareのステータスページ（`cloudflarestatus.com`）でサービス障害がないかも確認した。稀にCloudflare Pages自体が一時的な障害中のことがあり、その場合はしばらく待つだけで解決する。自分の場合は障害ではなかったが、診断の最初に確認しておくことで無駄な作業を省けた。
 
 ## 解決策
 
@@ -161,6 +165,14 @@ Building Astro site...
 
 Cloudflareダッシュボードでドメインを選択→「Caching」→「Configuration」→「Purge Cache」→「Purge Everything」でCDNキャッシュを全削除できる。Purge後は次のアクセス時にオリジン（Cloudflare Pagesのサーバー）から新しいコンテンツを取得する。
 
+### 問題が再発しないようにする
+
+自動デプロイが止まるのは一度経験すると「また止まってないか」と不安になる。以下の対策をとっておくと早期発見できる。
+
+Cloudflare PagesのNotifications機能でビルド失敗のメール通知を設定する。「Workers & Pages」→プロジェクト→「Settings」→「Notifications」で設定できる。ビルドが失敗した時に即座にメールが届くので、長時間気づかずに放置する状況を防げる。
+
+GitHubにpushした後は毎回Deploymentsタブを確認する習慣をつける。慣れてくると「2分でビルドが来るはず」という感覚が身につくので、来ない場合にすぐ気づけるようになる。
+
 ## ハマったポイント
 
 - 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
@@ -171,6 +183,7 @@ Cloudflareダッシュボードでドメインを選択→「Caching」→「Con
 - デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
 - `master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らなかったことがあった。ブランチ名の不一致は気づきにくいので、接続時に設定したブランチ名を定期的に確認しておくといい
 - デプロイ「Success」なのにサイトが更新されない場合はCDNキャッシュが原因のことがある。ブラウザのハードリロードで変わらなければCloudflareのPurge Cacheで解決した。「ビルドはできているのに反映されない」という現象はキャッシュを真っ先に疑う
+- Cloudflare自体のサービス障害が原因のことも稀にある。`cloudflarestatus.com`を最初に確認すると、自分のアカウントの問題かCloudflare全体の問題かをすぐに切り分けられる。障害中であれば自分で何をしても解決しないので待つだけでいい
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 

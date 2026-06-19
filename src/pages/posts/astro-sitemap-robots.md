@@ -14,6 +14,8 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 
 プラグインをインストールして設定ファイルに2行追加するだけで完結するはずが、実際には「siteプロパティ未設定エラー」「sitemap-index.xmlとsitemap.xmlの混乱」「robots.txtの設置場所間違い」と3つのハマりポイントを踏んで、完成まで2時間かかった。
 
+手動でXMLを書いていた時期が3ヶ月ほどあった。記事を追加するたびに`public/sitemap.xml`を開いて`<url>`を1行追加する作業で、30記事を超えてから「これは続かない」と気づいて自動生成に切り替えた。自動生成への切り替えは正解で、記事を追加してpushするだけで自動的にサイトマップが更新されるようになった。
+
 ## 環境
 
 - Astro 5.2.3
@@ -41,6 +43,8 @@ A site URL is required to generate a sitemap.
 `@astrojs/sitemap`をインストールするだけでサイトマップが生成されると思っていたのも間違いだった。パッケージのインストール後に`astro.config.mjs`の`integrations`配列に追加する設定が別途必要で、この設定を書き忘れると`npm install`後にビルドしても`sitemap-index.xml`は一切生成されない。30分以上「なぜ生成されないのか」を調べてようやく気づいた。
 
 ビルドした後に`dist/sitemap-index.xml`が生成されているかを確認せずにSearch Consoleに送信してしまって、「ステータス：読み取り不可」というエラーが出たことも。「送信したのになぜ読めないのか」と10分悩んだが、そもそもファイルが存在していなかった。作業前に`ls dist/sitemap*.xml`で確認する癖をつければ防げた。
+
+`astro.config.mjs`で`site`プロパティを設定した後、ローカルの`npm run dev`でも確認しようとしたが、devモードではサイトマップは生成されないことに気づいた。サイトマップは`npm run build`でビルドした時にしか生成されないので、確認は必ず`npm run build`後に`dist/`を見る必要がある。「devで確認できない」という事実を知らずに「なぜdevで見えないのか」と悩んだ時間があった。
 
 ## 解決策
 
@@ -130,7 +134,30 @@ cat dist/robots.txt
 
 noindexにしたいページがある場合は`robots.txt`ではなく各ページの`<meta name="robots" content="noindex">`で制御する。`robots.txt`の`Disallow`はクロールをブロックするものであって、インデックスを制御するものではない。この違いを最初に理解しておかないと、Search Consoleのカバレッジレポートで「除外済み」になる原因を調べて時間を無駄にする。
 
-### 5. 両方をpushしてデプロイ
+### 5. サイトマップの優先度を設定する（応用）
+
+`@astrojs/sitemap`は`priority`と`changefreq`の設定もできる。デフォルトでは`priority`は設定されない。Googleの公式見解では`priority`や`changefreq`はほとんど無視されているが、設定したい場合は`serialize`オプションを使う。
+
+```js
+integrations: [
+  sitemap({
+    serialize(item) {
+      if (/posts/.test(item.url)) {
+        return {
+          ...item,
+          changefreq: 'monthly',
+          lastmod: new Date(),
+        };
+      }
+      return item;
+    },
+  }),
+],
+```
+
+記事ページ（`/posts/`を含むURL）だけ`changefreq`を設定するような使い方ができる。`lastmod`に実際の更新日時を入れる場合は、frontmatterの`date`を読み込んで設定するとより正確になる。
+
+### 6. 両方をpushしてデプロイ
 
 ```bash
 git add astro.config.mjs public/robots.txt
@@ -143,7 +170,7 @@ git push
 - `https://yourdomain.com/sitemap-index.xml` → 全記事のURLが含まれているか確認
 - `https://yourdomain.com/robots.txt` → Sitemapの行のURLが正しいか確認
 
-### 6. Google Search Consoleでサイトマップを送信
+### 7. Google Search Consoleでサイトマップを送信
 
 左メニュー「サイトマップ」→ URLの入力欄に `sitemap-index.xml` と入力して「送信」をクリックする。
 
@@ -151,7 +178,7 @@ git push
 
 「読み取り成功」と表示された後も「検出されたURL：0」になることがある。Search Consoleがサイトマップの中身を処理するまで数日かかるので、送信から1〜3日後に再確認する。
 
-Search Consoleへの登録がまだの場合は[Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順](/posts/google-search-console-html-verification)から先に設定する。
+Search ConsoleへのHTMLファイル認証登録がまだの場合は[Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順](/posts/google-search-console-html-verification)から先に設定する。
 
 サイトマップ送信後の数日間は、カバレッジレポートの「有効」のURL数がゼロのままになることが多い。これは正常な動作で、Googleがサイトマップを処理してURLをクロールキューに入れるまでに時間がかかるため。1週間待ってもゼロのままなら、サイトマップのURLが正しいか、サイトがGooglebotからアクセスできるかを確認する。
 
@@ -165,6 +192,7 @@ Search Consoleへの登録がまだの場合は[Google Search ConsoleのHTMLフ�
 - プラグインをインストールするだけではサイトマップは生成されない。`astro.config.mjs`の`integrations`に追加するのを忘れると、ビルドしても`sitemap-index.xml`が生成されない。インストール後に設定ファイルへの追記が必要だった。「インストールは完了しているのになぜ生成されないのか」と30分以上調べた
 - robots.txtの`Sitemap:`行に`*.pages.dev`のURLを書いてしまっていた。カスタムドメインを設定した後もrobots.txtを更新し忘れていて、Googlebot向けのサイトマップURLが`*.pages.dev`のままになっていた。カスタムドメイン設定後は必ずrobots.txtの内容も更新する
 - `dist/`ディレクトリの中身を確認せずにSearch Consoleに送信してしまうと、存在しないファイルを送信することになる。`npm run build && ls dist/sitemap*.xml`でファイル存在確認してからSearch Consoleに送信する順番を守るだけで余分なデバッグ時間がなくなった
+- devモードではサイトマップが生成されない。`npm run dev`でサイトを確認しながら「なぜ`/sitemap-index.xml`が404になるのか」と1時間悩んだが、サイトマップはビルド時にのみ生成される。`npm run build && npm run preview`の組み合わせで確認する必要があった
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 
