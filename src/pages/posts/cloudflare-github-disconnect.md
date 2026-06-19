@@ -56,6 +56,8 @@ GitHubのSettings → Applications → Authorized OAuth Apps でCloudflareのエ
 
 「GitHub Appsと何が違うのか」も気になって調べた。Cloudflare PagesはOAuth Appを使って接続しているので、GitHubのSettings → Applicationsの「Authorized OAuth Apps」タブを確認する。「Installed GitHub Apps」タブではなく「Authorized OAuth Apps」の方。両方存在していてどちらを見ればいいかわからず混乱したが、Cloudflare Pagesの接続はOAuth App側にある。「Installed GitHub Apps」を見てCloudflareのエントリがあるから「大丈夫だ」と思ったが、それはGitHub Apps用のリストで、OAuth Appsとは別物だった。この混乱に30分以上取られた。
 
+Organizationリポジトリを使っている場合、GitHubのOrganization設定でThird-party access policyの確認も試みた。OrganizationのSettings → Third-party Access → OAuth Appsに移動すると、Cloudflare Pagesのエントリが「Pending approval」になっていた。これを見逃していたのが長時間ハマった原因の一つだった。再認証しようとOAuth認証画面を開いたら「Authorize」ボタンではなく「Request approval from administrators」というボタンだけが表示されていて、何回押してもOrganizationオーナーに承認依頼が飛ぶだけでAuthorizationまで進めなかった。この状態ではOrganizationのThird-party access policyが「No restrictions」または「Allowed」に設定されていないと個人ではどうしようもない。
+
 もう一つ試したのが、Cloudflareのプロジェクト設定をリロードしながら「Build & deployments」の設定を眺めることだった。Branchの設定が`main`になっていて、GitHubのデフォルトブランチも`main`なので設定のズレではないとここで確認した。接続の問題なのかビルド設定の問題なのかを切り分ける意味でも、Settingsタブの確認は早めにやっておくべきだった。
 
 Cloudflareのダッシュボードには「Workers & Pages」という項目があって、WorkersとPagesが同じメニューにまとまっている。「Workers」の設定を間違えて開いてしまって、そこでGitHub連携の設定を探してしまったことがあった。WorkersにはGitHubとの接続設定がないので、いくら探しても見つからなかった。Pagesの設定は「Workers & Pages」→「Pages」タブ側で確認する。
@@ -99,13 +101,17 @@ Redeliverを実行した後は、GitHubのWebhookのdelivery一覧に新しい�
 
 ### 4. 再認証できない場合の対処
 
-「Manage」を押しても認証画面が開かない、または認証後にまた同じバナーが出る場合は、プロジェクトのGitHubとの接続を一度完全に切断して再設定する方法がある。
+「Manage」を押しても認証画面が開かない、または認証後にまた同じバナーが出る場合は、CloudflareダッシュボードのAccountsページからGitHub連携を完全に削除して再接続する方法がある。
 
-Cloudflare PagesのSettings → Git repositoryで「Disconnect Git repository」を探す。切断後に「Connect to Git」から改めてGitHubのリポジトリを選択して接続し直す。この方法は接続設定が完全にリセットされるので確実に直る。ただし本番ブランチの設定やPreview branchの設定なども再設定が必要になる。
+具体的な手順として、まずCloudflareダッシュボードの左サイドバーから「Workers & Pages」を開き、対象プロジェクトに入ったら上部の「Settings」タブをクリックする。ページ内の「Git repository」セクションまでスクロールして「Disconnect Git repository」ボタンを探す。切断の確認ダイアログが出るので「Disconnect」で実行する。
+
+切断後はプロジェクトページの「Connect to Git」ボタンが表示されるので、そこからGitHubのOAuth認証をやり直し、リポジトリを再選択して接続し直す。この方法は接続設定が完全にリセットされるので確実に直る。ただし本番ブランチの設定やPreview branchの設定なども再設定が必要になる。
 
 切断後の再接続時、GitHubのリポジトリ一覧にプロジェクトが表示されない場合は、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから対象リポジトリへのアクセスを許可する。
 
-GitHubのOrganizationリポジトリを使っている場合は、OrganizationのSettings → Third-party Access → OAuth AppsでCloudflare Pagesへのアクセスが承認されているかも確認する。個人リポジトリと違い、Organizationオーナーの承認が別途必要なケースがある。承認されていない場合、再認証しようとしてもOAuth画面に「Request approval」というボタンが出てきて、Authorizeまで進めない。Organizationのオーナー権限を持つアカウントで承認するか、オーナーに依頼する必要がある。
+GitHubのOrganizationリポジトリを使っている場合、OrganizationのSettings → Third-party Access → OAuth AppsでCloudflare Pagesへのアクセスが承認されているかも確認する。个人リポジトリと違い、Organizationオーナーの承認が別途必要なケースがある。承認されていない場合、再認証しようとしてもOAuth画面に「Request approval from administrators」というボタンが出てきて、Authorizeまで進めない。
+
+**Organizationの管理者でない場合の対処方法**としては、まず自分がOrganizationのオーナーでないことを確認したうえで、OrganizationオーナーにSlackやメールで以下を依頼する。「GitHubのOrganization Settings → Third-party Access → OAuth Apps の画面で、Cloudflare Pagesのエントリを "Approved" にしてほしい」という内容を伝えればいい。オーナーが承認した後に改めてCloudflareの「Manage」から再認証を試みると、今度は「Authorize」ボタンが表示されて先に進める。承認前に何度Authorizeを試みても「Request approval」が出るだけで状況は変わらない。
 
 Cloudflare PagesのプロジェクトをOrganizationリポジトリに接続している場合、個人アカウントのOAuth認証だけでは不十分なことがある。Organization側の設定を明示的に確認する手順を含めてから再認証すると確実だった。
 
@@ -138,7 +144,7 @@ Cloudflareのダッシュボードに「Notifications」という機能があっ
 - GitHubのSettings → Applications → Authorized OAuth Appsでもアクセス状況を確認できる。ここでCloudflareのエントリが「Revoked」になっていたら再認証が必要なサインだった
 - CloudflareのAudit Logに切断が発生した日時の記録があった。自分の場合はGitHubの2段階認証を変更した日と一致していて、原因の特定に役立った。「いつから動かなくなったか」がわからない時にAudit Logを確認すると手がかりになる
 - 長期間放置したプロジェクトで起きやすい。月に1回以上触っているプロジェクトではほとんど起きないが、数ヶ月単位で放置するとOAuthトークンが期限切れになることがある。GitHubのセキュリティ設定変更後にも起きる
-- Preview Deploymentsのビルドも同様に止まる。mainブランチ以外のブランチへのpushもCloudflareが検知しなくなるので、ブランチ作業中でも同じ症状が出る
+- Preview Deploymentsのビルドも同様に止まる。mainブランチ以外のブランチへのpushもCloudflareが検知しなくなるので、ブランチ作業中でも同じ症状が出る。「Production（本番）のデプロイは止まっているがPreviewは生きているのでは」と思って最初Productionしか確認していなかったが、Build & DeploymentsのPreviewタブも確認したら両方完全に止まっていた
 - OrganizationのリポジトリをCloudflareに接続している場合は、個人アカウントの再認証だけでは足りないことがある。Organization側のThird-party Access設定でCloudflare Pagesのアクセスが承認済みかを別途確認する必要があった。この確認を怠ると「Authorizeしたはずなのにまだ切断されている」という状況が続く
 - Workers側の設定画面とPages側の設定画面を間違えてしまい、GitHub連携の設定がWorkers側には存在しないことに気づくまで時間がかかった。「Workers & Pages」のメニューからPages側のプロジェクトに入り直す必要があった
 
