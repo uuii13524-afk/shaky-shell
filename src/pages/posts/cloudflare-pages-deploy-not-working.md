@@ -21,6 +21,8 @@ This may cause deployments to fail.
 
 なお、「自動デプロイが動かない」という問題にはDeploymentsタブの状態によって2つの全然違う原因がある。「Deploymentsタブが静かなまま何もない」状態と「DeploymentsタブにビルドはあるがFailed」状態では、見るべき場所がまったく違う。最初にDeploymentsタブを開いて「ビルドが来ているかどうか」だけ確認する一手間が、診断時間を大幅に短縮する。
 
+自動デプロイが1時間以上反応しない場合、まず疑うべきは「GitHubとCloudflareのOAuth接続が切れていないか」だった。直感的には「ビルド設定が壊れた」と考えがちだが、実際には接続切断が一番多い原因だった。GitHubにpushできているのにCloudflareが反応しない場合は、接続の問題を最初に調べる方が結果的に速い。
+
 ## 環境
 
 - Cloudflare Pages（2026年5月時点）
@@ -36,6 +38,8 @@ This may cause deployments to fail.
 
 「もう一度pushすれば直るかも」と思って`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを全く検知していなかった。
 
+Cloudflareのプロジェクト設定に問題があるかと思って「Settings」タブを全部確認した。「Build & deployments」の設定でProduction branchが`main`になっていてGitHubのデフォルトブランチも`main`だったので、ブランチ設定のズレではないとわかった。Environment variablesの設定も問題なかった。設定画面を隅々まで確認して「設定ファイルは全部正しい」とわかった後で「じゃあなぜビルドが来ないのか」という状況だった。
+
 GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryを確認できた。直近のdeliveryを開いてレスポンスを見たら、HTTPステータスが`401 Unauthorized`になっていた。
 
 ```
@@ -47,6 +51,8 @@ Response: 401
 これはCloudflareとGitHubの認証が切れているサインだとわかった。CloudflareがGitHubのWebhookを受け取り拒否している状態で、OAuthトークンの有効期限が切れていた。
 
 別のケースでは、ビルドは来ているのに「Deploymentsタブに新しいビルドは来るが、本番サイトが更新されない」という状況も経験した。原因を調べたら、本番ブランチの設定が`main`のままなのに、作業していたブランチが`master`だったことが判明した。Cloudflareは指定されたブランチのpushしかデプロイのトリガーにしないので、ブランチ名が合っていないとビルド自体が来ない。
+
+git logでコミット履歴を確認したら`master`ブランチにはpushできていたが、Cloudflareの設定が`main`を監視しているため完全に無視されていた。`git branch`でカレントブランチを確認したら確かに`master`だった。`git checkout main`と`git merge master`でmainにマージしてから`git push origin main`したらDeploymentsタブにビルドが来た。ブランチ名の不一致というシンプルな原因だったが、気づくまでに30分かかった。
 
 また別の機会に、ビルドは来るし「Success」になるのにサイトが更新されないという現象もあった。ブラウザのキャッシュではなく、CloudflareのCDNキャッシュが古いものを返し続けていたのが原因だった。CloudflareのキャッシュはDeploymentsが成功してもすぐには更新されないことがあって、「Purge Cache」を手動で実行したら解決した。Cloudflareダッシュボードの「Caching」→「Configuration」→「Purge Everything」で全キャッシュを削除できる。
 
@@ -72,6 +78,8 @@ git push
 これでDeploymentsタブにビルドが来て解決した。GitHubのSettings → Applications → Authorized OAuth Appsも確認して、Cloudflareのエントリが「Revoked」になっていないか確認しておく。
 
 再認証後にDeploymentsタブでビルドが来ない場合は、GitHubのWebhooksページで「Recent Deliveries」の最新エントリを確認する。`200`が返っているか確認して、`401`や`403`が返っている場合はまだ認証が通っていない。
+
+GitHubのWebhook設定画面の「Ping」ボタンを押して、その場でCloudflareへの疎通確認ができる。Pingを送った後のDelivery結果に`200`が返ってくれば接続は復旧している。`401`が返ってくれば再認証が不完全なので、Authorize OAuth Appsのページを確認してCloudflareのエントリが「Revoked」ではなく正常な権限を持っているかを見直す。
 
 詳細な切断・再接続の手順は[Cloudflare PagesがGitHubと切断された時の対処法](/posts/cloudflare-github-disconnect)にまとめた。
 
@@ -165,13 +173,15 @@ Building Astro site...
 
 Cloudflareダッシュボードでドメインを選択→「Caching」→「Configuration」→「Purge Cache」→「Purge Everything」でCDNキャッシュを全削除できる。Purge後は次のアクセス時にオリジン（Cloudflare Pagesのサーバー）から新しいコンテンツを取得する。
 
+「Purge Everything」はサイト全体のキャッシュを削除するので、Purge直後は全てのページで通常より少しレスポンスが遅くなる。頻繁にPurgeするとCDNの効果が薄れるので、本当に「Success」なのにサイトが更新されない場合にだけ使うほうがよかった。特定のページだけ怪しい場合は「Custom Purge」でURLを指定して部分削除する方法もある。
+
 ### 問題が再発しないようにする
 
 自動デプロイが止まるのは一度経験すると「また止まってないか」と不安になる。以下の対策をとっておくと早期発見できる。
 
 Cloudflare PagesのNotifications機能でビルド失敗のメール通知を設定する。「Workers & Pages」→プロジェクト→「Settings」→「Notifications」で設定できる。ビルドが失敗した時に即座にメールが届くので、長時間気づかずに放置する状況を防げる。
 
-GitHubにpushした後は毎回Deploymentsタブを確認する習慣をつける。慣れてくると「2分でビルドが来るはず」という感覚が身につくので、来ない場合にすぐ気づけるようになる。
+GitHubにpushした後は毎回Deploymentsタブを確認する習慣をつける。慣れてくると「2分でビルドが来るはず」という感覚が身につくので、来ない場合にすぐ気づけるようになる。プッシュしたら必ずブラウザでDeploymentsタブを一度開いてビルドが走り始めているのを確認してからターミナルを閉じる、という習慣が予防になった。
 
 ## ハマったポイント
 
@@ -180,10 +190,12 @@ GitHubにpushした後は毎回Deploymentsタブを確認する習慣をつけ�
 - Settings → Git repositoryの「Manage」ボタンは分かりにくい場所にある。Settingsタブを開いてかなり下にスクロールした先にある。プロジェクトのトップ画面では見えない
 - 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
 - GitHubのWebhookのdeliveryログを見ると、Cloudflareへの通知が成功しているか失敗しているかがわかる。Settings → Webhooksから各deliveryのレスポンスを確認できる。`401`が出ていたらOAuth切れ、`200`が出ていたらCloudflare側のビルド設定の問題
+- GitHubのWebhook設定画面にある「Ping」ボタンを使えばその場で疎通確認ができた。再認証後にPingを送ってレスポンスが200かどうかを確認するのが、deliveryの一覧を眺めるより速かった。このボタンの存在に気づくまでPingの使い方を知らなかった
 - デプロイが止まったタイミングと最後にGitHubのセキュリティ設定を変更したタイミングが一致していた。2段階認証の設定変更後にOAuth接続が切れることがあるので、セキュリティ設定を変えた後はCloudflareのデプロイを確認する
 - `master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らなかったことがあった。ブランチ名の不一致は気づきにくいので、接続時に設定したブランチ名を定期的に確認しておくといい
 - デプロイ「Success」なのにサイトが更新されない場合はCDNキャッシュが原因のことがある。ブラウザのハードリロードで変わらなければCloudflareのPurge Cacheで解決した。「ビルドはできているのに反映されない」という現象はキャッシュを真っ先に疑う
 - Cloudflare自体のサービス障害が原因のことも稀にある。`cloudflarestatus.com`を最初に確認すると、自分のアカウントの問題かCloudflare全体の問題かをすぐに切り分けられる。障害中であれば自分で何をしても解決しないので待つだけでいい
+- ビルドログが大量にあって「Build completed」の行を探すのに5分かかったことがあった。「Download logs」でテキストファイルとして保存して`Build completed`を検索するのが一番速い確認方法だった。ブラウザ上のログビューアをスクロールする方法はログが1000行を超えると現実的ではなかった
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。環境変数が足りていてビルドが失敗している場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参照。
 
