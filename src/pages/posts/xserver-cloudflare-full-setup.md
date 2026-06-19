@@ -14,6 +14,8 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 設定が全部完了するまでに実作業は30分程度でも、Active待ちや確認の手間を含めると半日近くかかった。「なぜまだ見えないのか」を何度も調べていたので、最初から手順の全体像を把握していればもっと短く終わったと思う。
 
+この作業を通じて「ネームサーバーとDNSとカスタムドメインの関係」がようやく整理できた。最初は混同していたが、「ネームサーバー変更＝DNS管理をCloudflareに移譲」「Custom domains設定＝Pagesがそのドメインからのアクセスをこのプロジェクトに転送する設定」の2段階だと理解すると全体の流れが見えた。
+
 ## 環境
 
 - Xserverドメイン（2026年5月時点）
@@ -32,6 +34,8 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。Custom domainsでActivateボタンを押してから5分後に再アクセスしたら正常に表示された。
 
 「HTTPSにするには証明書が必要では？」とも悩んだ。Cloudflareのデフォルトが「Flexible SSL」なのか「Full SSL」なのかわからず、設定を間違えるとサイトにアクセスできなくなるのではと心配した。実際にはCustom domainsの設定が完了した時点でHTTPSは自動で有効になって、SSLの設定を別途触る必要はなかった。ただしEncryption Modeが「Flexible」のままだとセキュリティ的に望ましくないので、「Full」に変更した。
+
+カスタムドメインが設定できた後、`www.yourdomain.com`でもアクセスできるようにしようとしたが、単純にCustom domainsにwww付きを追加するだけではリダイレクト設定が必要だとわかった。www付きとwwwなしが共存してどちらでもアクセスできる状態になってしまい、Googleがどちらを「正規URL」として扱うかわからなくなった。最終的にCloudflareのRedirect Rulesでwwwなしに統一する設定を入れた。
 
 ## 解決策
 
@@ -141,9 +145,13 @@ If: Hostname equals www.yourdomain.com
 Then: Dynamic redirect to https://yourdomain.com${uri}（301）
 ```
 
+Redirect Rulesを設定したら、`https://www.yourdomain.com`にアクセスして`https://yourdomain.com`にリダイレクトされるか確認する。ブラウザのアドレスバーで確認するのが一番わかりやすかった。
+
 ### 7. Search ConsoleをカスタムドメインURLで登録
 
 `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になるが、Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
+
+`*.pages.dev`のURLはSearch Console登録に使わないだけでなく、Googleにインデックスされないよう`robots.txt`で制御することも考えられる。ただしCloudflare Pagesは`*.pages.dev`のURLのrobots.txtをカスタマイズできないので、カスタムドメインを主に使い`*.pages.dev`は開発確認用と割り切るのが現実的だった。
 
 ## ハマったポイント
 
@@ -156,6 +164,7 @@ Then: Dynamic redirect to https://yourdomain.com${uri}（301）
 - ネームサーバーのアドレスはCloudflareアカウントごとに割り当てが異なる。他の記事に書いてある`ns1.cloudflare.com`などを入力しても動かない。自分のCloudflareダッシュボードに表示されたアドレスを使う必要があった
 - www付きとwwwなしの両方でアクセスできるが、Googleはどちらかを正規URLとして扱う。どちらに統一するかをRedirect Rulesで設定しないと、www有り・無しで別々にインデックスされる可能性がある。設定が完了したら`https://www.yourdomain.com`と`https://yourdomain.com`の両方でアクセスして期待通りにリダイレクトされるか確認した
 - Cloudflareに「I updated my nameservers」ボタンがあることを見落とすと、ずっとPendingのままになる。画面内に小さく表示されているボタンで、押さないとCloudflareが確認を開始しない
+- Activateボタンを押した直後は「Initializing」のステータスが数分続く。「Activateを押したのに何も変わらない」と思ってもう一度押すと設定が重複してしまうことがあった。初回Activateを押したら数分待ってからページをリロードして確認するのが正しい手順だった
 
 ## 関連記事
 

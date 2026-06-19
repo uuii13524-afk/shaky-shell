@@ -21,6 +21,8 @@ This may cause deployments to fail.
 
 後から調べてわかったのだが、GitHubは2023年に2段階認証の強制化を段階的に進めていた時期があり、その設定変更のタイミングでOAuthの認可状態がリセットされるケースが多かった。自分のサイトで起きたのもその後遺症だった可能性が高い。
 
+この切断状態になっているとき、Cloudflare側には「ビルドが失敗している」という記録すら残らない。何かがおかしいと気づかずに放置すると、記事を何本追加しても一切公開されないまま時間だけが過ぎていく。自分の場合は2ヶ月分の更新が全部止まっていたので、再接続した後にまとめて全部デプロイし直す必要があった。
+
 ## 環境
 
 - Cloudflare Pages（2026年5月時点）
@@ -52,9 +54,11 @@ GitHubはpushをCloudflareに通知しようとしているが、Cloudflareが�
 
 GitHubのSettings → Applications → Authorized OAuth Apps でCloudflareのエントリを確認したら、アクセスの状態が「Revoked」になっていた。GitHubのセキュリティ設定で2段階認証を変更した後、OAuthアプリの権限がリセットされていたのが根本原因だった。
 
-「GitHub Appsと何が違うのか」も気になって調べた。Cloudflare PagesはOAuth Appを使って接続しているので、GitHubのSettings → Applicationsの「Authorized OAuth Apps」タブを確認する。「Installed GitHub Apps」タブではなく「Authorized OAuth Apps」の方。両方存在していてどちらを見ればいいかわからず混乱したが、Cloudflare Pagesの接続はOAuth App側にある。
+「GitHub Appsと何が違うのか」も気になって調べた。Cloudflare PagesはOAuth Appを使って接続しているので、GitHubのSettings → Applicationsの「Authorized OAuth Apps」タブを確認する。「Installed GitHub Apps」タブではなく「Authorized OAuth Apps」の方。両方存在していてどちらを見ればいいかわからず混乱したが、Cloudflare Pagesの接続はOAuth App側にある。「Installed GitHub Apps」を見てCloudflareのエントリがあるから「大丈夫だ」と思ったが、それはGitHub Apps用のリストで、OAuth Appsとは別物だった。この混乱に30分以上取られた。
 
 もう一つ試したのが、Cloudflareのプロジェクト設定をリロードしながら「Build & deployments」の設定を眺めることだった。Branchの設定が`main`になっていて、GitHubのデフォルトブランチも`main`なので設定のズレではないとここで確認した。接続の問題なのかビルド設定の問題なのかを切り分ける意味でも、Settingsタブの確認は早めにやっておくべきだった。
+
+Cloudflareのダッシュボードには「Workers & Pages」という項目があって、WorkersとPagesが同じメニューにまとまっている。「Workers」の設定を間違えて開いてしまって、そこでGitHub連携の設定を探してしまったことがあった。WorkersにはGitHubとの接続設定がないので、いくら探しても見つからなかった。Pagesの設定は「Workers & Pages」→「Pages」タブ側で確認する。
 
 ## 解決策
 
@@ -105,7 +109,17 @@ GitHubのOrganizationリポジトリを使っている場合は、Organization�
 
 Cloudflare PagesのプロジェクトをOrganizationリポジトリに接続している場合、個人アカウントのOAuth認証だけでは不十分なことがある。Organization側の設定を明示的に確認する手順を含めてから再認証すると確実だった。
 
-### 5. 再発防止
+### 5. デプロイ通知を設定して早期発見する
+
+切断が長期間気づかれないままになった原因の一つは「通知設定がなかった」こと。CloudflareのNotifications機能でビルド失敗のメール通知を設定しておくと、次回は早く気づける。
+
+Cloudflareダッシュボードの上部メニューから「Notifications」→「Add」→「Pages - Deployment Failed」で設定できる。メールアドレスを登録しておけば、ビルドが失敗した時にメールが届く。
+
+ただし「デプロイが来ない（接続切断）」状態の場合はビルドが始まらないので、この通知では検知できない。「ビルド失敗」の検知にはなるが、「接続切断」の検知にはならない。完全な監視には定期的に手動でDeploymentsタブを確認する習慣が必要だった。
+
+月に1回でいいので「最新のDeploymentはいつか」を確認する習慣をつけると、次回は2ヶ月気づかずに放置するという状況は避けられる。自分はこの一件以来、月初にデプロイを1本確認するようにした。
+
+### 6. 再発防止
 
 GitHubのセキュリティ設定（2段階認証・SSHキー・パスワード変更など）を変えた後は、Cloudflare PagesのDeploymentsタブを必ず確認する癖をつけると早期発見できる。設定変更後に一度テストコミットをpushして、1〜2分以内にビルドが来るかどうか確認するだけでいい。
 
@@ -120,11 +134,13 @@ Cloudflareのダッシュボードに「Notifications」という機能があっ
 - GitHubのリポジトリ自体には問題なくpushできていたので、「Gitの問題」ではなく「CloudflareとGitHubの間の接続の問題」だと理解するまでに時間がかかった。コミット履歴はちゃんと積まれているのにデプロイが動かない場合は、接続の問題を最初に疑う
 - 再認証後に「もうpushしてあるから大丈夫」と思って待っていたら何も起きなかった。再認証はあくまで接続の修復で、過去のコミットをCloudflareが遡って処理してくれるわけではなかった。`git commit --allow-empty -m "force deploy" && git push` の空コミットを追加でpushするのが必要だった
 - GitHubのWebhookのdeliveryログを確認したら、HTTPレスポンスが `401 Unauthorized` になっていた。CloudflareがGitHubのWebhookを弾いている状態で、これが「OAuthが切れている」の具体的な証拠だった。診断に迷ったらGitHub側のWebhookログを確認すると原因がはっきりする
+- GitHubのSettings → Applications の「Installed GitHub Apps」タブと「Authorized OAuth Apps」タブを混同してしまった。Cloudflare Pagesの接続は「Authorized OAuth Apps」側にある。「Installed GitHub Apps」にCloudflareが見当たらないのは正常で、OAuth Appsの方を見る必要があった。この2つが別のリストだと気づくまで20分かかった
 - GitHubのSettings → Applications → Authorized OAuth Appsでもアクセス状況を確認できる。ここでCloudflareのエントリが「Revoked」になっていたら再認証が必要なサインだった
 - CloudflareのAudit Logに切断が発生した日時の記録があった。自分の場合はGitHubの2段階認証を変更した日と一致していて、原因の特定に役立った。「いつから動かなくなったか」がわからない時にAudit Logを確認すると手がかりになる
 - 長期間放置したプロジェクトで起きやすい。月に1回以上触っているプロジェクトではほとんど起きないが、数ヶ月単位で放置するとOAuthトークンが期限切れになることがある。GitHubのセキュリティ設定変更後にも起きる
 - Preview Deploymentsのビルドも同様に止まる。mainブランチ以外のブランチへのpushもCloudflareが検知しなくなるので、ブランチ作業中でも同じ症状が出る
 - OrganizationのリポジトリをCloudflareに接続している場合は、個人アカウントの再認証だけでは足りないことがある。Organization側のThird-party Access設定でCloudflare Pagesのアクセスが承認済みかを別途確認する必要があった。この確認を怠ると「Authorizeしたはずなのにまだ切断されている」という状況が続く
+- Workers側の設定画面とPages側の設定画面を間違えてしまい、GitHub連携の設定がWorkers側には存在しないことに気づくまで時間がかかった。「Workers & Pages」のメニューからPages側のプロジェクトに入り直す必要があった
 
 デプロイが反映されない時はまずDeploymentsタブのログを確認する。ビルドログの読み方については[Cloudflare Pagesのビルドログの見方とエラーの対処法](/posts/cloudflare-pages-build-log)が参考になる。
 

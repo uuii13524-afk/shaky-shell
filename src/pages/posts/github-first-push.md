@@ -14,6 +14,8 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 最終的にわかったのは、GitHubは2021年8月にパスワード認証を廃止していたということ。これを知らなかっただけで、正しい手順さえわかれば初回pushは5分で終わる作業だった。認証方法が変わっていること自体を知らないと、何をやっても解決しない状況になる。
 
+GitHubへの初回pushは「リポジトリ作成」「Gitの初期化とコミット」「リモートの設定」「認証」の4段階に分かれていて、どれか一つでも手順を間違えると詰まる。「git initしてgit pushするだけ」と思っていたが、全部で15ステップ以上ある作業だった。
+
 ## 環境
 
 - Git 2.44.0
@@ -50,6 +52,8 @@ hint: Integrate the remote changes (e.g. hint: 'git pull ...') before pushing ag
 さらに詰まったのが、`git push -u origin main`を実行したときに「src refspec main does not match any」というエラーが出たケース。ローカルのデフォルトブランチが`master`のままで、GitHubのデフォルトが`main`になっていたため名前が合わなかった。`git branch -M main`でブランチ名を変更してから再度pushしたら通った。
 
 最初のコミットをせずに`git push`しようとして「nothing to commit」というメッセージが出たことも。`git init`後に`git add`と`git commit`を済ませてからでないと`git push`は実行できない。当たり前のことだが、手順を飛ばしてしまうと何が足りないかわかりにくかった。
+
+`git remote add origin`のURLを間違えてしまって、`origin`が間違ったURLを指している状態で`git push`を試みてしまったことがあった。URLを間違えた場合は`git remote set-url origin 正しいURL`で修正できる。最初から`git remote -v`でoriginのURLを確認する習慣をつければ防げた。
 
 ## 解決策
 
@@ -102,6 +106,8 @@ git remote add origin https://github.com/ユーザー名/リポジトリ名.git
 git branch -M main
 git push -u origin main
 ```
+
+実行前に`git remote -v`でoriginのURLが正しいか確認しておくと安心だった。URLのタイポは発見しにくいので、GitHubの「Quick setup」画面からコピーしてそのまま使うのが一番確実。
 
 ### 4. 認証を求められたらPATで認証する
 
@@ -177,6 +183,18 @@ GitHubのリポジトリをブラウザで開いて、コミットが反映さ�
 
 ブラウザで確認する際、「Insights」→「Network」グラフでコミット履歴を視覚的に確認できる。初回pushが成功していれば、グラフにコミットが表示される。
 
+### 7. 2回目以降のpushの流れ
+
+初回pushの設定が完了すれば、以降は以下の3コマンドだけで変更を反映できる。
+
+```bash
+git add 変更したファイル
+git commit -m "変更内容"
+git push
+```
+
+`-u origin main`は初回のみ必要で、2回目以降は`git push`だけで動く。`-u`オプションがローカルブランチとリモートブランチの追跡関係を設定するため、一度設定すれば以降は不要になる。
+
 ## ハマったポイント
 
 - リポジトリ作成時に「Add a README file」を有効にするとリモートにコミットが作られる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少ない
@@ -187,6 +205,7 @@ GitHubのリポジトリをブラウザで開いて、コミットが反映さ�
 - PATのスコープで「repo」だけでなく全部チェックしてしまうと権限が広すぎる。コードのpushだけなら「repo」のみで十分。必要最小限のスコープにしておくのが安全
 - Windowsの場合、PATを一度使って認証が通ると「資格情報マネージャー」に保存される。次回からは入力不要になるが、PATの有効期限が切れた後は再入力が必要になる。期限切れのトークンが保存されていると「認証エラー」が出るので、その場合は資格情報マネージャーからGitHubのエントリを削除して再認証する。この「古いトークンが残っている」パターンに気づくまで30分以上かかった
 - `git commit`せずに`git push`しようとすると「nothing to commit」や「Everything up-to-date」と出てpushが実行されない。`git add`→`git commit`→`git push`の順番を守らないと、変更内容がGitHubに届かない。初回はこの順番が当然ではないので手順を飛ばしやすい
+- `git remote add origin`のURLを手入力する場合にタイポが起きやすい。URLが間違っていると`git push`で「repository not found」や「Could not read from remote repository」というエラーになる。GitHubの「Quick setup」画面のコピーボタンを使うのが確実で、手入力は避けた方がいい
 
 ## 関連記事
 

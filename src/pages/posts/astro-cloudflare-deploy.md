@@ -14,6 +14,8 @@ Astroで作ったブログサイトをCloudflare Pagesで公開しようとし�
 
 Vercelとの比較で一番戸惑ったのは、Cloudflare Pagesの「Pages」という概念がWorkers & Pagesという一つの項目にまとまっていることだった。Vercelなら「Deploy」ボタンが一番目立つ場所にあるが、Cloudflareは「Create application」を押してからさらに「Pages」の画面を探す必要があった。
 
+初回デプロイが成功するまでのトラブルは、大きく分けると「UI上でPageの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3段階に分かれていた。最初にこの3段階を理解していたら、もっと短時間で解決できたと思う。
+
 ## 環境
 
 - Windows 11
@@ -48,6 +50,8 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 ```
 
 ローカルでは`site`を設定していなくても動いていたが、Cloudflare上でビルドすると`@astrojs/sitemap`プラグインが`site`の設定を要求してビルドが止まった。ローカルのdevモードとCloudflareのproductionビルドで動きが違う箇所がいくつかあって、ローカルテストだけでは見つけられないバグがあった。
+
+また、gitリポジトリに`.gitignore`を作る前に`git add .`を実行してしまい、`node_modules/`がリポジトリに含まれた状態でpushしてしまった。Cloudflare側のビルドには直接影響しないが、リポジトリサイズが膨大になってpushに数分かかるようになった。この失敗から、最初に`.gitignore`を確認してから`git add .`することを必ず守るようにした。
 
 ## 解決策
 
@@ -144,13 +148,29 @@ NODE_VERSION = 20
 
 Cloudflare PagesはデフォルトのNode.jsバージョンが古めに設定されていることがある。Astroは新しいNode.jsのAPIを使う箇所があるので、`NODE_VERSION`を明示的に指定するのがトラブル防止の基本だった。
 
-### 5. デプロイ完了後の確認
+### 5. ビルドログを効率よく読む方法
+
+Cloudflare Pagesのビルドログは量が多くて読みにくい。効率よく原因を探すには以下の方法が役立った。
+
+「Download logs」でローカルにテキストとしてダウンロードして、テキストエディタで`Error:`や`error`で検索する。ブラウザのログビューアでスクロールしながら探すよりも圧倒的に速い。
+
+ログの末尾付近に実際のエラーが出ていることが多い。ビルドの最後の方で失敗するエラー（レンダリングエラーや設定エラー）はログの後半に書いてある。逆に、依存インストールで失敗する場合はログの前半を見る。
+
+```
+Installing dependencies...   ← ここでエラーが出れば依存問題
+Building Astro site...       ← ここでエラーが出ればビルド設定問題
+  → rendering pages...       ← ここでエラーが出ればページ内容の問題
+```
+
+この3段階を意識してログを読むと、どのフェーズで失敗しているかがすぐにわかる。
+
+### 6. デプロイ完了後の確認
 
 Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。ブラウザで開いてサイトが表示されれば成功。
 
 カスタムドメインを設定したい場合は[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)を参照。環境変数が必要な場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参考になる。
 
-### 6. プレビューデプロイの活用
+### 7. プレビューデプロイの活用
 
 Cloudflare Pagesは`main`ブランチ以外のpushに対しても自動でプレビューURLを発行する。`feature/`ブランチでコードを書いてpushすると、本番とは別の`xxxxxxxx.プロジェクト名.pages.dev`という形のURLでプレビューが確認できる。
 
@@ -162,7 +182,7 @@ git push origin feature/add-new-section
 
 プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。プレビュー環境では本番の環境変数は引き継がれないので注意。必要に応じてSettings → Environment variables で「Preview」環境向けの値を別途設定する。
 
-### 7. 以降のpushの流れ
+### 8. 以降のpushの流れ
 
 一度設定が完了すれば、あとは`git push`するだけで自動デプロイが走る。
 
@@ -175,7 +195,7 @@ git push
 
 pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。ビルドが来ない場合は[Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)を確認する。
 
-### 8. 直前のデプロイに戻したい場合
+### 9. 直前のデプロイに戻したい場合
 
 デプロイ後にサイトが壊れた場合、CloudflareのDeploymentsタブから以前のデプロイに戻せる。
 
@@ -185,7 +205,7 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 
 1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。Rollbackはデプロイを「特定のビルドの状態に戻す」操作で、GitのコミットやブランチはそのままになるのでGit側の作業は不要だった。
 
-### 9. Freeプランの制限を把握しておく
+### 10. Freeプランの制限を把握しておく
 
 Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅が上限になっている（2026年5月時点）。ブログサイトを個人で運営する分にはほとんど気にならない上限だが、毎日何度もpushするような開発フローでは消費が早まる。Deploymentsタブの「Build count」でその月の残りビルド回数を確認できる。
 
@@ -198,6 +218,8 @@ Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅�
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
 - デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
 - ローカルのdevモードでは正常に動いていても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされてもビルド時に必須になる。全てのAstroプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
+- `node_modules/`を`.gitignore`に追加する前に`git add .`してしまうと、リポジトリに何千ものファイルが含まれてしまう。Cloudflareのビルド自体は通るが、pushに何分もかかるようになる。`git rm -r --cached node_modules`で追跡から除外してから`.gitignore`に追加し直す必要があった
+- ビルドログは「Download logs」でローカルに保存してからテキスト検索する方が、ブラウザのスクロールで探すより圧倒的に速かった。ログの量が多い時は特に有効で、`Error:`で検索するだけで原因が一発で見つかることが多かった
 
 ## 関連記事
 
