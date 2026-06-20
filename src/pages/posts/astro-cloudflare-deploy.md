@@ -16,6 +16,8 @@ Vercelとの比較で一番戸惑ったのは、Cloudflare Pagesの「Pages」�
 
 初回デプロイが成功するまでのトラブルは、大きく分けると「UI上でPageの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3段階に分かれていた。最初にこの3段階を理解していたら、もっと短時間で解決できたと思う。
 
+Cloudflare Pagesに移行して良かった点は速度だけではなかった。月500回のビルドと月500GBの転送量が無料で、Astroのブログ程度の規模では制限に引っかかることがほぼない。VercelのFreeプランはTeamメンバーの招待数や帯域幅に制限があって、個人ブログでも将来的な制限を気にする必要があったが、Cloudflare PagesのFreeプランはその点で気楽だった。移行して半年以上経つが、コスト面では完全に正解だったと思っている。
+
 ## 環境
 
 - Windows 11
@@ -51,7 +53,9 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 
 ローカルでは`site`を設定していなくても動いていたが、Cloudflare上でビルドすると`@astrojs/sitemap`プラグインが`site`の設定を要求してビルドが止まった。ローカルのdevモードとCloudflareのproductionビルドで動きが違う箇所がいくつかあって、ローカルテストだけでは見つけられないバグがあった。
 
-また、gitリポジトリに`.gitignore`を作る前に`git add .`を実行してしまい、`node_modules/`がリポジトリに含まれた状態でpushしてしまった。Cloudflare側のビルドには直接影響しないが、リポジトリサイズが膨大になってpushに数分かかるようになった。この失敗から、最初に`.gitignore`を確認してから`git add .`することを必ず守るようにした。
+`astro.config.mjs`に`site`を設定してビルドが通るようになった後、今度はビルド成功なのにサイトを開いたら「522 Connection Timed Out」が出た。焦ってビルドログを再確認したが「Success」のままだった。5分待ってからリロードしたら正常に表示された。デプロイ直後はCloudflareのエッジサーバーへの伝播に時間がかかることがあるので、「Success」になってから少し待つのが正しかった。
+
+また、gitリポジトリに`.gitignore`を作る前に`git add .`を実行してしまい、`node_modules/`がリポジトリに含まれた状態でpushしてしまった。Cloudflare側のビルドには直接影響しないが、リポジトリサイズが膨大になってpushに数分かかるようになった。この失敗から、最初に`.gitignore`を確認してから`git add .`することを必ず守るようにした。`node_modules`をpushしてしまった後の解消は`git rm -r --cached node_modules`でキャッシュを削除してから`.gitignore`に追記してコミットする必要があって、その作業に30分以上かかった。
 
 ## 解決策
 
@@ -164,6 +168,8 @@ Building Astro site...       ← ここでエラーが出ればビルド設定�
 
 この3段階を意識してログを読むと、どのフェーズで失敗しているかがすぐにわかる。
 
+ビルドログの中にWARNINGとERRORが混在していて、WARNINGを無視してERRORに集中するのが大事だった。`npm warn deprecated`のような警告はビルド失敗に直接関係しないことがほとんどで、そこで時間を取られると本当の原因を見つけるのが遅くなった。
+
 ### 6. デプロイ完了後の確認
 
 Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。ブラウザで開いてサイトが表示されれば成功。
@@ -181,6 +187,8 @@ git push origin feature/add-new-section
 ```
 
 プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。プレビュー環境では本番の環境変数は引き継がれないので注意。必要に応じてSettings → Environment variables で「Preview」環境向けの値を別途設定する。
+
+プレビューURLはブランチ単位で固定されるので、同じブランチに何度pushしても同じ`xxxxxxxx.pages.dev`のURLでプレビューを確認できる。デザインの確認などで何度もpushを繰り返す場合、毎回新しいURLが発行されるわけではないのでURLをブックマークしておくと便利だった。
 
 ### 8. 以降のpushの流れ
 
@@ -205,6 +213,8 @@ pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分�
 
 1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。Rollbackはデプロイを「特定のビルドの状態に戻す」操作で、GitのコミットやブランチはそのままになるのでGit側の作業は不要だった。
 
+Rollbackした後も、GitHubのリポジトリのコードは最新のコミットのままになっている。Rollback後にコードを修正してpushすると、また最新コミットの内容でビルドが走る。「Rollbackしたのに何でまたビルドが走るんだ」と混乱したが、Rollbackはあくまでデプロイ先を変えるだけで、Gitのコミット履歴には影響しないと理解してから納得できた。
+
 ### 10. Freeプランの制限を把握しておく
 
 Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅が上限になっている（2026年5月時点）。ブログサイトを個人で運営する分にはほとんど気にならない上限だが、毎日何度もpushするような開発フローでは消費が早まる。Deploymentsタブの「Build count」でその月の残りビルド回数を確認できる。
@@ -216,10 +226,12 @@ Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅�
 - GitHubの認証ページで「Only select repositories」を選ぶと、後から新しいリポジトリを追加した時にCloudflareの一覧に出てこない。その場合はGitHubのSettings → Applications → Cloudflare Pages → Repositoriesから追加できる。「なぜ新しいリポジトリが出てこないのか」と20分悩んだことがあった
 - ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが16や18の可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
-- デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだDNSが伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
+- デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだCloudflareのエッジへの伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
 - ローカルのdevモードでは正常に動いていても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされてもビルド時に必須になる。全てのAstroプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
 - `node_modules/`を`.gitignore`に追加する前に`git add .`してしまうと、リポジトリに何千ものファイルが含まれてしまう。Cloudflareのビルド自体は通るが、pushに何分もかかるようになる。`git rm -r --cached node_modules`で追跡から除外してから`.gitignore`に追加し直す必要があった
 - ビルドログは「Download logs」でローカルに保存してからテキスト検索する方が、ブラウザのスクロールで探すより圧倒的に速かった。ログの量が多い時は特に有効で、`Error:`で検索するだけで原因が一発で見つかることが多かった
+- ビルドログにWARNINGが大量に出ていてERRORを見落としやすかった。`npm warn deprecated`などの警告は無視してよく、エラーだけを探す意識が必要だった。ビルドログの量が多くて途方に暮れた時は、まずDownload logsしてから`Error`で全文検索するのが最も速い原因特定方法だった
+- Rollback後にGitHubにpushしたら自動でまた最新コミットの内容でビルドが走った。「Rollbackした状態を保ちたい」と思ったら、Gitのコミット自体も`git revert`か`git reset`で戻す必要があった。CloudflareのRollbackとGitの履歴は独立しているので、両方の状態を合わせる意識が必要だった
 
 ## 関連記事
 

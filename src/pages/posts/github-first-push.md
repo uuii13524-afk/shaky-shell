@@ -8,13 +8,19 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 ## やりたかったこと
 
-ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとした。Gitはローカルで使っていたが、GitHubへのpushは初めてで認証周りでエラーが出て詰まった。「パスワードを入力してください」と言われてGitHubのログインパスワードを入力したらエラーになった。パスワードが合っているのになぜ弾かれるのかが最初わからなかった。
+ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとしたら、認証でエラーが出て詰まった。GitHubのページに書いてある手順通りにコマンドを実行したのに、`git push -u origin main`のところでユーザー名とパスワードを聞かれた。GitHubのログインパスワードを入力したら以下のエラーが出た。
 
-何度パスワードを入れ直してもエラーが出続けて、「GitHubのアカウントが制限されているのかも」と思って設定画面を確認しに行ったりと、30分以上迷走した。
+```
+remote: Support for password authentication was removed on August 13, 2021.
+remote: Please see https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories
+fatal: Authentication failed for 'https://github.com/ユーザー名/my-astro-blog.git'
+```
 
-最終的にわかったのは、GitHubは2021年8月にパスワード認証を廃止していたということ。これを知らなかっただけで、正しい手順さえわかれば初回pushは5分で終わる作業だった。認証方法が変わっていること自体を知らないと、何をやっても解決しない状況になる。
+「パスワードが違う」というエラーではなく「パスワード認証は削除された」という内容だった。エラーメッセージを読んでいなかったので、最初は「アカウントのパスワードを間違えているのかも」と思ってブラウザでGitHubにログインして確認した。ログインできるので、パスワードは合っている。それなのにgitではエラーになる理由が全くわからなかった。
 
-GitHubへの初回pushは「リポジトリ作成」「Gitの初期化とコミット」「リモートの設定」「認証」の4段階に分かれていて、どれか一つでも手順を間違えると詰まる。「git initしてgit pushするだけ」と思っていたが、全部で15ステップ以上ある作業だった。
+何度パスワードを入れ直してもエラーが出続けて、「GitHubのアカウントに何か制限がかかっているのかも」と思って設定画面を確認しに行ったりと、30分以上迷走した。
+
+最終的にわかったのは、GitHubは2021年8月にパスワード認証を廃止していたということ。エラーメッセージにそのまま書いてあった。英文のエラーを読み飛ばしてしまったのが最初のミスだった。正しい手順さえわかれば初回pushは5分で終わる作業だった。
 
 ## 環境
 
@@ -25,21 +31,21 @@ GitHubへの初回pushは「リポジトリ作成」「Gitの初期化とコミ�
 
 ## 試したこと・うまくいかなかったこと
 
-GitHubにリポジトリを作って、表示された「…or push an existing repository from the command line」のコマンドをそのまま実行した。`git push -u origin main`まで進んだが、ユーザー名とパスワードを求められた。GitHubのログインに使っているパスワードを入力したら以下のエラーになった。
+最初、GitHubでリポジトリを作って「…or push an existing repository from the command line」に表示されたコマンドをそのままコピーして実行した。`git push -u origin main`まで進んだがパスワードエラーになった。「パスワードを間違えた」と思ってもう一度試したが、3回試しても同じエラーだった。エラーメッセージの1行目「password authentication was removed」を最初は読んでいなかったので、原因が全くわからなかった。
+
+パスワード認証が廃止されていたとわかった後、代替手段としてPersonal Access Token（PAT）を試した。「GitHubの設定でPATを発行する」とわかったが、GitHubのSettingsページを開いてもどこにもそれらしいメニューが見当たらなかった。「Emails」「Password and authentication」「SSH and GPG keys」などのメニューを全部見たが「Personal access tokens」という項目はなかった。
+
+実は「Settings」→「Developer settings」→「Personal access tokens」という3段階の階層にあって、「Developer settings」はSettingsページの一番下のスクロールしないと見えない場所にある小さいリンクだった。ここを見つけるまで10分かかった。
 
 ```
-remote: Support for password authentication was removed on August 13, 2021.
-remote: Please see https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories
-fatal: Authentication failed for 'https://github.com/ユーザー名/リポジトリ名.git'
+Settings
+  └── （一番下までスクロール）
+       └── Developer settings
+            └── Personal access tokens
+                 └── Tokens (classic)
 ```
 
-2021年にパスワード認証が廃止されていたとは知らなかった。「じゃあどうやって認証するんだ」とGitHubのドキュメントを読んだが、Personal Access Token（PAT）とSSH鍵の2種類があってどちらを使えばいいか迷った。
-
-とりあえずPATを試した。GitHubのどこでPATを発行するのか最初わからなかった。Settingsに行ったが「Personal access tokens」という項目が見当たらなかった。実は「Settings」→「Developer settings」→「Personal access tokens」という3段階の階層にあって、「Developer settings」はSettingsページの一番下の小さいリンクにある。ここを見つけるまで10分くらいかかった。
-
-PATを発行してパスワード欄に貼り付けたら通ったが、毎回長いトークンをコピペするのが面倒だった。Windowsの場合は資格情報マネージャーに保存されるので2回目以降は入力不要だが、それを知らなくてPATを何度も貼り直していた。
-
-また、リポジトリ作成時にREADMEを追加するチェックを入れてしまっていたので、最初のpushでこんなエラーが出た。
+PATを発行してパスワード欄に貼り付けたら通ったが、次の問題が起きた。リポジトリ作成時に「Add a README file」のチェックを入れてしまっていたため、最初のpushでエラーになった。
 
 ```
 error: failed to push some refs to 'https://github.com/...'
@@ -47,13 +53,16 @@ hint: Updates were rejected because the remote contains work that you do not hav
 hint: Integrate the remote changes (e.g. hint: 'git pull ...') before pushing again.
 ```
 
-ローカルとリモートで別々のコミット履歴が存在していて競合していた。「pushに失敗した」というエラーで焦ったが、単純にリモートにREADMEのコミットがあっただけだった。
+「pushが失敗した」とだけ読み取ってしまい、原因がわからなかった。実際にはリモートにREADMEのコミットが作られていて、ローカルとリモートで別々のコミット履歴が存在していたから弾かれていただけだった。`git pull origin main --allow-unrelated-histories`で解決できたが、この`--allow-unrelated-histories`オプションは普通のpullでは使わないオプションで、調べるのに時間がかかった。
 
-さらに詰まったのが、`git push -u origin main`を実行したときに「src refspec main does not match any」というエラーが出たケース。ローカルのデフォルトブランチが`master`のままで、GitHubのデフォルトが`main`になっていたため名前が合わなかった。`git branch -M main`でブランチ名を変更してから再度pushしたら通った。
+さらに詰まったのが、`git push -u origin main`を実行した時に「src refspec main does not match any」というエラーが出たケース。別のタイミングで試した時に起きた問題で、ローカルのデフォルトブランチが`master`のままで、GitHubのデフォルトが`main`になっていたため名前が合わなかった。
 
-最初のコミットをせずに`git push`しようとして「nothing to commit」というメッセージが出たことも。`git init`後に`git add`と`git commit`を済ませてからでないと`git push`は実行できない。当たり前のことだが、手順を飛ばしてしまうと何が足りないかわかりにくかった。
+```
+error: src refspec main does not match any
+error: failed to push some refs to 'https://github.com/...'
+```
 
-`git remote add origin`のURLを間違えてしまって、`origin`が間違ったURLを指している状態で`git push`を試みてしまったことがあった。URLを間違えた場合は`git remote set-url origin 正しいURL`で修正できる。最初から`git remote -v`でoriginのURLを確認する習慣をつければ防げた。
+`git branch`で確認したらブランチ名が`master`だったので`git branch -M main`でブランチ名を変更してから再度pushしたら通った。
 
 ## 解決策
 
@@ -65,7 +74,7 @@ hint: Integrate the remote changes (e.g. hint: 'git pull ...') before pushing ag
 4. **「Add a README file」のチェックは外す**（ここをオンにすると最初のpushで競合が起きる）
 5. 「Create repository」
 
-空のリポジトリが作られると「Quick setup」画面が表示される。ここに表示されているコマンドを次の手順で使う。
+空のリポジトリが作られると「Quick setup」画面が表示される。ここに表示されているコマンドを次の手順で使う。READMEのチェックを外し忘れた場合でも後から解決できるが（後述）、最初から外しておくのが圧倒的にトラブルが少ない。
 
 ### 2. ローカルでGitを初期化してコミット
 
@@ -107,14 +116,16 @@ git branch -M main
 git push -u origin main
 ```
 
-実行前に`git remote -v`でoriginのURLが正しいか確認しておくと安心だった。URLのタイポは発見しにくいので、GitHubの「Quick setup」画面からコピーしてそのまま使うのが一番確実。
+実行前に`git remote -v`でoriginのURLが正しいか確認しておくと安心だった。URLのタイポは発見しにくいので、GitHubの「Quick setup」画面のコピーボタンを使うのが確実。
+
+`git branch -M main`はローカルのブランチ名を`main`に変更するコマンド。Git 2.28以前のデフォルトブランチは`master`なので、GitHubの`main`と名前を合わせるために必要。`git branch`で確認して既に`main`になっていれば実行不要。
 
 ### 4. 認証を求められたらPATで認証する
 
 GitHubはパスワード認証が廃止されているのでPersonal Access Token（PAT）を使う。
 
 1. GitHubの右上アイコン → 「Settings」
-2. 左サイドバーを一番下までスクロール → 「Developer settings」
+2. 左サイドバーを**一番下までスクロール** → 「Developer settings」
 3. 「Personal access tokens」→「Tokens (classic)」→「Generate new token」
 4. 「Note」に用途を書く（例：「local development」）
 5. Expirationは適切な期間を選ぶ（90 daysなど）
@@ -123,13 +134,11 @@ GitHubはパスワード認証が廃止されているのでPersonal Access Toke
 
 発行されたトークンをコピーしてパスワード入力欄に貼り付けると認証が通る。トークンは一度しか表示されないので、コピーしてパスワードマネージャーなどに保存しておく。
 
-なお、GitHubには2種類のPATがある。「Tokens (classic)」と「Fine-grained tokens」で、Fine-grained tokensの方がリポジトリ単位や権限単位で細かく制御できる。個人プロジェクトで使い始める場合はclassicのほうがシンプルで扱いやすかった。
+GitHubには「Tokens (classic)」と「Fine-grained tokens」の2種類がある。Fine-grained tokensはリポジトリ単位や権限単位で細かく制御できる。個人プロジェクトで使い始める場合はclassicのほうがシンプルで扱いやすかった。
 
 Windowsの場合、一度認証が通ると「Windows 資格情報マネージャー」に保存される。次回以降は入力不要になるので、PATは発行したら安全な場所に保管しておく。
 
-PATの有効期限が切れた場合、`git push`で`Authentication failed`が出る。Windows資格情報マネージャーに古いトークンが残っているとそれが使われて毎回失敗する。スタートメニューで「資格情報マネージャー」を開いて「Windows資格情報」タブを選び、`git:https://github.com`のエントリを削除してから新しいトークンを発行し直す。
-
-Macの場合はキーチェーンアクセスに保存される。「キーチェーンアクセス」でgithub.comを検索して該当エントリを削除してから再認証する。
+PATの有効期限が切れた場合、`git push`で`Authentication failed`が出る。Windows資格情報マネージャーに古いトークンが残っているとそれが使われて毎回失敗する。スタートメニューで「資格情報マネージャー」を開いて「Windows資格情報」タブを選び、`git:https://github.com`のエントリを削除してから新しいトークンを発行し直す。Macの場合はキーチェーンアクセスに保存されるので、「キーチェーンアクセス」でgithub.comを検索して該当エントリを削除してから再認証する。
 
 **SSH鍵を使う場合（長期的には推奨）：**
 
@@ -197,15 +206,16 @@ git push
 
 ## ハマったポイント
 
-- リポジトリ作成時に「Add a README file」を有効にするとリモートにコミットが作られる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少ない
-- GitHubはパスワード認証を2021年8月に廃止している。ログインパスワードをそのまま入力しても絶対に通らない。「認証に失敗した」と思ってパスワードを何度も入力し直す時間が無駄だった。エラーメッセージをよく読めば原因が書いてある
-- PATを発行する「Developer settings」はSettingsページの一番下の小さいリンクにある。上のメニューをいくら探しても見つからない。Settings → ページ最下部 → Developer settings という手順
-- SSH鍵の設定を試みた時、HTTPSでcloneしたリポジトリにSSH鍵を設定してもremoteのURLがHTTPSのままでは機能しない。`git remote set-url`でSSH形式（`git@github.com:...`）のURLに変更するのが必要だった
-- `git branch -M main`を実行するまで、ローカルのブランチが`master`になっていてGitHubの`main`と名前が合わずにpushが失敗した。最近のGitHubはデフォルトブランチが`main`なので、ローカルとブランチ名を合わせる必要がある
-- PATのスコープで「repo」だけでなく全部チェックしてしまうと権限が広すぎる。コードのpushだけなら「repo」のみで十分。必要最小限のスコープにしておくのが安全
-- Windowsの場合、PATを一度使って認証が通ると「資格情報マネージャー」に保存される。次回からは入力不要になるが、PATの有効期限が切れた後は再入力が必要になる。期限切れのトークンが保存されていると「認証エラー」が出るので、その場合は資格情報マネージャーからGitHubのエントリを削除して再認証する。この「古いトークンが残っている」パターンに気づくまで30分以上かかった
-- `git commit`せずに`git push`しようとすると「nothing to commit」や「Everything up-to-date」と出てpushが実行されない。`git add`→`git commit`→`git push`の順番を守らないと、変更内容がGitHubに届かない。初回はこの順番が当然ではないので手順を飛ばしやすい
-- `git remote add origin`のURLを手入力する場合にタイポが起きやすい。URLが間違っていると`git push`で「repository not found」や「Could not read from remote repository」というエラーになる。GitHubの「Quick setup」画面のコピーボタンを使うのが確実で、手入力は避けた方がいい
+- リポジトリ作成時に「Add a README file」を有効にしないと問題ないと思っていたが、チェックをつけると空のリポジトリではなくREADMEのコミットが入った状態になる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少かった。「初期ファイルを作ってくれるから便利」と思って入れたのが裏目に出た
+- GitHubはパスワード認証でpushできると思っていたが、2021年8月に廃止されていた。エラーメッセージの1行目「Support for password authentication was removed」にそのまま書いてあったが、英文を読み飛ばして何度もパスワードを入れ直すという無駄をした。エラーメッセージをちゃんと読む習慣が大事だった
+- PATを発行する「Developer settings」はSettingsページの一番下の小さいリンクにあるだけで、上のメニューをいくら探しても見つからなかった。「Developer settings」という名前と「Personal access tokens」という名前が全然結びつかなかった。Settings → ページ最下部 → Developer settings という経路を知らないと辿り着けない
+- SSH鍵を設定すればHTTPS+PATより便利だと思ってSSH鍵の設定を試みたが、HTTPSでcloneしたリポジトリにSSH鍵を設定してもremoteのURLがHTTPSのままでは機能しなかった。`git remote set-url`でSSH形式（`git@github.com:...`）のURLに変更する必要があって、鍵の設定とURL変更は別の操作だということを知らなかった
+- ローカルのブランチ名が`master`のままだとGitHubの`main`と名前が合わずにpushが失敗するのはわかったが、`git branch -M main`を実行した後もうまくいかないことがあった。原因は`git remote add origin`でリモートを登録したURL自体を間違えていたこと。`git remote -v`でURLを確認する手順を最初に踏んでいれば20分省けた
+- PATのスコープで「repo」だけでなく全部チェックすれば確実に動くと思っていたが、権限を広くするほどセキュリティリスクが上がる。コードのpushだけなら「repo」スコープのみで十分だった。「とりあえず全部チェック」でトークンを発行していたのは悪い習慣だった
+- Windowsで一度PATを使って認証が通ると「資格情報マネージャー」に保存されて次回は入力不要になると思っていたが、PATの有効期限が切れると古いトークンが保存されたまま毎回認証エラーになり続けた。新しいPATを発行しても資格情報マネージャーに古いトークンが残っている限り使われてしまう。「資格情報マネージャーからエントリを削除してから再発行」という手順を知るまで30分かかった
+- `git commit`せずに`git push`しようとすると「nothing to commit」や「Everything up-to-date」と出てpushが実行されないと思っていたが、実際には`git init`直後にコミットなしで`git push`を試みると「fatal: The current branch main has no upstream branch」というエラーになることがあった。「コミットしていない」と「upstreamが設定されていない」は別のエラーで、混同してしまった
+- `git remote add origin`のURLを手入力する場合にタイポが起きやすい。URLが間違っていると`git push`で「repository not found」や「Could not read from remote repository」というエラーになる。手入力ではなくGitHubの「Quick setup」画面のコピーボタンを使うのが確実で、手入力は避けた方がいいということを最初は知らなかった
+- `git push -u origin main`の`-u`（`--set-upstream`）オプションは初回のみ必要だと思っていなかった。2回目以降も`-u origin main`を付けていたが、`-u`なしで`git push`だけで動くようになる。`-u`で一度設定すれば追跡関係が保存されるという仕組みを知らなかった
 
 ## 関連記事
 

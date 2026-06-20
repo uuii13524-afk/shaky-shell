@@ -16,6 +16,8 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 この作業を通じて「ネームサーバーとDNSとカスタムドメインの関係」がようやく整理できた。最初は混同していたが、「ネームサーバー変更＝DNS管理をCloudflareに移譲」「Custom domains設定＝Pagesがそのドメインからのアクセスをこのプロジェクトに転送する設定」の2段階だと理解すると全体の流れが見えた。
 
+カスタムドメインを設定して実際に独自ドメインでアクセスできるようになった時の達成感は大きかった。`*.pages.dev`のURLではリンクを共有する際に「なんかパスがおかしい」と思われるのが気になっていたが、独自ドメインになってからその心配がなくなった。速度面でもCloudflareのCDNを通じているのでレスポンスが速く、実際にPageSpeed Insightsで測定したら以前のVercel運用時より数値が改善した。
+
 ## 環境
 
 - Xserverドメイン（2026年5月時点）
@@ -35,7 +37,7 @@ Activeになって独自ドメインでアクセスしてみたら「Cloudflare 
 
 「HTTPSにするには証明書が必要では？」とも悩んだ。Cloudflareのデフォルトが「Flexible SSL」なのか「Full SSL」なのかわからず、設定を間違えるとサイトにアクセスできなくなるのではと心配した。実際にはCustom domainsの設定が完了した時点でHTTPSは自動で有効になって、SSLの設定を別途触る必要はなかった。ただしEncryption Modeが「Flexible」のままだとセキュリティ的に望ましくないので、「Full」に変更した。
 
-カスタムドメインが設定できた後、`www.yourdomain.com`でもアクセスできるようにしようとしたが、単純にCustom domainsにwww付きを追加するだけではリダイレクト設定が必要だとわかった。www付きとwwwなしが共存してどちらでもアクセスできる状態になってしまい、Googleがどちらを「正規URL」として扱うかわからなくなった。最終的にCloudflareのRedirect Rulesでwwwなしに統一する設定を入れた。
+カスタムドメインが設定できた後、`www.yourdomain.com`でもアクセスできるようにしようとしたが、単純にCustom domainsにwww付きを追加するだけではリダイレクト設定が必要だとわかった。www付きとwwwなしが共存してどちらでもアクセスできる状態になってしまい、Googleがどちらを「正規URL」として扱うかわからなくなった。最終的にCloudflareのRedirect Rulesでwwwなしに統一する設定を入れた。wwwありでアクセスするとwwwなしに301リダイレクトされるようになって、Googleの正規URL判定も統一できた。
 
 ## 解決策
 
@@ -68,6 +70,8 @@ bob.ns.cloudflare.com
 このアドレスをメモする。インターネット上の記事に書いてある`ns1.cloudflare.com`などは自分のアカウントでは使えないので、必ず自分の画面に表示されたアドレスを使う。
 
 このタイミングでCloudflareがスキャンした既存DNSレコードを確認する。Xserverのメールを使っていた場合、MXレコードが正しくインポートされているか確認しておく。消えていた場合は手動で追加する。XserverのSPFレコード（TXTレコード）があればそれもインポートされているか確認しておくと、ネームサーバー変更後のメール送受信が安定する。
+
+スキャン後に「MXレコードが見当たらない」と思ったら、Cloudflareのダッシュボードに移動してDNSレコード一覧を直接確認する。スキャン画面には全レコードが表示されないこともあったので、インポート後にDNS設定画面で全レコードを通しで確認するのが確実だった。
 
 ### 2. XserverでネームサーバーをCloudflareに変更
 
@@ -102,7 +106,7 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 
 手元のDNSキャッシュが古い場合は正確な結果が出ない。Windowsの場合は`ipconfig /flushdns`でキャッシュをクリアしてから再確認する。
 
-外部のDNS確認サービス（`dnschecker.org`など）で世界各地からの解決結果を確認すると、ローカルのキャッシュ問題かどうかの切り分けができる。
+外部のDNS確認サービス（`dnschecker.org`など）で世界各地からの解決結果を確認すると、ローカルのキャッシュ問題かどうかの切り分けができる。自分の環境ではCloudflareのネームサーバーが返ってきているのにCloudflareのダッシュボードがまだ「Pending」のことがあった。その場合は少し待つか「I updated my nameservers」をもう一度押すと確認が進む場合があった。
 
 ### 4. Cloudflare PagesのCustom domainsでドメインを有効化
 
@@ -119,6 +123,8 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 ステータスが「Active」になったことをCustom domainsのページで確認する。「Initializing」や「Pending」のままの場合は数分待ってからページをリロードする。
 
 Activateボタンを押した後にDNSレコードがCloudflareのDNS設定に自動追加される。Cloudflare PagesのプロジェクトはIPアドレスではなくCNAMEレコードを使って接続する。`yourdomain.com`に対してCloudflare Pagesのアドレス（`プロジェクト名.pages.dev`）を向けるCNAMEが自動作成される。
+
+Activateボタンを押してから「Custom domains」のステータスが「Active」になるまでの間、ブラウザでドメインにアクセスすると「522 Connection Timed Out」が出ることがあった。これはCloudflareの設定が反映中の一時的な状態で、数分待てば解消した。「522が出た＝設定が失敗した」ではなくて「設定が伝播中」のサインだとわかるまで焦った。
 
 ### 5. HTTPSの確認
 
@@ -147,6 +153,8 @@ Then: Dynamic redirect to https://yourdomain.com${uri}（301）
 
 Redirect Rulesを設定したら、`https://www.yourdomain.com`にアクセスして`https://yourdomain.com`にリダイレクトされるか確認する。ブラウザのアドレスバーで確認するのが一番わかりやすかった。
 
+Redirect Rulesで「Dynamic」を選んだ場合は`${uri}`部分がパスとクエリ文字列をそのまま引き継ぐ。`https://www.yourdomain.com/posts/some-article`へのアクセスが`https://yourdomain.com/posts/some-article`にリダイレクトされるかも確認しておくと確実だった。
+
 ### 7. Search ConsoleをカスタムドメインURLで登録
 
 `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になるが、Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
@@ -164,7 +172,8 @@ Redirect Rulesを設定したら、`https://www.yourdomain.com`にアクセス�
 - ネームサーバーのアドレスはCloudflareアカウントごとに割り当てが異なる。他の記事に書いてある`ns1.cloudflare.com`などを入力しても動かない。自分のCloudflareダッシュボードに表示されたアドレスを使う必要があった
 - www付きとwwwなしの両方でアクセスできるが、Googleはどちらかを正規URLとして扱う。どちらに統一するかをRedirect Rulesで設定しないと、www有り・無しで別々にインデックスされる可能性がある。設定が完了したら`https://www.yourdomain.com`と`https://yourdomain.com`の両方でアクセスして期待通りにリダイレクトされるか確認した
 - Cloudflareに「I updated my nameservers」ボタンがあることを見落とすと、ずっとPendingのままになる。画面内に小さく表示されているボタンで、押さないとCloudflareが確認を開始しない
-- Activateボタンを押した直後は「Initializing」のステータスが数分続く。「Activateを押したのに何も変わらない」と思ってもう一度押すと設定が重複してしまうことがあった。初回Activateを押したら数分待ってからページをリロードして確認するのが正しい手順だった
+- Activateボタンを押した直後は「522 Connection Timed Out」のエラーが数分続くことがある。「失敗した」と思ってもう一度Activateを押すと設定が重複してしまうことがあった。初回Activateを押したら5分待ってからページをリロードして確認するのが正しい手順だった
+- Redirect Rulesで`${uri}`を使わずに固定URLへのリダイレクトを設定してしまい、`www.yourdomain.com/posts/something`が常に`yourdomain.com`（トップページ）にリダイレクトされる設定になってしまったことがあった。Dynamic redirectで`${uri}`を含めることでパスごとの正しいリダイレクトができる。設定後は記事ページのURLでもリダイレクトが正しく動くか確認することにした
 
 ## 関連記事
 

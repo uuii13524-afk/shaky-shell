@@ -16,6 +16,8 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 
 手動でXMLを書いていた時期が3ヶ月ほどあった。記事を追加するたびに`public/sitemap.xml`を開いて`<url>`を1行追加する作業で、30記事を超えてから「これは続かない」と気づいて自動生成に切り替えた。自動生成への切り替えは正解で、記事を追加してpushするだけで自動的にサイトマップが更新されるようになった。
 
+手動管理の時代にやらかしたのが、URLのtypoだった。記事のslugを書き間違えたまま`sitemap.xml`に書いてしまい、その記事が正しいURLでインデックスされずに存在しないURLでインデックスされてしまっていた。Googleがインデックスした後に気づいて修正するはめになった。自動生成であれば記事ファイルのパスからURLを生成するのでtypoが入り込む余地がない、という安心感が大きかった。
+
 ## 環境
 
 - Astro 5.2.3
@@ -45,6 +47,8 @@ A site URL is required to generate a sitemap.
 ビルドした後に`dist/sitemap-index.xml`が生成されているかを確認せずにSearch Consoleに送信してしまって、「ステータス：読み取り不可」というエラーが出たことも。「送信したのになぜ読めないのか」と10分悩んだが、そもそもファイルが存在していなかった。作業前に`ls dist/sitemap*.xml`で確認する癖をつければ防げた。
 
 `astro.config.mjs`で`site`プロパティを設定した後、ローカルの`npm run dev`でも確認しようとしたが、devモードではサイトマップは生成されないことに気づいた。サイトマップは`npm run build`でビルドした時にしか生成されないので、確認は必ず`npm run build`後に`dist/`を見る必要がある。「devで確認できない」という事実を知らずに「なぜdevで見えないのか」と悩んだ時間があった。
+
+サイトマップが生成されたと思って`dist/sitemap-0.xml`を開いたら、記事ページのURLが含まれていないことに気づいたことがあった。原因を調べたらAstroのコンテンツコレクションを使って記事ページを生成していたが、`getStaticPaths()`から返すパスがサイトマップに含まれるかどうかはAstroのバージョンによって挙動が違うことがわかった。Astro 4以前では追加設定が必要な場合があった。自分のケースはAstro 5.2.3で問題なく記事URLが含まれていたが、バージョンが古い場合は確認が必要だった。
 
 ## 解決策
 
@@ -134,6 +138,8 @@ cat dist/robots.txt
 
 noindexにしたいページがある場合は`robots.txt`ではなく各ページの`<meta name="robots" content="noindex">`で制御する。`robots.txt`の`Disallow`はクロールをブロックするものであって、インデックスを制御するものではない。この違いを最初に理解しておかないと、Search Consoleのカバレッジレポートで「除外済み」になる原因を調べて時間を無駄にする。
 
+カスタムドメインを設定する前は`*.pages.dev`のURLでサイトにアクセスできる。この段階でrobots.txtに書く`Sitemap:`のURLを`*.pages.dev`ベースで設定してしまうと、カスタムドメイン切り替え後に更新が必要になる。最初から独自ドメインを想定してURLを書いておくのが後々楽だった。
+
 ### 5. サイトマップの優先度を設定する（応用）
 
 `@astrojs/sitemap`は`priority`と`changefreq`の設定もできる。デフォルトでは`priority`は設定されない。Googleの公式見解では`priority`や`changefreq`はほとんど無視されているが、設定したい場合は`serialize`オプションを使う。
@@ -156,6 +162,8 @@ integrations: [
 ```
 
 記事ページ（`/posts/`を含むURL）だけ`changefreq`を設定するような使い方ができる。`lastmod`に実際の更新日時を入れる場合は、frontmatterの`date`を読み込んで設定するとより正確になる。
+
+`lastmod`を正確に設定したい場合は、Astroのコンテンツコレクションからfrontmatterの`date`を読み出して渡す方法がある。ただしこの実装は少し複雑になる上、Googleが`lastmod`をクロールの優先度判断にどれだけ使うかは不明瞭なので、最初はデフォルト設定で動かしてから必要に応じて応用するくらいのスタンスがちょうどよかった。
 
 ### 6. 両方をpushしてデプロイ
 
@@ -193,6 +201,8 @@ Search ConsoleへのHTMLファイル認証登録がまだの場合は[Google Sea
 - robots.txtの`Sitemap:`行に`*.pages.dev`のURLを書いてしまっていた。カスタムドメインを設定した後もrobots.txtを更新し忘れていて、Googlebot向けのサイトマップURLが`*.pages.dev`のままになっていた。カスタムドメイン設定後は必ずrobots.txtの内容も更新する
 - `dist/`ディレクトリの中身を確認せずにSearch Consoleに送信してしまうと、存在しないファイルを送信することになる。`npm run build && ls dist/sitemap*.xml`でファイル存在確認してからSearch Consoleに送信する順番を守るだけで余分なデバッグ時間がなくなった
 - devモードではサイトマップが生成されない。`npm run dev`でサイトを確認しながら「なぜ`/sitemap-index.xml`が404になるのか」と1時間悩んだが、サイトマップはビルド時にのみ生成される。`npm run build && npm run preview`の組み合わせで確認する必要があった
+- `sitemap-0.xml`の中に記事ページのURLが含まれていなかった。コンテンツコレクションで記事を管理している場合、Astroのバージョンによってサイトマップへの含まれ方が違うことがある。生成後に`head -50 dist/sitemap-0.xml`で実際の記事URLが含まれているか必ず確認するようにした
+- 手動でsitemap.xmlを書いていた時代にURLのtypoが入り込んで、誤ったURLでインデックスされてしまった。自動生成に切り替えてからはtypoのリスクがゼロになった。「記事を追加するたびにsitemap.xmlも更新する」という作業を完全になくせたのが一番の恩恵だった
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 
