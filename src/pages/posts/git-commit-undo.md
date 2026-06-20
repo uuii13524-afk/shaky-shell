@@ -10,6 +10,8 @@ description: 'Gitで間違えてcommitした時の取り消し方を解説。git
 
 `.env`ファイルを誤ってコミットしていたことに、pushした後で気づいた。GitHubのリポジトリをブラウザで確認したら`.env`の中身がそのまま公開されていた。`STRIPE_SECRET_KEY=sk_live_xxxxxxxx`という行がコミットの差分ビューに丸見えになっていて、かなり焦った。
 
+しかも気づくまでに3日かかった。pushした翌日でも翌々日でもなく、3日後にGitHubのセキュリティbotから「Secret exposed in commit」という通知のissueが自動で作られていて、それで初めて気づいた。つまり3日間、誰でも`.env`の中身を見られる状態が続いていた。その間に自分のStripeのシークレットキーが悪用されていないかを確認するために、Stripeダッシュボードのアクセスログを見て回るという作業をすることになった。
+
 急いで取り消そうとしたが、「コミットを取り消す」方法を調べると`git reset`と`git revert`の2種類が出てきてどちらを使えばいいか判断できなかった。
 
 ```
@@ -49,6 +51,8 @@ git status
 # nothing to commit, working tree clean
 # 1時間分の変更が跡形もなく消えた
 ```
+
+`git reset`を試す前に「とりあえず一旦退避しよう」と思って`git stash`を使ったこともあった。でも`git stash`はステージングエリアやワーキングツリーの変更を退避するもので、既にコミット済みの変更には効かなかった。「stashしてから`.env`だけ取り除いてもとに戻せるかも」と思ったが、コミットが既に作られている以上stashで操作できる対象ではなかった。30分試してから「stashはコミット済みには使えない」と気づいた。
 
 焦って複数のコマンドを試したせいで、最終的に「今のローカルのコミット履歴がどうなっているか」がわからなくなった。`git log --oneline`で現在の状態を先に確認してから操作する、というのをもっと早く習慣にするべきだった。
 
@@ -148,6 +152,8 @@ git filter-repo --path .env --invert-paths
 
 `git filter-repo`実行後にforce pushした後は、全コラボレーターがローカルのリポジトリをcloneし直す必要がある。古いリポジトリ状態でpullしても正常にマージできないことがある。「filter-repoを実行する前に全員に告知してcloneし直してもらう」という段取りが必要だった。告知なしでforce pushしたら、チームメンバーからすぐに「pushできなくなった」と連絡が来た。
 
+`git filter-repo`実行後はローカルのリポジトリ自体も「履歴が書き換わったリポジトリ」になっているため、`git pull`では取得できなくなる。「filter-repo後に`git pull`したら`fatal: refusing to merge unrelated histories`と出てpullできなくなった」という状況になった。この場合は自分も含めてクリーンな状態から`git clone`し直すのが一番早い。
+
 ### 6. 2つ以上前のcommitを取り消したい
 
 `HEAD~1`の数字を変えれば何個でも指定できる。どのコミットまで戻るか確認してから実行する。
@@ -208,6 +214,64 @@ git stash list      # 退避リストを確認
 
 stashは複数個積み重ねることができる。`git stash list`で一覧を確認して、`git stash pop stash@{1}`で特定のstashを取り出す使い方もある。破壊的な操作を試したい前に`git stash`しておくと、失敗しても`git stash pop`で元に戻せる。
 
+stashはコミット前の変更を退避する機能で、既にコミット済みの変更には効かない。「コミット済みの変更をstashで取り消せるかも」と思って試したが、コミット後の変更はstashの対象外だった。
+
+### 9. .envを誤ってpushした時の緊急対応手順
+
+`.env`や認証情報を含むファイルをpushしてしまった場合の対応は「Gitの操作」と「認証情報の無効化」を必ず並行して進める。Git操作だけでは不十分で、その間も漏洩が続いている。
+
+**Step 1：認証情報を即時無効化する（最優先）**
+
+```
+- Stripe/AWS/GCPなどのダッシュボードにログインして該当キーを削除または無効化する
+- GitHubのPATが含まれている場合はGitHub Settings → Developer settings から削除する
+- DBパスワードが含まれている場合はDBのパスワードを即時変更する
+- 新しいキー/パスワードを発行して.envを更新する（まだGitにはコミットしない）
+```
+
+Step 1は文字通り最初にやること。git filter-repoを実行している間も漏洩は続いている。
+
+**Step 2：.gitignoreに追加してローカルでアンステージ**
+
+```bash
+echo ".env" >> .gitignore
+git rm --cached .env
+git add .gitignore
+git commit -m "remove .env from tracking"
+```
+
+**Step 3：git filter-repoで全履歴から削除**
+
+```bash
+pip install git-filter-repo
+git filter-repo --path .env --invert-paths
+```
+
+**Step 4：force pushしてチームに通知**
+
+```bash
+git push --force origin main
+```
+
+force push前に必ずチームメンバーに連絡する。「force pushします。完了したら全員git cloneし直してください」という内容で。
+
+**Step 5：re-clone（自分自身も含む）**
+
+```bash
+# 旧ディレクトリを削除または別名でバックアップ
+cd ..
+mv my-project my-project-old
+git clone https://github.com/yourname/my-project.git
+cd my-project
+# .envを新しいキーで作成する
+```
+
+filter-repo後は`git pull`ができなくなるため、自分自身もcloneし直す必要がある。
+
+**Step 6：GitHubのキャッシュクリアを依頼（必要に応じて）**
+
+force push後もGitHubのキャッシュに古いコミットが残ることがある。`https://github.com/yourname/repo/commit/古いハッシュ`のURLにアクセスして`.env`の内容が見えないことを確認する。まだ見える場合はGitHub Supportに連絡してキャッシュクリアを依頼する。
+
 ## ハマったポイント
 
 - `--soft`と`--hard`の違いは「ファイルの変更を残すかどうか」だと思っていたが、実際にはもう少し厳密に言うと「インデックス（ステージ）とワーキングツリーをどこまでリセットするか」の違いだった。`--soft`はコミットだけ消えてファイルはstaged状態で残る。`--mixed`（デフォルト）はコミットとステージが消えてファイルは残る。`--hard`はコミット・ステージ・ワーキングツリーすべて消える。「とりあえずコードを消さずにコミットだけ取り消したい」なら`--soft`一択だった
@@ -219,6 +283,9 @@ stashは複数個積み重ねることができる。`git stash list`で一覧�
 - `git filter-repo`を実行したら全コラボレーターにcloneし直しを依頼する必要があると思っていたが、実際に告知せずにforce pushしてしまって「pushできない」という連絡がチームメンバーから来た。force pushで共有ブランチの履歴を書き換えると、他の人のローカルリポジトリは「存在しないコミットの子」という状態になる。事前告知は必須だった
 - 複数の操作を焦って連続で実行すると`git log --oneline`を見ても現在の状態が把握できなくなる、と思っていたが、`git log --oneline`は「現在地」を教えてくれるだけで「どういう操作をしたか」は`git reflog`を見ないとわからなかった。操作に行き詰まったら`git reflog`で操作の全履歴を確認するのが一番状況を整理しやすかった
 - `git revert`でコミットを取り消した後も、GitHubのコミット一覧には「Revert "コミットメッセージ"」という新しいコミットが追加されるだけで、元のコミットは履歴上で閲覧可能な状態のまま残る。「履歴から完全に消す」ためには`git filter-repo`が必要で、これはrevertとは全く別の操作だった。この違いを理解するのに時間がかかった
+- GitHubのSecret Scanning機能はGitHub発行のトークン（PAT、GitHub Actionsシークレットなど）を自動検知するが、StripeのシークレットキーやカスタムのAPIキーは検知対象外だった。「GitHubが自動で検知して教えてくれる」と思い込んでいたが、任意のAPIキーは自分で気づくしかない。GitHub Secret Scanningが通知してくれたのはGitHub PATだけで、Stripeキーは3日間スルーされていた
+- `.env`をpushしてから気づくまで3日かかった。GitHubのセキュリティbotが自動issueを作成してくれたことで発覚したが、それまでリポジトリは誰でも見られる状態だった。pushした後に一度ブラウザでGitHubのコミット差分を確認する習慣があれば即日気づけた。今は必ずpush後に差分をブラウザで確認するようにしている
+- `git filter-repo`実行後に`git pull`をしようとしたら`fatal: refusing to merge unrelated histories`と出てpullできなくなった。filter-repoで履歴が書き換わったため、ローカルとリモートが「別のリポジトリ」という扱いになってしまった。`git pull`で解決しようとして時間を無駄にしたが、正解は`git clone`でやり直すことだった
 
 ## 関連記事
 

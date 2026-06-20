@@ -10,6 +10,8 @@ description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解
 
 Astroで作ったブログサイトをCloudflare Pagesで公開しようとした。これまでVercelしか使ったことがなかったが、Cloudflareの方がCDNの速度が良いと聞いて移行を考えた。Cloudflare PagesのUIがVercelと全然違って、最初どこから設定を始めればいいのかわからなかった。
 
+作業を始める前にMediumで「Cloudflare Pages + Astro deployment guide」みたいなタイトルの記事を見つけて読んでいたのだが、**その記事が2年前に書かれたものだった**。UIのスクリーンショットが今のCloudflareのダッシュボードと全然違っていて、記事では「Pages」という独立したメニューが左サイドバーにあるように見えていたが、今は「Workers & Pages」という項目にまとまっていた。手順を追ったつもりが「記事の画面と全然違う」状態になって、30分以上迷子になった。GitHubやCloudflare関連のチュートリアルは更新が速いので、記事の日付を確認してから読む習慣が必要だとこのときに学んだ。
+
 「Workers & Pages」を開いたらWorkers用の画面しか見当たらず、Pagesの設定に入る場所が見つけにくくて詰まった。Vercelだと「New Project」を押してGitHubリポジトリを選ぶだけで全部繋がるのに、Cloudflareは同じノリでやったら全然違う画面が出てきた。結果的に最初のデプロイ完了まで3時間近くかかったが、2回目以降は5分でできるようになった。
 
 Vercelとの比較で一番戸惑ったのは、Cloudflare Pagesの「Pages」という概念がWorkers & Pagesという一つの項目にまとまっていることだった。Vercelなら「Deploy」ボタンが一番目立つ場所にあるが、Cloudflareは「Create application」を押してからさらに「Pages」の画面を探す必要があった。
@@ -42,6 +44,14 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 ```
 
 このエラーが出た時は`sharp`を`dependencies`ではなく`devDependencies`に入れていたのが原因だった。本番ビルドでは`devDependencies`はインストールされないので、使うパッケージは必ず`dependencies`に入れる必要があった。
+
+それとは別に、ローカルでは一切出なかったTypeScriptのエラーがCloudflareのビルド環境でだけ発生した。具体的には以下のようなエラーだった。
+
+```
+error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
+```
+
+ローカルではNode.js 20で動いていたのに、CloudflareのデフォルトビルドがNode.js 18を使っていたため、TypeScriptの型定義のバージョンが違ってエラーになっていた。`NODE_VERSION`環境変数を設定するまで「なぜローカルで通るのにCloudflareで失敗するのか」全くわからなかった。ローカルとCloudflareでNode.jsバージョンが揃っていないと、TSのコンパイルエラーが片方でしか再現しないというトラップにはまる。TypeScriptエラーはローカルで確認できないと特に厄介で、デプロイを2〜3回繰り返すことになった。
 
 さらに詰まったのが、Cloudflare PagesのGitHub認証画面で「Only select repositories」を選んでいたこと。後から新しいリポジトリを別に作ってCloudflareに接続しようとしたら、リポジトリの一覧に出てこなかった。「All repositories」に変更するか、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから個別に追加する必要があった。
 
@@ -219,8 +229,47 @@ Rollbackした後も、GitHubのリポジトリのコードは最新のコミッ
 
 Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅が上限になっている（2026年5月時点）。ブログサイトを個人で運営する分にはほとんど気にならない上限だが、毎日何度もpushするような開発フローでは消費が早まる。Deploymentsタブの「Build count」でその月の残りビルド回数を確認できる。
 
+### 11. TypeScriptエラーのトラブルシューティング
+
+ローカルでは出ないのにCloudflareのビルドでだけTypeScriptエラーが出る場合、ほぼ確実にNode.jsのバージョン差異が原因だった。
+
+まず`NODE_VERSION`環境変数を設定してローカルと同じバージョンを指定する。
+
+Settings → Environment variables → 「Add variable」で以下を追加する。
+
+```
+Variable name: NODE_VERSION
+Value: 20
+```
+
+これでCloudflareのビルド環境がNode.js 20で動くようになる。TypeScriptの型定義はNode.jsバージョンごとに差があるので、バージョンを統一するだけで解消できるエラーが多かった。
+
+よく出るTypeScriptエラーのパターン：
+
+```
+error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
+```
+→ `ImportMeta`の型定義がNode.jsバージョンによって違う。`NODE_VERSION=20`を設定することで解消した。
+
+```
+error TS2307: Cannot find module '~/components/xxx' or its corresponding type declarations
+```
+→ パスエイリアスの解決がCloudflare環境で失敗している。`tsconfig.json`の`paths`設定と`astro.config.mjs`のaliasが一致しているか確認する。
+
+ローカルで同じエラーを再現させたい場合は、`.nvmrc`にバージョンを固定してCloudflareの環境変数と揃えることで「ローカルでだけ通ってCloudflareで落ちる」という状況を防げた。
+
+```bash
+echo "20" > .nvmrc
+nvm use
+npm run build
+```
+
+TypeScriptのエラーがビルドを止めている場合、`tsconfig.json`に`"skipLibCheck": true`を追加すると一時的に回避できる。ただし型チェックが甘くなるので、根本原因（Node.jsバージョンの不一致など）を解消してから外す方がよかった。
+
 ## ハマったポイント
 
+- ローカルで通っていたTypeScriptのコードがCloudflareのビルドでだけ`error TS2339`などの型エラーで落ちた。原因はCloudflareのデフォルトNode.jsバージョンがローカルより古かったこと。`NODE_VERSION=20`を環境変数に追加するまで「ローカルで動くのになぜ」と2回デプロイを無駄にした。TypeScriptエラーが出たらまずNode.jsバージョンを疑う
+- 参考にしていたMediumの記事が2年前のもので、UIのスクリーンショットが現在のCloudflareダッシュボードと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事ではまだ「Pages」が独立したメニューに見えていた。チュートリアルを読むときは記事の公開日を必ず確認する
 - 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。ページの上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計だった
 - Framework presetで「Astro」を選ぶとビルド設定が自動入力されるだけでなく、推奨のNode.jsバージョンも適用される。手動で`npm run build`と`dist`を入れても一応動くが、Node.jsのバージョン差異でビルドが失敗しやすい。最初から「Astro」を選んでおけば避けられる失敗だった
 - GitHubの認証ページで「Only select repositories」を選ぶと、後から新しいリポジトリを追加した時にCloudflareの一覧に出てこない。その場合はGitHubのSettings → Applications → Cloudflare Pages → Repositoriesから追加できる。「なぜ新しいリポジトリが出てこないのか」と20分悩んだことがあった

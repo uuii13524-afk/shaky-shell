@@ -10,6 +10,10 @@ description: 'XserverのドメインをCloudflare Pagesのカスタムドメイ�
 
 Xserverで取得したドメインをCloudflare Pagesで公開しているAstroサイトのカスタムドメインに設定したかった。`*.pages.dev`のURLから独自ドメインに変えるのが目的だったが、手順が複数ステップにわたっていて全体像がつかめなかった。
 
+今回の作業をさらに複雑にしていたのが、同じXserverの同じドメインで以前からWordPressサイトを運営していた点だ。WordPressは別のディレクトリ（`/blog/`）に入っていて、まだ記事を書いていたので絶対に止めたくなかった。「ネームサーバーをCloudflareに変えたらWordPressは動かなくなるのか」という不安があり、それを確認しながら進める必要があった。
+
+結論から言うと、ネームサーバーをCloudflareに変えた時点でXserverで動いていたWordPressは表示されなくなった。これは予想できた話ではあるが、実際に「サイトが表示されなくなった」という状態になると焦った。事前にWordPressのデータをエクスポートしておいたのは正解だった。CloudflareのDNSにXserverのIPを向けるAレコードを追加すれば理論上は復活させられるが、今回はCloudflare Pagesへの完全移行を選んだ。
+
 ネームサーバーの変更・Active待ち・カスタムドメインの有効化が別々の作業として必要で、どこまで済んでいてどこが残っているかわからなくなった。特に「ネームサーバーの変更」と「Custom domainsでのActivate」が2段階になっているのを知らず、1段階目で終わったと思って待ち続けた時間があった。
 
 設定が全部完了するまでに実作業は30分程度でも、Active待ちや確認の手間を含めると半日近くかかった。「なぜまだ見えないのか」を何度も調べていたので、最初から手順の全体像を把握していればもっと短く終わったと思う。
@@ -33,7 +37,9 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 ネームサーバーをCloudflareに変更してActive待ちの間、「これでカスタムドメインの設定は完了したのでは」と思っていたが、実はActiveになってから**もう一度Cloudflare PagesのCustom domainsで操作が必要**だとわかって、作業が2段階になっているとは最初知らなかった。
 
-Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。「PagesのCustom domains設定が終わっていない」が原因で、Cloudflareがトラフィックを受け取ったが転送先（Cloudflare Pages）が設定されていない状態だった。Custom domainsでActivateボタンを押してから5分後に再アクセスしたら正常に表示された。
+Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。最初は「PagesのCustom domains設定が終わっていない」が原因だと思っていたが、Custom domainsでActivateボタンを押した後も同じ522エラーが数分続いた。ここで焦って状況を調べたら、実はXserverの旧IPを指すAレコードがCloudflareのDNSに残っていたことがわかった。
+
+Cloudflareがネームサーバーのスキャン時に取り込んだXserverのAレコード（`192.168.xxx.xxx`のような形式）が、CloudflareのDNS設定にそのまま残っていた。そのAレコードがCloudflare Pagesのより優先されていたため、アクセスがXserverの旧IPに向いてしまって522が出続けていた。CloudflareのDNS設定画面を開いてそのAレコードを削除したら、数分後に正常に表示されるようになった。
 
 「HTTPSにするには証明書が必要では？」とも悩んだ。Cloudflareのデフォルトが「Flexible SSL」なのか「Full SSL」なのかわからず、設定を間違えるとサイトにアクセスできなくなるのではと心配した。実際にはCustom domainsの設定が完了した時点でHTTPSは自動で有効になって、SSLの設定を別途触る必要はなかった。ただしEncryption Modeが「Flexible」のままだとセキュリティ的に望ましくないので、「Full」に変更した。
 
@@ -161,6 +167,37 @@ Redirect Rulesで「Dynamic」を選んだ場合は`${uri}`部分がパスとク
 
 `*.pages.dev`のURLはSearch Console登録に使わないだけでなく、Googleにインデックスされないよう`robots.txt`で制御することも考えられる。ただしCloudflare Pagesは`*.pages.dev`のURLのrobots.txtをカスタマイズできないので、カスタムドメインを主に使い`*.pages.dev`は開発確認用と割り切るのが現実的だった。
 
+### 8. カスタムドメインが設定できない場合の追加確認
+
+「Activateを押したのに522が続く」「Custom domainsのステータスがPendingから動かない」という場合は、CloudflareのDNS設定に古いAレコードが残っているケースを疑う。
+
+Cloudflareのダッシュボード→「Websites」→ドメインを選択→「DNS」→「Records」を開く。
+
+確認するポイント：
+
+```
+1. yourdomain.com に対してAレコードが残っていないか確認する
+   （XserverのIPを指す 192.168.xxx.xxx のようなレコード）
+2. そのAレコードがCloudflare Pagesのより先に評価されていないか確認する
+3. 不要なAレコードは削除する
+```
+
+AレコードとCNAMEが同じホスト名に共存していると予期しない挙動が起きる。Activateボタンを押すと`yourdomain.com`に対してCNAMEが追加されるが、既存のAレコードが残っていた場合はどちらが優先されるかが不安定になる。
+
+削除するAレコードを見極める方法：
+
+```bash
+# 現在のDNS解決結果を確認する
+nslookup yourdomain.com
+
+# Aレコードだけ確認する
+nslookup -type=A yourdomain.com
+```
+
+CloudflareのIPアドレス（`104.21.x.x`や`172.67.x.x`など）が返ってくれば正常。Xserverのような他のサーバーのIPが返ってくれば古いAレコードが残っている。
+
+SSL「Full」設定で無限リダイレクトが起きた場合は、Encryption Modeが「Flexible」になっていないか確認する。「Flexible」にしてしまうと、Cloudflare→オリジン間はHTTPで接続するが、オリジン（Cloudflare Pages）がHTTPSにリダイレクトしようとするため無限ループが起きる。「Full」に戻せば解消する。
+
 ## ハマったポイント
 
 - ネームサーバーが「Active」になる前にCustom domainsでドメインを設定しようとしても「Pending」のまま何も進まない。「Active後に改めてCustom domainsの設定をする」という2段階になっているとは最初知らなかった。Activeになってからもう一度Pagesの設定に戻る手順がある
@@ -174,6 +211,9 @@ Redirect Rulesで「Dynamic」を選んだ場合は`${uri}`部分がパスとク
 - Cloudflareに「I updated my nameservers」ボタンがあることを見落とすと、ずっとPendingのままになる。画面内に小さく表示されているボタンで、押さないとCloudflareが確認を開始しない
 - Activateボタンを押した直後は「522 Connection Timed Out」のエラーが数分続くことがある。「失敗した」と思ってもう一度Activateを押すと設定が重複してしまうことがあった。初回Activateを押したら5分待ってからページをリロードして確認するのが正しい手順だった
 - Redirect Rulesで`${uri}`を使わずに固定URLへのリダイレクトを設定してしまい、`www.yourdomain.com/posts/something`が常に`yourdomain.com`（トップページ）にリダイレクトされる設定になってしまったことがあった。Dynamic redirectで`${uri}`を含めることでパスごとの正しいリダイレクトができる。設定後は記事ページのURLでもリダイレクトが正しく動くか確認することにした
+- Cloudflareがネームサーバースキャン時に取り込んだXserverのAレコードがDNS設定に残ったままで、Custom domainsのActivate後も522エラーが続いた。CloudflareのDNS設定画面を見るまで原因に気づかなかった。Xserverの旧IPを指すAレコードを削除したら解消した。Activateした後も522が続く場合はDNSの残存レコードを疑うべきだった
+- Xserverで動かしていたWordPressサイトがネームサーバー変更後すぐに表示されなくなった。「切り替え後は表示されなくなる」と頭ではわかっていたが、実際にサイトが見えなくなった瞬間は予想以上に焦った。Cloudflare移行前にWordPressのデータをバックアップしておいたのは正解だった
+- Encryption Modeを「Full」に変えたところで問題なかったが、「Flexible」のままにしていた時期に`https://`でアクセスしても無限リダイレクトが起きた。「Flexible」ではCloudflare→オリジン間がHTTPになるため、Cloudflare Pagesが再びHTTPSにリダイレクトしようとしてループが発生した。「Full」に変えたら即座に解消した
 
 ## 関連記事
 
