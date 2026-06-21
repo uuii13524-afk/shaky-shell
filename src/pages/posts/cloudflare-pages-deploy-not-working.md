@@ -10,6 +10,8 @@ description: 'git pushしてもCloudflare Pagesに変更が反映されない原
 
 記事を更新してgit pushしたのに、Cloudflare Pagesのサイトに変更が全然反映されなかった。いつもは1〜2分で更新されるのに、30分待っても何も変わらない。Deploymentsタブを開いたら新しいデプロイが一切来ておらず、最後のデプロイが昨日のままになっていた。
 
+最初は「自分の回線かISPの問題かも」と思って、スマホのモバイル回線でもサイトを確認してみた。どちらでも同じ古い内容が表示されていた。「じゃあCloudflare側がキャッシュを返しているのでは」とも考えたが、サイト自体は問題なく表示されていたのでサーバー障害ではないと判断した。「サイトが表示される＝デプロイが正常に動いている」と思い込んでいたが、実際にはキャッシュされた古いバージョンが表示され続けていただけで、デプロイ自体は完全に止まっていた。「サイトが動いているから問題ない」という判断が、問題発見を30分以上遅らせた。
+
 ```
 This project is disconnected from your Git account.
 This may cause deployments to fail.
@@ -38,6 +40,16 @@ This may cause deployments to fail.
 
 「もう一度pushすれば直るかも」と思って`git push --force`まで試したが何も起きなかった。GitHubのリポジトリにはちゃんとコミットが積まれているのに、Cloudflareがそれを全く検知していなかった。
 
+Cloudflare APIに直接リクエストを投げてプロジェクトの状態を確認しようと試みたこともあった。Cloudflare APIのドキュメントを調べて、以下のようなコマンドで現在のデプロイ状態を取得しようとした。
+
+```bash
+curl -X GET "https://api.cloudflare.com/client/v4/accounts/{account_id}/pages/projects/{project_name}" \
+  -H "Authorization: Bearer {api_token}" \
+  -H "Content-Type: application/json"
+```
+
+APIトークンはCloudflareダッシュボードの「My Profile」→「API Tokens」→「Create Token」で作成できる。ただし、API経由で確認できたのは「プロジェクトの設定が存在する」という事実だけで、「なぜビルドが来ないのか」という根本原因はAPI応答からは読み取れなかった。GitHubとのOAuth接続状態はAPIレスポンスの`deployment_configs`や`latest_deployment`フィールドを見てもエラーとして出てこなかった。結局、APIで確認するよりもGitHubのWebhook deliveryを見に行く方がずっと早く根本原因に到達できた。
+
 Cloudflareのプロジェクト設定に問題があるかと思って「Settings」タブを全部確認した。「Build & deployments」の設定でProduction branchが`main`になっていてGitHubのデフォルトブランチも`main`だったので、ブランチ設定のズレではないとわかった。Environment variablesの設定も問題なかった。設定画面を隅々まで確認して「設定ファイルは全部正しい」とわかった後で「じゃあなぜビルドが来ないのか」という状況だった。
 
 GitHubのリポジトリSettings → Webhooksを確認したら、Cloudflare Pagesが登録しているWebhookのdeliveryを確認できた。直近のdeliveryを開いてレスポンスを見たら、HTTPステータスが`401 Unauthorized`になっていた。
@@ -61,6 +73,26 @@ git logでコミット履歴を確認したら`master`ブランチにはpushで�
 ## 解決策
 
 原因は3パターンある。「Deploymentsタブにビルドが来ているか来ていないか」を最初に確認して、上から順に確認していくのが早い。
+
+### ビルドが来ない原因を30秒で判定する方法
+
+Deploymentsタブを開いてから30秒以内に原因の方向性を絞る手順。
+
+```
+Deploymentsタブを開く
+  │
+  ├─ 新しいビルドエントリが0件（最後のデプロイが昨日以前）
+  │   ├─ プロジェクトトップにオレンジのバナーあり → 原因1（OAuth切断）
+  │   └─ バナーなし → GitHubのWebhookを確認（Settings → Webhooks → Recent Deliveries）
+  │         ├─ 401が返っている → 原因1（OAuth切断）
+  │         └─ Deliveryが1件もない → ブランチ名を確認 → 原因2
+  │
+  └─ 新しいビルドエントリあり
+        ├─ Failed → ビルドログを確認 → 原因3
+        └─ Success → サイトが変わっていない → CDNキャッシュ → Purge Cache
+```
+
+この判定ツリーを知っていれば、「ビルドが来ていない」「ビルドは来ているがFailed」「ビルド成功だがサイト変わらない」のどれかに30秒で絞り込める。あとはそのパターン向けの対処だけをすればいい。
 
 ### 原因1：CloudflareとGitHubの接続が切れている
 
@@ -185,6 +217,8 @@ GitHubにpushした後は毎回Deploymentsタブを確認する習慣をつけ�
 
 ## ハマったポイント
 
+- サイトが問題なく表示されていたので「ISPや自分の回線の問題かも」と最初に疑ったが、実際はCloudflareのCDNキャッシュが古いバージョンを返し続けていただけだった。「サイトが表示される＝デプロイが動いている」という思い込みを捨てて、まずDeploymentsタブを確認するのが正しかった
+- Cloudflare APIを直接叩いてプロジェクト状態を確認しようとしたが、OAuth切断の状態はAPIレスポンスからは判定できなかった。APIで確認するより、GitHubのWebhook deliveryログを見に行く方が根本原因に30分速く到達できた。「API→ログ」ではなく「ログ→API」の順番で調べる方が効率的だった
 - 空のコミットのpushが最も確実な強制デプロイ方法。`--allow-empty`オプションを知らなくて最初は1文字だけ追加したファイルをコミットしてはpushという無駄な作業をしていた
 - ビルドが「来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった。「Failed」が来ていれば原因3、何も来ていなければ原因1か2
 - Settings → Git repositoryの「Manage」ボタンは分かりにくい場所にある。Settingsタブを開いてかなり下にスクロールした先にある。プロジェクトのトップ画面では見えない

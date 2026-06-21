@@ -8,13 +8,15 @@ description: 'GitHubでリポジトリを新規作成してローカルの既存
 
 ## やりたかったこと
 
-ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとしたら、認証でエラーが出て詰まった。GitHubのページに書いてある手順通りにコマンドを実行したのに、`git push -u origin main`のところでユーザー名とパスワードを聞かれた。GitHubのログインパスワードを入力したら以下のエラーが出た。
+ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとしたら、認証でエラーが出て詰まった。YouTubeで「GitHubにpushする方法」という動画を見つけて、その通りに操作していた。動画の通りにコマンドを打って、パスワードを入力する画面が出たのでGitHubのアカウントパスワードを入れた。そしたら以下のエラーが出た。
 
 ```
 remote: Support for password authentication was removed on August 13, 2021.
 remote: Please see https://docs.github.com/en/get-started/getting-started-with-git/about-remote-repositories
 fatal: Authentication failed for 'https://github.com/ユーザー名/my-astro-blog.git'
 ```
+
+後で気づいたことだが、見ていたYouTube動画は2020年に録画されたものだった。動画の中ではパスワードを入力してpushが通る様子が映っていた。だが2021年8月にGitHubはパスワード認証を廃止しており、2020年の動画の手順はそのまま使えなくなっていた。動画の公開日を確認する習慣がなかったので、「なぜ動画通りにやってるのに動かないのか」と30分以上迷走した。
 
 「パスワードが違う」というエラーではなく「パスワード認証は削除された」という内容だった。エラーメッセージを読んでいなかったので、最初は「アカウントのパスワードを間違えているのかも」と思ってブラウザでGitHubにログインして確認した。ログインできるので、パスワードは合っている。それなのにgitではエラーになる理由が全くわからなかった。
 
@@ -32,6 +34,10 @@ fatal: Authentication failed for 'https://github.com/ユーザー名/my-astro-bl
 ## 試したこと・うまくいかなかったこと
 
 最初、GitHubでリポジトリを作って「…or push an existing repository from the command line」に表示されたコマンドをそのままコピーして実行した。`git push -u origin main`まで進んだがパスワードエラーになった。「パスワードを間違えた」と思ってもう一度試したが、3回試しても同じエラーだった。エラーメッセージの1行目「password authentication was removed」を最初は読んでいなかったので、原因が全くわからなかった。
+
+CLIでの認証がうまくいかないので、試しにGitHub Desktopをインストールして同じリポジトリをpushしてみた。GitHub Desktopはブラウザ経由でGitHubアカウントにログインする形式なので、パスワード認証の問題が一切なく、あっさりpushが通った。「あれ、GitHubへのpushはできてる。じゃあCLIの問題なんだ」とわかって、問題の切り分けができた。
+
+ただGitHub Desktopを使い続けようとは思わなかった。CLIでコマンドを打ってpushできるようになりたかったし、「デスクトップアプリに頼るのは逃げている気がする」という気持ちがあった。それにVSCodeのターミナルやサーバーのSSH越しでは当然デスクトップアプリは使えない。GitHub Desktopで一回動作確認できたのは良かったが、「なぜCLIで動かないか」を理解するための調査に戻った。
 
 パスワード認証が廃止されていたとわかった後、代替手段としてPersonal Access Token（PAT）を試した。「GitHubの設定でPATを発行する」とわかったが、GitHubのSettingsページを開いてもどこにもそれらしいメニューが見当たらなかった。「Emails」「Password and authentication」「SSH and GPG keys」などのメニューを全部見たが「Personal access tokens」という項目はなかった。
 
@@ -134,6 +140,8 @@ GitHubはパスワード認証が廃止されているのでPersonal Access Toke
 
 発行されたトークンをコピーしてパスワード入力欄に貼り付けると認証が通る。トークンは一度しか表示されないので、コピーしてパスワードマネージャーなどに保存しておく。
 
+スコープの「repo」は全プライベートリポジトリへのアクセス権を含む。パブリックリポジトリのみへのpushであれば「public_repo」だけで足りる。「とりあえず`repo`を入れておけばいい」と全部チェックしていた時期があったが、セキュリティの観点から必要最小限のスコープにしておくのが正しかった。
+
 GitHubには「Tokens (classic)」と「Fine-grained tokens」の2種類がある。Fine-grained tokensはリポジトリ単位や権限単位で細かく制御できる。個人プロジェクトで使い始める場合はclassicのほうがシンプルで扱いやすかった。
 
 Windowsの場合、一度認証が通ると「Windows 資格情報マネージャー」に保存される。次回以降は入力不要になるので、PATは発行したら安全な場所に保管しておく。
@@ -204,6 +212,46 @@ git push
 
 `-u origin main`は初回のみ必要で、2回目以降は`git push`だけで動く。`-u`オプションがローカルブランチとリモートブランチの追跡関係を設定するため、一度設定すれば以降は不要になる。
 
+### 8. GitHub CLIを使った方法（代替手段）
+
+PATの発行・管理が面倒に感じる場合は、GitHub CLI（`gh`コマンド）を使った認証が便利だった。インストール後に`gh auth login`を実行するだけでブラウザ経由でGitHubアカウントと連携できる。
+
+```bash
+# GitHub CLIのインストール（Windowsの場合）
+winget install --id GitHub.cli
+
+# macOSの場合
+brew install gh
+
+# 認証
+gh auth login
+```
+
+`gh auth login`を実行するとインタラクティブな選択肢が出てくる。
+
+```
+? What account do you want to log into? GitHub.com
+? What is your preferred protocol for Git operations? HTTPS
+? Authenticate Git with your GitHub credentials? Yes
+? How would you like to authenticate GitHub CLI? Login with a web browser
+
+! First copy your one-time code: XXXX-XXXX
+Press Enter to open github.com in your browser...
+```
+
+ブラウザが開いてワンタイムコードを入力するだけで認証が完了する。PATの発行・スコープ設定・トークンの保管という手間が一切不要で、「CLIでpushしたいだけなのにPATの説明が長い」と感じた時はこちらが早かった。
+
+認証後は普通に`git push`が使えるようになる。`gh auth status`で認証状態を確認できる。
+
+```bash
+gh auth status
+# github.com
+#   ✓ Logged in to github.com as yourname
+#   ✓ Git operations for github.com configured to use https protocol.
+```
+
+GitHub CLIはリポジトリの作成やIssueの管理など他の操作もCLIからできるので、入れておくと便利な場面が多かった。
+
 ## ハマったポイント
 
 - リポジトリ作成時に「Add a README file」を有効にしないと問題ないと思っていたが、チェックをつけると空のリポジトリではなくREADMEのコミットが入った状態になる。ローカルとリモートで別々の履歴が生まれて最初のpushが失敗する。空のリポジトリから始める方が圧倒的にトラブルが少かった。「初期ファイルを作ってくれるから便利」と思って入れたのが裏目に出た
@@ -216,6 +264,9 @@ git push
 - `git commit`せずに`git push`しようとすると「nothing to commit」や「Everything up-to-date」と出てpushが実行されないと思っていたが、実際には`git init`直後にコミットなしで`git push`を試みると「fatal: The current branch main has no upstream branch」というエラーになることがあった。「コミットしていない」と「upstreamが設定されていない」は別のエラーで、混同してしまった
 - `git remote add origin`のURLを手入力する場合にタイポが起きやすい。URLが間違っていると`git push`で「repository not found」や「Could not read from remote repository」というエラーになる。手入力ではなくGitHubの「Quick setup」画面のコピーボタンを使うのが確実で、手入力は避けた方がいいということを最初は知らなかった
 - `git push -u origin main`の`-u`（`--set-upstream`）オプションは初回のみ必要だと思っていなかった。2回目以降も`-u origin main`を付けていたが、`-u`なしで`git push`だけで動くようになる。`-u`で一度設定すれば追跡関係が保存されるという仕組みを知らなかった
+- 2020年以前に録画されたYouTubeの手順動画を参考にしていたため、パスワードで認証できるという前提で進めていた。「動画通りにやっているのに動かない」という状況の原因が「動画が古い」だとは最初思わなかった。GitHubの仕様は2021年に大きく変わっており、動画の公開日を確認してから参考にする必要があった
+- GitHub Desktopを試したらあっさりpushが通った。これで「Gitのインストールやリポジトリ設定は正しい、認証だけが問題」だとわかった。CLIで詰まった時にGitHub Desktopで試してみることで問題の切り分けができた。「CLIで動かないからGitが壊れている」ではなく「認証方法が違う」という正確な診断ができた
+- PATのスコープ「repo」と「public_repo」の違いを理解していなかった。「repo」はプライベートリポジトリも含む全リポジトリへのアクセス権で、「public_repo」はパブリックリポジトリのみに限定される。パブリックリポジトリへのpushだけなら「public_repo」で十分で、不必要に広い権限を与えないのがセキュリティの基本だと後から知った
 
 ## 関連記事
 
