@@ -8,17 +8,17 @@ description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解
 
 ## やりたかったこと
 
-Astroで作ったブログサイトをCloudflare Pagesで公開しようとした。これまでVercelしか使ったことがなかったが、Cloudflareの方がCDNの速度が良いと聞いて移行を考えた。Cloudflare PagesのUIがVercelと全然違って、最初どこから設定を始めればいいのかわからなかった。
+Astroで作ったブログをCloudflare Pagesで公開しようとした。VercelからCloudflareに移行する目的だったが、Cloudflare PagesのUIがVercelと全然違って、最初どこから設定を始めればいいかわからなかった。
 
-作業を始める前にMediumで「Cloudflare Pages + Astro deployment guide」みたいなタイトルの記事を見つけて読んでいたのだが、**その記事が2年前に書かれたものだった**。UIのスクリーンショットが今のCloudflareのダッシュボードと全然違っていて、記事では「Pages」という独立したメニューが左サイドバーにあるように見えていたが、今は「Workers & Pages」という項目にまとまっていた。手順を追ったつもりが「記事の画面と全然違う」状態になって、30分以上迷子になった。GitHubやCloudflare関連のチュートリアルは更新が速いので、記事の日付を確認してから読む習慣が必要だとこのときに学んだ。
+MediumでAstro+Cloudflareのデプロイ記事を見つけて読んでいたのだが、2年前の記事だった。スクリーンショットのUIが現在のCloudflareと全然違って「Pages」という独立したメニューが左サイドバーにあるように見えていた。今は「Workers & Pages」という項目にまとまっていて、記事の通りに操作しても「その画面がない」という状態になった。記事の日付を確認せずに参考にしたのが最初のミスだった。
 
-「Workers & Pages」を開いたらWorkers用の画面しか見当たらず、Pagesの設定に入る場所が見つけにくくて詰まった。Vercelだと「New Project」を押してGitHubリポジトリを選ぶだけで全部繋がるのに、Cloudflareは同じノリでやったら全然違う画面が出てきた。結果的に最初のデプロイ完了まで3時間近くかかったが、2回目以降は5分でできるようになった。
+「Create application」を押したらWorkers用の画面が出てきて、Pagesの設定入口がどこにあるかわからなくなった。Vercelなら「New Project」→GitHubリポジトリを選ぶだけで繋がるのに、Cloudflareは全然違う流れになっていた。
 
-Vercelとの比較で一番戸惑ったのは、Cloudflare Pagesの「Pages」という概念がWorkers & Pagesという一つの項目にまとまっていることだった。Vercelなら「Deploy」ボタンが一番目立つ場所にあるが、Cloudflareは「Create application」を押してからさらに「Pages」の画面を探す必要があった。
+最終的に初回デプロイ完了まで3時間かかった。2回目以降は5分でできるようになった。
 
-初回デプロイが成功するまでのトラブルは、大きく分けると「UI上でPageの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3段階に分かれていた。最初にこの3段階を理解していたら、もっと短時間で解決できたと思う。
+3時間のトラブルは大きく3段階に分かれていた。「UI上でPagesの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3つだった。最初にこの3段階を知っていれば1時間以下で終わっていたと思う。
 
-Cloudflare Pagesに移行して良かった点は速度だけではなかった。月500回のビルドと月500GBの転送量が無料で、Astroのブログ程度の規模では制限に引っかかることがほぼない。VercelのFreeプランはTeamメンバーの招待数や帯域幅に制限があって、個人ブログでも将来的な制限を気にする必要があったが、Cloudflare PagesのFreeプランはその点で気楽だった。移行して半年以上経つが、コスト面では完全に正解だったと思っている。
+VercelのFreeプランはTeamメンバー数や帯域に制限があるが、Cloudflare PagesのFreeプランは月500回のビルドと月500GBの転送量が上限で、個人ブログの規模ではまず引っかからない。コスト面での移行メリットはあった。
 
 ## 環境
 
@@ -31,41 +31,37 @@ Cloudflare Pagesに移行して良かった点は速度だけではなかった�
 
 ## 試したこと・うまくいかなかったこと
 
-最初、Cloudflareのダッシュボードにログインして「Workers & Pages」→「Create application」を押したら、「Create a Worker」という画面が出てきた。「Connect to Git」のようなボタンが見当たらず、Pagesの設定がどこにあるのかわからなかった。Workersの設定画面でAstroのリポジトリを繋ごうと右往左往した。
+**「Create application」でWorkers画面が出た → Pages入口が見つからない**
 
-左側のサイドバーをすべて確認したが、「Pages」という独立したメニューはなかった。「Workers & Pages」が両方を兼ねているとわかるまで10分以上かかった。「Create application」を押した後の画面に**小さく**「Looking to deploy Pages? Get started here」というリンクがあって、それをクリックしないとPages用の画面に入れない作りだった。このリンクは画面の下の方にあって、上部だけ見ていると絶対に気づかない。
+Cloudflareの「Workers & Pages」→「Create application」を押したら「Create a Worker」という画面になった。「Connect to Git」のようなボタンがなく、PagesへのGitHub接続がどこにあるか全くわからなかった。左サイドバーに「Pages」という独立したメニューはない。「Workers & Pages」が両方を兼ねているとわかるまで10分以上右往左往した。
 
-ビルドコマンドの設定で手動入力しようとして`npm run build`と`dist`を入れたが、Framework presetで「Astro」を選べば自動で入力されることを後から知った。手動でも問題ないが、Astroのpresetを使わないと`NODE_VERSION`などの推奨環境変数が設定されず、Cloudflare側のNode.jsバージョンが古くてビルドが失敗することがあった。
+「Create application」を押した後の画面の**下の方**に「Looking to deploy Pages? Get started here」という小さいリンクがあった。上部だけ見ていると気づかない。このリンクを見つけてから先に進めた。
 
-最初のビルドが`Error: Cannot find module`で失敗したが、ログをよく見たら`node_modules`が正しくインストールされていなかった。ローカルでは`npm install`済みなのに、Cloudflareは毎回クリーンな状態からビルドするのでリポジトリの`package.json`に書かれた依存が正しくないと失敗する。ローカルで`npm run build`が通るからCloudflareでも通ると思っていたが、Node.jsのバージョンが違うと同じコードでもエラーになることがあった。
+**Framework presetを手動入力した → Node.jsバージョン不一致でビルド失敗**
 
-```
-Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
-```
-
-このエラーが出た時は`sharp`を`dependencies`ではなく`devDependencies`に入れていたのが原因だった。本番ビルドでは`devDependencies`はインストールされないので、使うパッケージは必ず`dependencies`に入れる必要があった。
-
-それとは別に、ローカルでは一切出なかったTypeScriptのエラーがCloudflareのビルド環境でだけ発生した。具体的には以下のようなエラーだった。
+ビルドコマンドを「`npm run build`」、出力ディレクトリを「`dist`」と手動で入力した。ビルドは失敗した。
 
 ```
 error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
 ```
 
-ローカルではNode.js 20で動いていたのに、CloudflareのデフォルトビルドがNode.js 18を使っていたため、TypeScriptの型定義のバージョンが違ってエラーになっていた。`NODE_VERSION`環境変数を設定するまで「なぜローカルで通るのにCloudflareで失敗するのか」全くわからなかった。ローカルとCloudflareでNode.jsバージョンが揃っていないと、TSのコンパイルエラーが片方でしか再現しないというトラップにはまる。TypeScriptエラーはローカルで確認できないと特に厄介で、デプロイを2〜3回繰り返すことになった。
+ローカルのNode.js 20でコンパイルできるコードが、CloudflareのデフォルトNode.js 18環境でTypeScriptエラーになっていた。Framework presetで「Astro」を選べばNode.jsの推奨バージョンも適用されるのに、手動入力したせいで環境変数の設定漏れが起きた。この時点で2回ビルドを無駄にした。
 
-さらに詰まったのが、Cloudflare PagesのGitHub認証画面で「Only select repositories」を選んでいたこと。後から新しいリポジトリを別に作ってCloudflareに接続しようとしたら、リポジトリの一覧に出てこなかった。「All repositories」に変更するか、GitHubのSettings → Applications → Cloudflare Pages → Repositoriesから個別に追加する必要があった。
+**`devDependencies`に入れたパッケージが本番ビルドでエラー**
 
-ビルドログをDL（Download logs）して確認していたら、別のエラーが見つかった。
+```
+Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
+```
+
+`sharp`を`devDependencies`に入れていたのが原因。Cloudflareの本番ビルドは`dependencies`のみをインストールする。ローカルでは`npm install`で全部入っているから気づかなかった。
+
+`@astrojs/sitemap`プラグインで`site`オプション未設定のエラーも出た。
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
 ```
 
-ローカルでは`site`を設定していなくても動いていたが、Cloudflare上でビルドすると`@astrojs/sitemap`プラグインが`site`の設定を要求してビルドが止まった。ローカルのdevモードとCloudflareのproductionビルドで動きが違う箇所がいくつかあって、ローカルテストだけでは見つけられないバグがあった。
-
-`astro.config.mjs`に`site`を設定してビルドが通るようになった後、今度はビルド成功なのにサイトを開いたら「522 Connection Timed Out」が出た。焦ってビルドログを再確認したが「Success」のままだった。5分待ってからリロードしたら正常に表示された。デプロイ直後はCloudflareのエッジサーバーへの伝播に時間がかかることがあるので、「Success」になってから少し待つのが正しかった。
-
-また、gitリポジトリに`.gitignore`を作る前に`git add .`を実行してしまい、`node_modules/`がリポジトリに含まれた状態でpushしてしまった。Cloudflare側のビルドには直接影響しないが、リポジトリサイズが膨大になってpushに数分かかるようになった。この失敗から、最初に`.gitignore`を確認してから`git add .`することを必ず守るようにした。`node_modules`をpushしてしまった後の解消は`git rm -r --cached node_modules`でキャッシュを削除してから`.gitignore`に追記してコミットする必要があって、その作業に30分以上かかった。
+ローカルのdevモードではスキップされてもCloudflareのproductionビルドでは必須になる設定がいくつかあった。ローカルテストだけでは発見できないバグがこの段階で2件出た。
 
 ## 解決策
 
@@ -81,8 +77,6 @@ npm run dev
 
 ### 2. GitHubにpush
 
-GitHubへの初回pushが初めての場合は、[GitHubで初めてリポジトリを作ってpushする手順](/posts/github-first-push)も参考に。
-
 ```bash
 git init
 git add .
@@ -92,83 +86,52 @@ git branch -M main
 git push -u origin main
 ```
 
-pushする前に`.gitignore`に`node_modules/`と`.env`が含まれているか確認しておく。`node_modules`をpushしてしまうとCloudflareのビルドに時間がかかる上、ローカルとCloudflare側の環境差異で意図しない動作になることがある。
-
-`.gitignore`の確認は以下のコマンドで。
+pushする前に`.gitignore`に`node_modules/`と`.env`が含まれているか確認する。`node_modules`をpushしてしまうとリポジトリサイズが膨大になってpushに数分かかるようになる。
 
 ```bash
 cat .gitignore
+# node_modules/、.env、dist/ が含まれていればOK
 ```
-
-`node_modules/`、`.env`、`dist/`が含まれていればOK。なければ追加してから`git add .gitignore && git commit -m "add gitignore"`する。
 
 ### 3. Cloudflare PagesにGitHubリポジトリを接続する
 
-1. Cloudflareダッシュボードで「Workers & Pages」を開く
-2. 「Create application」ボタンを押す
-3. **画面下部**にある「Looking to deploy Pages? Get started here」をクリック（これを見落としやすい）
-4. 「Import an existing Git repository」→「Get started」
-5. GitHubアカウントを認証してリポジトリを選択
-6. ビルド設定でFramework presetを「**Astro**」に変更する
+1. 「Workers & Pages」→「Create application」を押す
+2. **画面下部**の「Looking to deploy Pages? Get started here」をクリック（見落としやすい）
+3. 「Import an existing Git repository」→「Get started」
+4. GitHubアカウントを認証してリポジトリを選択
+5. ビルド設定でFramework presetを**「Astro」**に変更する
 
-Framework presetでAstroを選ぶと以下が自動入力される。
+Framework presetでAstroを選ぶと以下が自動入力され、推奨Node.jsバージョンも適用される。
 
 ```
 Build command: npm run build
 Build output directory: dist
 ```
 
-7. 「Save and Deploy」でデプロイ開始
+6. 「Save and Deploy」でデプロイ開始
 
 初回ビルドは2〜3分かかる。Deploymentsタブでビルドログをリアルタイムで確認できる。
 
 ### 4. ビルドが失敗した時の対処
 
-初回デプロイでビルドエラーになる場合は、Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を確認する。ビルドログは量が多い場合は「Download logs」でテキストファイルとして保存してから`Error:`で検索すると原因が見つけやすい。
-
-よくあるエラー：
+よくあるエラーと対処法：
 
 ```
 Error: Cannot find module 'sharp'
 ```
-→ `package.json`のdependenciesに`sharp`が入っているか確認する。`devDependencies`に入れてしまうと本番ビルドで読み込めない。
+→ `package.json`の`dependencies`（`devDependencies`ではない）に`sharp`があるか確認する。
 
 ```
 error: No matching version found for node@xx.x.x
 ```
-→ Node.jsのバージョン不一致。Settings → Environment variablesで`NODE_VERSION`を`20`に指定する。
-
-```
-Build failed: 'astro' is not recognized
-```
-→ `npm install`が失敗している可能性。`package.json`の内容をローカルと比較して依存が正しいか確認する。
+→ Settings → Environment variablesで`NODE_VERSION=20`を追加する。
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
 ```
-→ `astro.config.mjs`に`site`プロパティがない。`site: 'https://yourdomain.com'`を追加する。
+→ `astro.config.mjs`に`site: 'https://yourdomain.com'`を追加する。
 
-```
-Build exceeded the time limit of 20 minutes
-```
-→ ビルド時間超過。画像の最適化処理が重い場合に起きやすい。`sharp`による画像変換を無効にするか、ビルドするページ数を絞る。
-
-環境変数を設定したい場合はSettings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
-
-```
-Environment variables:
-NODE_VERSION = 20
-```
-
-Cloudflare PagesはデフォルトのNode.jsバージョンが古めに設定されていることがある。Astroは新しいNode.jsのAPIを使う箇所があるので、`NODE_VERSION`を明示的に指定するのがトラブル防止の基本だった。
-
-### 5. ビルドログを効率よく読む方法
-
-Cloudflare Pagesのビルドログは量が多くて読みにくい。効率よく原因を探すには以下の方法が役立った。
-
-「Download logs」でローカルにテキストとしてダウンロードして、テキストエディタで`Error:`や`error`で検索する。ブラウザのログビューアでスクロールしながら探すよりも圧倒的に速い。
-
-ログの末尾付近に実際のエラーが出ていることが多い。ビルドの最後の方で失敗するエラー（レンダリングエラーや設定エラー）はログの後半に書いてある。逆に、依存インストールで失敗する場合はログの前半を見る。
+ビルドログは「Download logs」でテキストとして保存してから`Error:`で検索すると原因が一発で見つかる。ブラウザのログビューアをスクロールしながら探すより圧倒的に速い。
 
 ```
 Installing dependencies...   ← ここでエラーが出れば依存問題
@@ -176,19 +139,23 @@ Building Astro site...       ← ここでエラーが出ればビルド設定�
   → rendering pages...       ← ここでエラーが出ればページ内容の問題
 ```
 
-この3段階を意識してログを読むと、どのフェーズで失敗しているかがすぐにわかる。
+### 5. 環境変数の設定
 
-ビルドログの中にWARNINGとERRORが混在していて、WARNINGを無視してERRORに集中するのが大事だった。`npm warn deprecated`のような警告はビルド失敗に直接関係しないことがほとんどで、そこで時間を取られると本当の原因を見つけるのが遅くなった。
+Settings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
+
+```
+NODE_VERSION = 20
+```
+
+TypeScriptエラーがローカルでは出ないのにCloudflareで出る場合、ほぼ確実にNode.jsバージョン差異が原因。`NODE_VERSION`を揃えるだけで解消するエラーが多かった。
 
 ### 6. デプロイ完了後の確認
 
-Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。ブラウザで開いてサイトが表示されれば成功。
-
-カスタムドメインを設定したい場合は[XserverドメインをCloudflare Pagesのカスタムドメインに設定する全手順](/posts/xserver-cloudflare-full-setup)を参照。環境変数が必要な場合は[Cloudflare Pagesで環境変数を設定する方法](/posts/cloudflare-pages-env-variables)も参考になる。
+Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。デプロイ直後は「522 Connection Timed Out」が出ることがある。CloudflareのエッジへのDNS伝播中で、5分待ってからリロードすると正常に表示された。
 
 ### 7. プレビューデプロイの活用
 
-Cloudflare Pagesは`main`ブランチ以外のpushに対しても自動でプレビューURLを発行する。`feature/`ブランチでコードを書いてpushすると、本番とは別の`xxxxxxxx.プロジェクト名.pages.dev`という形のURLでプレビューが確認できる。
+`main`以外のブランチへのpushに対しても自動でプレビューURLが発行される。
 
 ```bash
 git checkout -b feature/add-new-section
@@ -196,91 +163,37 @@ git checkout -b feature/add-new-section
 git push origin feature/add-new-section
 ```
 
-プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番デプロイ前に見た目を確認できるので、大きな変更時に使うと安心だった。プレビュー環境では本番の環境変数は引き継がれないので注意。必要に応じてSettings → Environment variables で「Preview」環境向けの値を別途設定する。
-
-プレビューURLはブランチ単位で固定されるので、同じブランチに何度pushしても同じ`xxxxxxxx.pages.dev`のURLでプレビューを確認できる。デザインの確認などで何度もpushを繰り返す場合、毎回新しいURLが発行されるわけではないのでURLをブックマークしておくと便利だった。
+プレビューURLはDeploymentsタブの該当ビルドから確認できる。本番環境変数は引き継がれないので注意。
 
 ### 8. 以降のpushの流れ
 
-一度設定が完了すれば、あとは`git push`するだけで自動デプロイが走る。
+一度設定が完了すれば、`git push`するだけで自動デプロイが走る。
 
 ```bash
-# 記事を追加・編集した後
 git add src/pages/posts/new-post.md
 git commit -m "add new post"
 git push
 ```
 
-pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。ビルドが来ない場合は[Cloudflare PagesのGitHub自動デプロイが動かない時の対処法](/posts/cloudflare-pages-deploy-not-working)を確認する。
+pushから1〜2分でDeploymentsタブに新しいビルドが来て、2〜3分でデプロイ完了する。
 
 ### 9. 直前のデプロイに戻したい場合
 
-デプロイ後にサイトが壊れた場合、CloudflareのDeploymentsタブから以前のデプロイに戻せる。
+DeploymentsタブのビルドエントリにあるRollback機能で以前のデプロイに戻せる。
 
 1. Deploymentsタブを開く
-2. 戻したいデプロイの右側「…」→「Rollback to this deployment」を選択
-3. 確認ダイアログで「Rollback」をクリック
+2. 戻したいビルドの「…」→「Rollback to this deployment」
+3. 1〜2分で以前のビルドが本番に反映される
 
-1〜2分で以前のビルドが本番に反映される。コードを修正してpushし直す時間が取れない緊急時に助かった。Rollbackはデプロイを「特定のビルドの状態に戻す」操作で、GitのコミットやブランチはそのままになるのでGit側の作業は不要だった。
-
-Rollbackした後も、GitHubのリポジトリのコードは最新のコミットのままになっている。Rollback後にコードを修正してpushすると、また最新コミットの内容でビルドが走る。「Rollbackしたのに何でまたビルドが走るんだ」と混乱したが、Rollbackはあくまでデプロイ先を変えるだけで、Gitのコミット履歴には影響しないと理解してから納得できた。
-
-### 10. Freeプランの制限を把握しておく
-
-Cloudflare PagesのFreeプランは月500回のビルド・月500GBの帯域幅が上限になっている（2026年5月時点）。ブログサイトを個人で運営する分にはほとんど気にならない上限だが、毎日何度もpushするような開発フローでは消費が早まる。Deploymentsタブの「Build count」でその月の残りビルド回数を確認できる。
-
-### 11. TypeScriptエラーのトラブルシューティング
-
-ローカルでは出ないのにCloudflareのビルドでだけTypeScriptエラーが出る場合、ほぼ確実にNode.jsのバージョン差異が原因だった。
-
-まず`NODE_VERSION`環境変数を設定してローカルと同じバージョンを指定する。
-
-Settings → Environment variables → 「Add variable」で以下を追加する。
-
-```
-Variable name: NODE_VERSION
-Value: 20
-```
-
-これでCloudflareのビルド環境がNode.js 20で動くようになる。TypeScriptの型定義はNode.jsバージョンごとに差があるので、バージョンを統一するだけで解消できるエラーが多かった。
-
-よく出るTypeScriptエラーのパターン：
-
-```
-error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
-```
-→ `ImportMeta`の型定義がNode.jsバージョンによって違う。`NODE_VERSION=20`を設定することで解消した。
-
-```
-error TS2307: Cannot find module '~/components/xxx' or its corresponding type declarations
-```
-→ パスエイリアスの解決がCloudflare環境で失敗している。`tsconfig.json`の`paths`設定と`astro.config.mjs`のaliasが一致しているか確認する。
-
-ローカルで同じエラーを再現させたい場合は、`.nvmrc`にバージョンを固定してCloudflareの環境変数と揃えることで「ローカルでだけ通ってCloudflareで落ちる」という状況を防げた。
-
-```bash
-echo "20" > .nvmrc
-nvm use
-npm run build
-```
-
-TypeScriptのエラーがビルドを止めている場合、`tsconfig.json`に`"skipLibCheck": true`を追加すると一時的に回避できる。ただし型チェックが甘くなるので、根本原因（Node.jsバージョンの不一致など）を解消してから外す方がよかった。
+Rollbackはデプロイ先を変えるだけでGitのコミット履歴には影響しない。Rollback後に`git push`すれば最新コミットの内容で再びビルドが走る。
 
 ## ハマったポイント
 
-- ローカルで通っていたTypeScriptのコードがCloudflareのビルドでだけ`error TS2339`などの型エラーで落ちた。原因はCloudflareのデフォルトNode.jsバージョンがローカルより古かったこと。`NODE_VERSION=20`を環境変数に追加するまで「ローカルで動くのになぜ」と2回デプロイを無駄にした。TypeScriptエラーが出たらまずNode.jsバージョンを疑う
-- 参考にしていたMediumの記事が2年前のもので、UIのスクリーンショットが現在のCloudflareダッシュボードと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事ではまだ「Pages」が独立したメニューに見えていた。チュートリアルを読むときは記事の公開日を必ず確認する
-- 「Create application」を押すとWorkers用の画面が出る。Pages用は**画面下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。ページの上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計だった
-- Framework presetで「Astro」を選ぶとビルド設定が自動入力されるだけでなく、推奨のNode.jsバージョンも適用される。手動で`npm run build`と`dist`を入れても一応動くが、Node.jsのバージョン差異でビルドが失敗しやすい。最初から「Astro」を選んでおけば避けられる失敗だった
-- GitHubの認証ページで「Only select repositories」を選ぶと、後から新しいリポジトリを追加した時にCloudflareの一覧に出てこない。その場合はGitHubのSettings → Applications → Cloudflare Pages → Repositoriesから追加できる。「なぜ新しいリポジトリが出てこないのか」と20分悩んだことがあった
-- ローカルで`npm run build`が通るのに、Cloudflare側で失敗するのはNode.jsのバージョン違いが多い。ローカルはNode.js 20でもCloudflareのデフォルトが16や18の可能性がある。Environment variablesで`NODE_VERSION=20`を指定すると一致させられた
-- `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているので気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
-- デプロイ後に`*.pages.dev`のURLが発行されるが、ブラウザでアクセスしたら「522 Connection timed out」が出ることがある。数分待ってからリロードすると直った。デプロイ直後はまだCloudflareのエッジへの伝播中のことがある。5分待っても出ない場合はDeploymentsタブのビルドログを再確認する
-- ローカルのdevモードでは正常に動いていても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされてもビルド時に必須になる。全てのAstroプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
-- `node_modules/`を`.gitignore`に追加する前に`git add .`してしまうと、リポジトリに何千ものファイルが含まれてしまう。Cloudflareのビルド自体は通るが、pushに何分もかかるようになる。`git rm -r --cached node_modules`で追跡から除外してから`.gitignore`に追加し直す必要があった
-- ビルドログは「Download logs」でローカルに保存してからテキスト検索する方が、ブラウザのスクロールで探すより圧倒的に速かった。ログの量が多い時は特に有効で、`Error:`で検索するだけで原因が一発で見つかることが多かった
-- ビルドログにWARNINGが大量に出ていてERRORを見落としやすかった。`npm warn deprecated`などの警告は無視してよく、エラーだけを探す意識が必要だった。ビルドログの量が多くて途方に暮れた時は、まずDownload logsしてから`Error`で全文検索するのが最も速い原因特定方法だった
-- Rollback後にGitHubにpushしたら自動でまた最新コミットの内容でビルドが走った。「Rollbackした状態を保ちたい」と思ったら、Gitのコミット自体も`git revert`か`git reset`で戻す必要があった。CloudflareのRollbackとGitの履歴は独立しているので、両方の状態を合わせる意識が必要だった
+- 「Create application」を押すとWorkers用の画面になる。Pages用は画面**下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計で、最初にここで10分以上時間を取られた
+- Framework presetで「Astro」を選ばずに手動でビルドコマンドを入力すると、推奨Node.jsバージョンの環境変数が設定されない。ローカルはNode.js 20でもCloudflareのデフォルトが古くて、TypeScriptのエラーがCloudflareのビルドでだけ出る状態になった。最初からFramework presetを「Astro」に設定するだけで避けられる失敗だった
+- `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているから気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
+- ローカルのdevモードでは正常に動いても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされる。全てのプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
+- 2年前のChrome記事のUIスクリーンショットが現在のCloudflareと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事では「Pages」が独立メニューに見えていた。GitHubやCloudflare関連のチュートリアルは記事の日付を必ず確認してから参考にする
 
 ## 関連記事
 
