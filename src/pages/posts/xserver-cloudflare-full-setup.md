@@ -10,17 +10,9 @@ description: 'XserverのドメインをCloudflare Pagesのカスタムドメイ�
 
 Xserverで取得したドメインをCloudflare Pagesで公開しているAstroサイトのカスタムドメインに設定したかった。`*.pages.dev`のURLから独自ドメインに変えるのが目的だったが、手順が複数ステップにわたっていて全体像がつかめなかった。
 
-今回の作業をさらに複雑にしていたのが、同じXserverの同じドメインで以前からWordPressサイトを運営していた点だ。WordPressは別のディレクトリ（`/blog/`）に入っていて、まだ記事を書いていたので絶対に止めたくなかった。「ネームサーバーをCloudflareに変えたらWordPressは動かなくなるのか」という不安があり、それを確認しながら進める必要があった。
+さらに複雑にしていたのが、同じXserverの同じドメインで以前からWordPressサイトを運営していた点だ。「ネームサーバーをCloudflareに変えたらWordPressは動かなくなるのか」という不安があり、それを確認しながら進める必要があった。結論から言うと、ネームサーバーをCloudflareに変えた時点でXserver上のWordPressは表示されなくなった。事前にWordPressのデータをエクスポートしておいたのは正解だった。
 
-結論から言うと、ネームサーバーをCloudflareに変えた時点でXserverで動いていたWordPressは表示されなくなった。これは予想できた話ではあるが、実際に「サイトが表示されなくなった」という状態になると焦った。事前にWordPressのデータをエクスポートしておいたのは正解だった。CloudflareのDNSにXserverのIPを向けるAレコードを追加すれば理論上は復活させられるが、今回はCloudflare Pagesへの完全移行を選んだ。
-
-ネームサーバーの変更・Active待ち・カスタムドメインの有効化が別々の作業として必要で、どこまで済んでいてどこが残っているかわからなくなった。特に「ネームサーバーの変更」と「Custom domainsでのActivate」が2段階になっているのを知らず、1段階目で終わったと思って待ち続けた時間があった。
-
-設定が全部完了するまでに実作業は30分程度でも、Active待ちや確認の手間を含めると半日近くかかった。「なぜまだ見えないのか」を何度も調べていたので、最初から手順の全体像を把握していればもっと短く終わったと思う。
-
-この作業を通じて「ネームサーバーとDNSとカスタムドメインの関係」がようやく整理できた。最初は混同していたが、「ネームサーバー変更＝DNS管理をCloudflareに移譲」「Custom domains設定＝Pagesがそのドメインからのアクセスをこのプロジェクトに転送する設定」の2段階だと理解すると全体の流れが見えた。
-
-カスタムドメインを設定して実際に独自ドメインでアクセスできるようになった時の達成感は大きかった。`*.pages.dev`のURLではリンクを共有する際に「なんかパスがおかしい」と思われるのが気になっていたが、独自ドメインになってからその心配がなくなった。速度面でもCloudflareのCDNを通じているのでレスポンスが速く、実際にPageSpeed Insightsで測定したら以前のVercel運用時より数値が改善した。
+「ネームサーバーの変更」と「Cloudflare PagesのCustom domainsでActivate」が2段階になっているのを知らず、1段階目で終わったと思って待ち続けた時間があった。設定が全部完了するまでに実作業は30分程度でも、Active待ちや確認の手間を含めると半日近くかかった。
 
 ## 環境
 
@@ -31,19 +23,17 @@ Xserverで取得したドメインをCloudflare Pagesで公開しているAstro�
 
 ## 試したこと・うまくいかなかったこと
 
-最初、Cloudflare PagesのプロジェクトからCustom domainsで直接ドメインを入力して進もうとした。ドメイン名を入力して「Continue」を押したら「Please update your nameservers」という画面になった。「とりあえず先に進めるかも」と「Activate domain」を押したが、ステータスがずっと「Pending」のままで先に進めなかった。ネームサーバーを変更していないから当然なのだが、最初はその順番がわかっていなかった。
+**ネームサーバー変更前にCustom domainsでActivateしようとした → Pendingのまま**
 
-次にネームサーバーをXserverで変更しようとしたが、サーバーパネルのどこを探してもネームサーバーの設定が見つからなかった。「DNS設定」というメニューはあったが、これはAレコードやCNAMEを編集するもので、ネームサーバー自体の変更ではなかった。Xserverのサポートページを調べてようやく「Xserverアカウント（旧インフォパネル）という別の管理画面」にあることがわかった。
+最初、Cloudflare PagesのプロジェクトからCustom domainsで直接ドメインを入力して進もうとした。「とりあえず先に進めるかも」と「Activate domain」を押したが、ステータスがずっと「Pending」のままで先に進めなかった。ネームサーバーを変更していないから当然だが、最初はその順番がわかっていなかった。Activeになってから改めてCustom domainsの設定に戻る必要があるとわかるまで30分近く無駄にした。
 
-ネームサーバーをCloudflareに変更してActive待ちの間、「これでカスタムドメインの設定は完了したのでは」と思っていたが、実はActiveになってから**もう一度Cloudflare PagesのCustom domainsで操作が必要**だとわかって、作業が2段階になっているとは最初知らなかった。
+**ネームサーバーのActiveだけで設定が完了したと思っていた → 独自ドメインで見えなかった**
 
-Activeになって独自ドメインでアクセスしてみたら「Cloudflare 522 Connection Timed Out」のエラーページが出た。最初は「PagesのCustom domains設定が終わっていない」が原因だと思っていたが、Custom domainsでActivateボタンを押した後も同じ522エラーが数分続いた。ここで焦って状況を調べたら、実はXserverの旧IPを指すAレコードがCloudflareのDNSに残っていたことがわかった。
+ネームサーバーをCloudflareに変更してActiveになった。「これでカスタムドメインの設定は完了した」と思って独自ドメインでブラウザを開いたが、Cloudflare Pagesのサイトは表示されなかった。「ActiveになったらPagesの設定に戻って改めて『Activate domain』を押す」という2段階が必要だとわかるまで30分待ち続けた。ネームサーバーのActive≠カスタムドメインの有効化、という2段階構造が最初わかっていなかった。
 
-Cloudflareがネームサーバーのスキャン時に取り込んだXserverのAレコード（`192.168.xxx.xxx`のような形式）が、CloudflareのDNS設定にそのまま残っていた。そのAレコードがCloudflare Pagesのより優先されていたため、アクセスがXserverの旧IPに向いてしまって522が出続けていた。CloudflareのDNS設定画面を開いてそのAレコードを削除したら、数分後に正常に表示されるようになった。
+**Activateしても522エラーが続いた → 古いAレコードが残っていた**
 
-「HTTPSにするには証明書が必要では？」とも悩んだ。Cloudflareのデフォルトが「Flexible SSL」なのか「Full SSL」なのかわからず、設定を間違えるとサイトにアクセスできなくなるのではと心配した。実際にはCustom domainsの設定が完了した時点でHTTPSは自動で有効になって、SSLの設定を別途触る必要はなかった。ただしEncryption Modeが「Flexible」のままだとセキュリティ的に望ましくないので、「Full」に変更した。
-
-カスタムドメインが設定できた後、`www.yourdomain.com`でもアクセスできるようにしようとしたが、単純にCustom domainsにwww付きを追加するだけではリダイレクト設定が必要だとわかった。www付きとwwwなしが共存してどちらでもアクセスできる状態になってしまい、Googleがどちらを「正規URL」として扱うかわからなくなった。最終的にCloudflareのRedirect Rulesでwwwなしに統一する設定を入れた。wwwありでアクセスするとwwwなしに301リダイレクトされるようになって、Googleの正規URL判定も統一できた。
+Pagesで「Activate domain」を押したのに「522 Connection Timed Out」エラーが数分続いた。「失敗した」と思ってもう一度Activateを押したが変わらなかった。CloudflareのDNS設定画面を開いたら、ネームサーバースキャン時に取り込んだXserverのAレコード（`192.168.xxx.xxx`のような形式）がそのまま残っていた。そのAレコードがCloudflare PagesのCNAMEより優先されてXserverの旧IPに向いていたのが原因だった。Aレコードを削除したら数分後に正常に表示されるようになった。
 
 ## 解決策
 
@@ -63,9 +53,9 @@ Cloudflareがネームサーバーのスキャン時に取り込んだXserverの
 
 ### 1. CloudflareにドメインをConnectしてネームサーバーを確認
 
-Cloudflareダッシュボード（`dash.cloudflare.com`）にログインして左サイドバー「Websites」→「Add a site」をクリック。ドメイン名（`example.com`の形式、`https://`なし）を入力してFreeプランを選択。
+Cloudflareダッシュボード（`dash.cloudflare.com`）にログインして左サイドバー「Websites」→「Add a site」をクリック。ドメイン名を入力してFreeプランを選択。
 
-「Continue」で進むとCloudflareが現在のDNSレコードをスキャンする画面が出る。「Continue to activation」を押すと**2つのネームサーバーのアドレスが表示される**。
+「Continue to activation」を押すと**2つのネームサーバーのアドレスが表示される**。
 
 ```
 ※このアドレスはアカウントごとに異なる
@@ -73,19 +63,15 @@ vera.ns.cloudflare.com
 bob.ns.cloudflare.com
 ```
 
-このアドレスをメモする。インターネット上の記事に書いてある`ns1.cloudflare.com`などは自分のアカウントでは使えないので、必ず自分の画面に表示されたアドレスを使う。
+インターネット上の記事に書いてある`ns1.cloudflare.com`などは自分のアカウントでは使えない。必ず自分の画面に表示されたアドレスを使う。
 
-このタイミングでCloudflareがスキャンした既存DNSレコードを確認する。Xserverのメールを使っていた場合、MXレコードが正しくインポートされているか確認しておく。消えていた場合は手動で追加する。XserverのSPFレコード（TXTレコード）があればそれもインポートされているか確認しておくと、ネームサーバー変更後のメール送受信が安定する。
-
-スキャン後に「MXレコードが見当たらない」と思ったら、Cloudflareのダッシュボードに移動してDNSレコード一覧を直接確認する。スキャン画面には全レコードが表示されないこともあったので、インポート後にDNS設定画面で全レコードを通しで確認するのが確実だった。
+このタイミングでCloudflareがスキャンした既存DNSレコードを確認する。Xserverのメールを使っていた場合、MXレコードが正しくインポートされているか確認しておく。
 
 ### 2. XserverでネームサーバーをCloudflareに変更
 
 Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログインする。サーバーパネル（`xapanel/server`）とは別のURLなので注意。
 
-「ドメイン」→「ドメイン設定一覧」→対象ドメインの「ネームサーバー設定」を開く。
-
-「その他のサービスで利用する」を選択。入力欄が2つ表示されるので、Cloudflareで確認したネームサーバー1・2のアドレスをそれぞれ入力して「確認」→「設定する」で保存する。
+「ドメイン」→「ドメイン設定一覧」→対象ドメインの「ネームサーバー設定」を開く。「その他のサービスで利用する」を選択して、Cloudflareのネームサーバー2つを入力して保存する。
 
 この時点でXserverでホスティングしているサイトは表示されなくなる（ドメインの向き先がCloudflareに変わるため）。今回はCloudflare Pagesに完全移行するので問題ない。
 
@@ -93,26 +79,15 @@ Xserverアカウント（`https://secure.xserver.ne.jp/xapanel/`）にログイ�
 
 ### 3. CloudflareでActiveを確認する
 
-Cloudflareに戻って「I updated my nameservers」ボタンを押す。**このボタンを押し忘れるとCloudflareが確認を開始しないので必ず押す。** ステータスが「Pending Nameserver Update」から「Active」に変わるまで待つ。だいたい30分〜1時間で変わるが、DNS伝播には最長72時間かかることもある。
+Cloudflareに戻って「I updated my nameservers」ボタンを押す。**このボタンを押し忘れるとCloudflareが確認を開始しないので必ず押す。** ステータスが「Pending Nameserver Update」から「Active」に変わるまで待つ。だいたい30分〜1時間。
 
-Activeになったら「Cloudflare is now protecting your site」というメールが届く。
-
-コマンドラインでも確認できる。
+Activeになったら「Cloudflare is now protecting your site」というメールが届く。コマンドラインでも確認できる。
 
 ```bash
 nslookup -type=NS yourdomain.com
 ```
 
-以下のようにCloudflareのネームサーバーが返ってくればOK。
-
-```
-yourdomain.com  nameserver = vera.ns.cloudflare.com
-yourdomain.com  nameserver = bob.ns.cloudflare.com
-```
-
-手元のDNSキャッシュが古い場合は正確な結果が出ない。Windowsの場合は`ipconfig /flushdns`でキャッシュをクリアしてから再確認する。
-
-外部のDNS確認サービス（`dnschecker.org`など）で世界各地からの解決結果を確認すると、ローカルのキャッシュ問題かどうかの切り分けができる。自分の環境ではCloudflareのネームサーバーが返ってきているのにCloudflareのダッシュボードがまだ「Pending」のことがあった。その場合は少し待つか「I updated my nameservers」をもう一度押すと確認が進む場合があった。
+Cloudflareのネームサーバーが返ってくればOK。手元のDNSキャッシュが古い場合はWindowsで`ipconfig /flushdns`を実行してから再確認する。
 
 ### 4. Cloudflare PagesのCustom domainsでドメインを有効化
 
@@ -124,96 +99,42 @@ yourdomain.com  nameserver = bob.ns.cloudflare.com
 4. ドメイン名（`example.com`）を入力して「Continue」
 5. DNS設定の確認画面が出たら内容を確認して「Activate domain」をクリック
 
-数分でHTTPSが有効になってカスタムドメインでサイトが見えるようになった。
+Activateボタンを押した後、数分でHTTPSが有効になってカスタムドメインでサイトが見えるようになった。
 
-ステータスが「Active」になったことをCustom domainsのページで確認する。「Initializing」や「Pending」のままの場合は数分待ってからページをリロードする。
-
-Activateボタンを押した後にDNSレコードがCloudflareのDNS設定に自動追加される。Cloudflare PagesのプロジェクトはIPアドレスではなくCNAMEレコードを使って接続する。`yourdomain.com`に対してCloudflare Pagesのアドレス（`プロジェクト名.pages.dev`）を向けるCNAMEが自動作成される。
-
-Activateボタンを押してから「Custom domains」のステータスが「Active」になるまでの間、ブラウザでドメインにアクセスすると「522 Connection Timed Out」が出ることがあった。これはCloudflareの設定が反映中の一時的な状態で、数分待てば解消した。「522が出た＝設定が失敗した」ではなくて「設定が伝播中」のサインだとわかるまで焦った。
+Activateボタンを押した直後は「522 Connection Timed Out」が出ることがある。この時点でDNSに古いAレコードが残っているケースを疑う。CloudflareのDNS設定画面（「Websites」→ドメイン→「DNS」→「Records」）を開いてXserverのIPを指すAレコードが残っていれば削除する。削除後に数分待てば解消する。
 
 ### 5. HTTPSの確認
 
 ブラウザで`https://yourdomain.com`にアクセスして鍵マークが表示されていれば完了。
 
-`http://`でアクセスしても`https://`にリダイレクトされるのを確認しておく。HTTP→HTTPSの自動リダイレクトはCloudflareのSSL/TLS設定でデフォルトで有効になっている。
-
-Cloudflare SSL/TLSのEncryption Modeは「Flexible」と「Full」がある。Cloudflare PagesではデフォルトでHTTPSが有効なので「Full」に設定するのが正しい。「Flexible」のままにしておくとセキュリティ上の問題が出ることがある。SSL/TLSの設定はCloudflareダッシュボードの左メニュー「SSL/TLS」から確認できる。
-
-「Full (strict)」はオリジンに有効な証明書が必要で、Cloudflare Pages自体は正式な証明書を持っているので「Full (strict)」に設定しても問題ない。「Flexible」→「Full」→「Full (strict)」の順で厳格になる。迷ったら「Full」でOK。
+Cloudflare SSL/TLSのEncryption Modeは「Flexible」ではなく「Full」に設定する。「Flexible」のままにしておくとCloudflare→オリジン間がHTTPになり、Cloudflare Pagesがさらにリダイレクトしようとして無限ループが発生することがある。SSL/TLSの設定はCloudflareダッシュボードの左メニュー「SSL/TLS」から確認できる。
 
 詳細な確認方法は[Cloudflareで独自ドメインのSSL設定を確認する方法](/posts/cloudflare-ssl-check)を参照。
 
 ### 6. wwwありURLの設定
 
-`www.yourdomain.com`でもアクセスできるようにしたい場合は、Custom domainsに`www.yourdomain.com`も追加する。追加するとCloudflare側でCNAMEレコードが自動設定される。
+`www.yourdomain.com`でもアクセスできるようにしたい場合は、Custom domainsに`www.yourdomain.com`も追加する。どちらかに統一するRedirect Rulesを設定しないと、www有り・無しで別々にインデックスされる可能性がある。
 
-ただし`www.yourdomain.com`を追加した場合、どちらを正規URLにするかを決めておく必要がある。Search Consoleにはどちらか一方のURLで登録して、もう一方はリダイレクト設定にするのが一般的。Cloudflare Pages側ではどちらも同じコンテンツを返すだけなので、Cloudflareのリダイレクトルールで`www`なし→`www`あり（またはその逆）を設定する。
-
-wwwなしに統一する場合のRedirect Rulesの設定（Cloudflareダッシュボード→「Rules」→「Redirect Rules」）:
+wwwなしに統一する場合のRedirect Rules（「Rules」→「Redirect Rules」）:
 
 ```
 If: Hostname equals www.yourdomain.com
 Then: Dynamic redirect to https://yourdomain.com${uri}（301）
 ```
 
-Redirect Rulesを設定したら、`https://www.yourdomain.com`にアクセスして`https://yourdomain.com`にリダイレクトされるか確認する。ブラウザのアドレスバーで確認するのが一番わかりやすかった。
-
-Redirect Rulesで「Dynamic」を選んだ場合は`${uri}`部分がパスとクエリ文字列をそのまま引き継ぐ。`https://www.yourdomain.com/posts/some-article`へのアクセスが`https://yourdomain.com/posts/some-article`にリダイレクトされるかも確認しておくと確実だった。
+`${uri}`を含めることでパスごとのリダイレクトが正しく動く。設定後は記事ページのURLでもリダイレクトが正しく動くか確認する。
 
 ### 7. Search ConsoleをカスタムドメインURLで登録
 
-`*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になるが、Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
-
-`*.pages.dev`のURLはSearch Console登録に使わないだけでなく、Googleにインデックスされないよう`robots.txt`で制御することも考えられる。ただしCloudflare Pagesは`*.pages.dev`のURLのrobots.txtをカスタマイズできないので、カスタムドメインを主に使い`*.pages.dev`は開発確認用と割り切るのが現実的だった。
-
-### 8. カスタムドメインが設定できない場合の追加確認
-
-「Activateを押したのに522が続く」「Custom domainsのステータスがPendingから動かない」という場合は、CloudflareのDNS設定に古いAレコードが残っているケースを疑う。
-
-Cloudflareのダッシュボード→「Websites」→ドメインを選択→「DNS」→「Records」を開く。
-
-確認するポイント：
-
-```
-1. yourdomain.com に対してAレコードが残っていないか確認する
-   （XserverのIPを指す 192.168.xxx.xxx のようなレコード）
-2. そのAレコードがCloudflare Pagesのより先に評価されていないか確認する
-3. 不要なAレコードは削除する
-```
-
-AレコードとCNAMEが同じホスト名に共存していると予期しない挙動が起きる。Activateボタンを押すと`yourdomain.com`に対してCNAMEが追加されるが、既存のAレコードが残っていた場合はどちらが優先されるかが不安定になる。
-
-削除するAレコードを見極める方法：
-
-```bash
-# 現在のDNS解決結果を確認する
-nslookup yourdomain.com
-
-# Aレコードだけ確認する
-nslookup -type=A yourdomain.com
-```
-
-CloudflareのIPアドレス（`104.21.x.x`や`172.67.x.x`など）が返ってくれば正常。Xserverのような他のサーバーのIPが返ってくれば古いAレコードが残っている。
-
-SSL「Full」設定で無限リダイレクトが起きた場合は、Encryption Modeが「Flexible」になっていないか確認する。「Flexible」にしてしまうと、Cloudflare→オリジン間はHTTPで接続するが、オリジン（Cloudflare Pages）がHTTPSにリダイレクトしようとするため無限ループが起きる。「Full」に戻せば解消する。
+`*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。Search Consoleにはカスタムドメインの`https://yourdomain.com`で登録する。`*.pages.dev`で登録してしまうと本来のドメインのインデックス状況が別管理になってしまう。
 
 ## ハマったポイント
 
-- ネームサーバーが「Active」になる前にCustom domainsでドメインを設定しようとしても「Pending」のまま何も進まない。「Active後に改めてCustom domainsの設定をする」という2段階になっているとは最初知らなかった。Activeになってからもう一度Pagesの設定に戻る手順がある
-- Xserverはサーバーパネル（`xapanel/server`）とアカウントパネル（`xapanel`）が別々の管理画面で、ネームサーバー設定はアカウントパネルの方にある。「ドメイン管理はサーバーパネルにある」という思い込みで1時間以上無駄にした
-- 「その他のサービスで利用する」に切り替えるとXserver上のWebサイトが表示されなくなる。Xserverでホスティングしている別のサイトがある場合は注意が必要。今回はCloudflare Pagesに完全移行するので問題なかった
-- Activeになった後にCloudflare Pagesのプロジェクトで「Custom domains」からもう一度「Activate domain」を押す必要があった。「Activeになったのになぜ独自ドメインで見えないのか」と30分近く悩んだが、Pages側のCustom domainsの設定が別途必要だった。その間「522 Connection Timed Out」が出続けていた
-- Cloudflare SSL/TLSのEncryption Modeが「Flexible」になっていると、HTTPSが有効のように見えても実際はCloudflare→オリジン間がHTTPになる問題がある。Cloudflare PagesはフルHTTPSなので「Full」に設定しておく
-- `*.pages.dev`のURLはカスタムドメイン設定後も引き続きアクセスできる。2つのURLが共存する状態になる。Search ConsoleにはカスタムドメインのURLで登録する
-- ネームサーバーのアドレスはCloudflareアカウントごとに割り当てが異なる。他の記事に書いてある`ns1.cloudflare.com`などを入力しても動かない。自分のCloudflareダッシュボードに表示されたアドレスを使う必要があった
-- www付きとwwwなしの両方でアクセスできるが、Googleはどちらかを正規URLとして扱う。どちらに統一するかをRedirect Rulesで設定しないと、www有り・無しで別々にインデックスされる可能性がある。設定が完了したら`https://www.yourdomain.com`と`https://yourdomain.com`の両方でアクセスして期待通りにリダイレクトされるか確認した
-- Cloudflareに「I updated my nameservers」ボタンがあることを見落とすと、ずっとPendingのままになる。画面内に小さく表示されているボタンで、押さないとCloudflareが確認を開始しない
-- Activateボタンを押した直後は「522 Connection Timed Out」のエラーが数分続くことがある。「失敗した」と思ってもう一度Activateを押すと設定が重複してしまうことがあった。初回Activateを押したら5分待ってからページをリロードして確認するのが正しい手順だった
-- Redirect Rulesで`${uri}`を使わずに固定URLへのリダイレクトを設定してしまい、`www.yourdomain.com/posts/something`が常に`yourdomain.com`（トップページ）にリダイレクトされる設定になってしまったことがあった。Dynamic redirectで`${uri}`を含めることでパスごとの正しいリダイレクトができる。設定後は記事ページのURLでもリダイレクトが正しく動くか確認することにした
-- Cloudflareがネームサーバースキャン時に取り込んだXserverのAレコードがDNS設定に残ったままで、Custom domainsのActivate後も522エラーが続いた。CloudflareのDNS設定画面を見るまで原因に気づかなかった。Xserverの旧IPを指すAレコードを削除したら解消した。Activateした後も522が続く場合はDNSの残存レコードを疑うべきだった
-- Xserverで動かしていたWordPressサイトがネームサーバー変更後すぐに表示されなくなった。「切り替え後は表示されなくなる」と頭ではわかっていたが、実際にサイトが見えなくなった瞬間は予想以上に焦った。Cloudflare移行前にWordPressのデータをバックアップしておいたのは正解だった
-- Encryption Modeを「Full」に変えたところで問題なかったが、「Flexible」のままにしていた時期に`https://`でアクセスしても無限リダイレクトが起きた。「Flexible」ではCloudflare→オリジン間がHTTPになるため、Cloudflare Pagesが再びHTTPSにリダイレクトしようとしてループが発生した。「Full」に変えたら即座に解消した
+- ネームサーバーがActiveになる前にCustom domainsでドメインをActivateしようとしても「Pending」のまま何も進まない。「①ネームサーバーのActive → ②PagesのCustom domainsでActivate」という2段階になっているとは知らなかった。1段階目が完了しても独自ドメインでは見えないまま、2段階目の操作が別途必要だった
+- Xserverのネームサーバー設定はサーバーパネル（`xapanel/server`）ではなくアカウントパネル（`xapanel`）にある。「ドメイン管理はサーバーパネル」という思い込みで1時間近く探し続けた。URLの末尾が`/server`ではなくドメインが`xapanel`で終わる方が正解だった
+- Cloudflareの「I updated my nameservers」ボタンを押し忘れるとずっとPendingのままになる。画面内に目立たないリンクとして表示されているが、このボタンを押してからCloudflareが確認を開始する仕組みになっている。30分待っても変わらない場合はまずこのボタンを押したか確認する
+- Activateボタンを押した直後の「522 Connection Timed Out」は一時的なものだと思って5分待ったが、5分以上続いた場合はCloudflareのDNS設定に古いAレコードが残っているのが原因だった。XserverのIPを指すAレコードがCNAMEより優先されていたため522が続いた。DNS設定画面でAレコードを削除したら即座に解消した
+- Encryption Modeを「Flexible」のままにしていたら無限リダイレクトが起きた。「Flexible」ではCloudflare→オリジン間がHTTPになるが、Cloudflare Pagesがさらにリダイレクトしようとしてループが発生する。「Full」に変えたら即座に解消した。Cloudflare Pagesを使う場合は「Full」に設定しておくのが正しい
 
 ## 関連記事
 
