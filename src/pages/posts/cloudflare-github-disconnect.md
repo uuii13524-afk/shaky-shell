@@ -1,9 +1,15 @@
 ---
-title: 'Cloudflare PagesがGitHubと切断された時の対処法'
+title: 'Cloudflare PagesがGitHubと切断された時の対処法（エラーメッセージ別）'
 date: '2026-05-01'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
-description: 'Cloudflare PagesとGitHubの連携が切断された時の症状と再接続する手順を解説。pushが反映されない場合の確認ポイントも紹介します。'
+description: 'Cloudflare PagesとGitHubの連携が切断された6種類のエラーメッセージと、それぞれの解決手順を解説。pushが反映されない場合の確認ポイントも紹介。'
+---
+
+## ひとことで言うと
+
+**Cloudflareダッシュボード → Pages → プロジェクト → Settings → Git repository → Manage** を開き、GitHubインテグレーションを再インストールする。ほとんどのケースはこれで2分以内に解決する。
+
 ---
 
 ## やりたかったこと
@@ -11,6 +17,17 @@ description: 'Cloudflare PagesとGitHubの連携が切断された時の症状�
 2ヶ月ぶりにAstroサイトを更新しようと記事を1本書いてgit pushした。GitHubのリポジトリにはちゃんとコミットが積まれているのに、5分待っても10分待っても Cloudflare PagesのDeploymentsタブに何も来なかった。
 
 おかしいと思ってプロジェクトのトップを開いたら、薄いオレンジのバナーが出ていた。
+
+Cloudflare Pagesが表示するバナーには以下の6種類がある：
+
+- `This project is disconnected from your Git account, this may cause deployments to fail.`
+- `Cloudflare Pages is not properly installed on your Git account, this may cause deployments to fail.`
+- `The Cloudflare Pages installation has been suspended, this may cause deployments to fail.`
+- `The project is linked to a repository that no longer exists, this may cause deployments to fail.`
+- `The repository cannot be accessed, this may cause deployments to fail.`
+- `There is an internal issue with your Cloudflare Pages Git installation.`
+
+今回出ていたのは最初のメッセージだった：
 
 ```
 This project is disconnected from your Git account.
@@ -103,6 +120,38 @@ Cloudflareには「Workers & Pages」→プロジェクト→「Settings」→�
 4. GitHubのWebhook deliveryが200を返しているか
 5. GitHubのAuthorized OAuth AppsにCloudflareが「Revoked」でなく表示されているか
 
+## エラーメッセージ別の対処法
+
+### "The Cloudflare Pages installation has been suspended"
+
+GitHubの設定でCloudflare PagesアプリがSuspendされている。
+
+1. GitHubのインストール設定を開く
+   - 個人アカウント: `https://github.com/settings/installations`
+   - Organization: `https://github.com/organizations/組織名/settings/installations`
+2. Cloudflare Pagesの「Configure」をクリック
+3. ページ下部の「Unsuspend」をクリック
+
+### "The repository cannot be accessed"
+
+GitHub Appのリポジトリアクセスからこのリポジトリがはずれている。
+
+1. 上記のインストール設定を開く
+2. 「Repository access」で対象リポジトリを追加、または「All repositories」に変更
+
+### "The project is linked to a repository that no longer exists"
+
+リポジトリが削除または別アカウントに移管された。
+
+- 削除された場合: 新しいリポジトリで新規Pagesプロジェクトを作成
+- 移管された場合: 元のアカウントに戻すか、新しい場所のリポジトリで新規プロジェクトを作成
+
+### "There is an internal issue with your Cloudflare Pages Git installation"
+
+Cloudflare内部のエラー。GitHubアプリの再インストールで解消しないなら[Cloudflareサポート](https://support.cloudflare.com/)に問い合わせる。
+
+---
+
 ## ハマったポイント
 
 - バナーが薄いオレンジ色で「May cause deployments to fail」という曖昧な表現だったので最初は軽く見ていた。実際にはその時点でデプロイは完全に止まっていた。バナーの色が薄いから「とりあえず動いているのかも」という思い込みが30分以上の放置につながった
@@ -112,6 +161,22 @@ Cloudflareには「Workers & Pages」→プロジェクト→「Settings」→�
 - GitHubのWebhook画面の「Ping」ボタンで、その場で接続が復旧しているか確認できる。再認証後にPingを送って200が返れば完了、401なら再認証が不完全。Deliveryの一覧を眺めるより、このPingで確認する方が30秒で終わる
 
 デプロイが反映されない時はまずDeploymentsタブのログを確認する。ビルドログの見方については[Cloudflare Pagesのビルドログの見方とエラーの対処法](/posts/cloudflare-pages-build-log)が参考になる。
+
+## よくある質問
+
+**Q: なぜCloudflare PagesがGitHubと切断されるのか？**
+最も多い原因はOAuthトークンの有効期限切れ。GitHubの2FA設定変更やパスワード変更後に失効することがある。
+
+**Q: Cloudflare PagesをGitHubに再接続する方法は？**
+Cloudflareダッシュボード → プロジェクト → Settings → Git repository → Manage → Uninstall → Install で再認証する。
+
+**Q: 再接続後もgit pushがデプロイをトリガーしない。**
+空コミットで強制トリガーする: `git commit --allow-empty -m "reconnect" && git push`。それでもダメならSettings内のプロダクションブランチ名が一致しているか確認する。
+
+**Q: GitLabでも同じ手順で直る？**
+はい。再接続手順は同じ。GitLabのインストール設定は `https://gitlab.com/-/profile/applications` で確認できる。
+
+---
 
 ## 関連記事
 

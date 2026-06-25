@@ -1,107 +1,207 @@
 ---
-title: '動いているDockerコンテナに入ってコマンドを実行する方法（docker exec）'
+title: 'docker execでコンテナ内にbashで入る・コマンドを実行する方法'
 date: '2026-06-02'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
 ja_tags: ['Docker', 'docker exec', 'コンテナ', 'bash', 'デバッグ']
 en_tags: ['Docker', 'docker exec', 'container', 'bash', 'debugging']
-description: 'docker execコマンドで起動中のコンテナ内にbashで入る方法を解説。デバッグ時のログ確認やファイル操作など実践的な使い方をまとめた。'
+description: 'docker execで起動中コンテナに入る方法を解説。bash/sh切り替え・オプション一覧・環境変数設定・よくあるエラーの対処をまとめた。'
 ---
-## やりたかったこと
-起動中のDockerコンテナに直接入って、中のファイルを確認したりコマンドを実行したかった。
-本番に近い環境でデバッグする時に毎回調べていたのでまとめてみた。
 
-## docker exec の基本的な使い方
-
-### コンテナに bash で入る
+## ひとことで言うと
 
 ```bash
-docker exec -it <コンテナ名またはID> bash
+# コンテナにbashで入る
+docker exec -it コンテナ名 bash
+
+# bashがない場合（Alpineイメージ）
+docker exec -it コンテナ名 sh
+
+# コンテナ内で1回だけコマンドを実行
+docker exec コンテナ名 cat /etc/nginx/nginx.conf
 ```
 
-`-i`（インタラクティブ）と `-t`（疑似TTY割り当て）を組み合わせる。
 コンテナ名は `docker ps` で確認できる。
 
+---
+
+## docker exec の構文とオプション
+
+```
+docker exec [オプション] コンテナ名 コマンド [引数...]
+```
+
+| オプション | 説明 |
+|---|---|
+| `-i` | 標準入力を開いたまま（インタラクティブ） |
+| `-t` | 疑似TTYを割り当て（ターミナル表示） |
+| `-u` | 実行ユーザーを指定 |
+| `-e` | 環境変数を設定 |
+| `-w` | 作業ディレクトリを指定 |
+
+シェルに入る時は `-i` と `-t` を必ず両方付ける（`-it`）。`-t` がないとプロンプトが出ない。`-i` がないと入力が即座に閉じられる。
+
+---
+
+## コンテナのシェルに入る
+
+### bash（ほとんどのイメージ）
+
 ```bash
-docker ps
-# CONTAINER ID   IMAGE     COMMAND   NAMES
-# a1b2c3d4e5f6   nginx     ...       my-nginx
 docker exec -it my-nginx bash
 ```
 
-### bash が入っていない場合は sh を使う
-
-Alpine Linuxベースのイメージには bash がないことが多い。
+### sh（Alpineベースのイメージはbashがないのでshを使う）
 
 ```bash
-docker exec -it <コンテナ名> sh
+docker exec -it my-alpine sh
 ```
 
-### 1回だけコマンドを実行する
-
-コンテナ内に入らずに単発でコマンドを実行したい場合。
+### rootで入る（パーミッション調査に便利）
 
 ```bash
-docker exec <コンテナ名> cat /etc/nginx/nginx.conf
-docker exec <コンテナ名> ls -la /var/log/nginx/
+docker exec -it -u root コンテナ名 bash
 ```
 
-### 環境変数を確認する
+### 特定ユーザーで入る
 
 ```bash
-docker exec <コンテナ名> env
+docker exec -it -u www-data コンテナ名 bash
 ```
+
+---
+
+## コンテナ内に入らずに1回だけコマンドを実行
+
+```bash
+# 設定ファイルを確認
+docker exec my-nginx cat /etc/nginx/nginx.conf
+
+# ファイル一覧
+docker exec my-app ls -la /var/log/
+
+# 環境変数を確認
+docker exec my-app env
+
+# プロセスを確認
+docker exec my-app ps aux
+```
+
+---
+
+## 環境変数を渡す
+
+```bash
+# 1つ渡す
+docker exec -e DEBUG=true my-app node debug.js
+
+# 複数渡す
+docker exec -e NODE_ENV=production -e PORT=8080 my-app node app.js
+```
+
+---
+
+## 作業ディレクトリを指定して実行
+
+```bash
+docker exec -w /app コンテナ名 ls
+```
+
+---
 
 ## docker-compose 環境での使い方
 
-docker-compose を使っている場合はサービス名で指定できる。
+docker-compose ではコンテナ名ではなく **サービス名**（`docker-compose.yml` の `services` キー）を使う。
 
 ```bash
-# docker-compose.yml の services 名で指定
 docker-compose exec web bash
 docker-compose exec db psql -U postgres
+docker-compose exec web rails db:migrate
 ```
 
-`docker exec` との違いは、`docker-compose exec` はコンテナ名ではなくサービス名を使う点。
+サービス名は `docker-compose ps` で確認できる。
 
-### 特定のユーザーで実行する
-
-```bash
-# root で入る（パーミッション系の確認に便利）
-docker exec -it -u root <コンテナ名> bash
-
-# 別のユーザーで実行
-docker exec -it -u www-data <コンテナ名> bash
-```
+---
 
 ## よく使うデバッグパターン
 
-### ログファイルを直接確認する
+### ログをリアルタイムで確認
 
 ```bash
-docker exec <コンテナ名> tail -f /var/log/nginx/error.log
+docker exec コンテナ名 tail -f /var/log/nginx/error.log
 ```
 
-### プロセスを確認する
+### コンテナ間のネットワーク疎通を確認
 
 ```bash
-docker exec <コンテナ名> ps aux
+docker exec my-app curl -v http://db:5432
+docker exec my-app ping redis
 ```
 
-### ネットワーク疎通を確認する
+### コンテナ内の開放ポートを確認
 
 ```bash
-# curl が入っているか確認してから実行
-docker exec <コンテナ名> curl -v http://other-container:3000
+docker exec コンテナ名 ss -tlnp
 ```
 
-## ハマったポイント
+---
 
-- `bash: not found` が出たら `sh` に切り替える。Alpine系は bash が入っていない
-- コンテナが停止中だと `docker exec` は使えない。`docker start` で起動してから実行する
-- `-it` を忘れると入力を受け付けず即終了する。シェルに入る時は必ず付ける
-- `docker-compose exec` でサービス名を間違えると `no such service` になる。`docker-compose ps` でサービス名を確認する
-- rootで作ったファイルがホストからパーミッション不足で見えないことがある。ユーザー指定（`-u`）を使うと解決することが多い
+## よくあるエラーと対処
+
+### `bash: not found`
+
+Alpine系イメージには bash が入っていない。`sh` を使う：
+
+```bash
+docker exec -it コンテナ名 sh
+```
+
+### `the input device is not a TTY`
+
+`-t` が抜けている。シェルに入る時は必ず `-it` を付ける。
+
+### `cannot exec in a stopped container`
+
+コンテナが停止中。先に起動する：
+
+```bash
+docker start コンテナ名
+docker exec -it コンテナ名 bash
+```
+
+---
+
+## docker exec vs docker run
+
+| | `docker exec` | `docker run` |
+|---|---|---|
+| 対象 | 起動中のコンテナ | 新しいコンテナを作成して起動 |
+| 用途 | 起動中コンテナのデバッグ | フレッシュな環境で実行 |
+| 状態 | 既存のコンテナ状態を使う | クリーンな状態から始まる |
+
+---
+
+## よくある質問
+
+**Q: `docker exec -it` の意味は？**
+`-i` が標準入力を開いたまま、`-t` が疑似ターミナルを割り当てる。組み合わせることでインタラクティブなシェル操作が可能になる。
+
+**Q: コンテナ内でコマンドを実行するには？**
+`docker exec コンテナ名 コマンド`。例: `docker exec my-app ls /var/log`。
+
+**Q: 起動中のコンテナに入るには？**
+`docker exec -it コンテナ名 bash`（Alpineは `sh`）。
+
+**Q: なぜ `bash: not found` になるのか？**
+Alpine Linuxベースのイメージはbashを含まない。`sh` を使うと入れる。
+
+**Q: 停止中のコンテナに docker exec できる？**
+できない。`docker start コンテナ名` で起動してから実行する。
+
+**Q: docker exec と docker attach の違いは？**
+`docker exec` はコンテナ内に新しいプロセスを起動する。`docker attach` はメインプロセス（PID 1）に接続する。デバッグには `exec` を使う。
+
+---
 
 ## 関連記事
 
