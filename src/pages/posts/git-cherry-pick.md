@@ -10,20 +10,40 @@ description: 'git cherry-pickコマンドで特定のコミットだけを別ブ
 
 ## やりたかったこと
 
-featureブランチで直したバグを、mainブランチにも適用したかった。
-ブランチ全体をmergeするほどではなく、特定のコミットだけ持ってきたかった。
+featureブランチで開発中に緊急のバグ修正をしてしまった。その修正だけmainブランチにも入れたかったが、featureブランチをまるごとmergeすると開発途中の機能まで入ってしまう。「特定のコミット1つだけを別ブランチに持っていきたい」と思って調べたら `git cherry-pick` にたどり着いた。
+
+---
+
+## 環境
+
+- OS: macOS 13.5 / Ubuntu 22.04
+- Git: 2.42.0
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初は「featureブランチからmainへmergeすればいい」と思って試したが、開発途中のコードが一緒に入ってしまった。hotfixブランチを作って修正を移植しようとしたが、そこでも同じ変更を2回手で書き直すことになって非効率だった。
+
+`git cherry-pick` を初めて使ったとき、コミットハッシュをフルで入力しようとして長さに戸惑った。7〜8文字の短縮形でよかったと後で気づいた。
+
+また、複数コミットをcherry-pickしたとき範囲指定の `A..B` でAが含まれないと知らずに、必要なコミットを1つ漏らして「あれ、変更が足りない」と気づくまで時間がかかった。
+
+---
 
 ## cherry-pickの基本
 
 ```bash
-# コミットハッシュを確認する
+# コミットハッシュを確認する（7文字の短縮形でOK）
 git log --oneline
 
 # 特定のコミットを現在のブランチに適用する
 git cherry-pick abc1234
 ```
 
-`git log` で持ってきたいコミットのハッシュを確認してから実行する。
+`git log` で持ってきたいコミットのハッシュを確認してから実行する。cherry-pickはそのコミットの変更内容を現在のブランチに新しいコミットとして追加する。
+
+---
 
 ## 複数コミットをcherry-pickする
 
@@ -35,7 +55,9 @@ git cherry-pick abc1234 def5678
 git cherry-pick abc1234..ghi9012
 ```
 
-範囲指定 `A..B` はAを含まずBを含む。
+範囲指定 `A..B` はAを含まずBを含む。Aも含めたいときは `A^..B` と書く。
+
+---
 
 ## コンフリクトが起きたとき
 
@@ -43,6 +65,7 @@ git cherry-pick abc1234..ghi9012
 # コンフリクト発生
 git cherry-pick abc1234
 # CONFLICT (content): Merge conflict in app.js
+# error: could not apply abc1234... fix: null check for user object
 
 # ファイルを手動で修正してから
 git add app.js
@@ -52,7 +75,9 @@ git cherry-pick --continue
 git cherry-pick --abort
 ```
 
-rebaseと同じく、修正 → `git add` → `--continue` の流れ。
+rebaseと同じく、コンフリクトしたファイルを修正 → `git add` → `--continue` の流れ。
+
+---
 
 ## cherry-pickを取り消す
 
@@ -64,17 +89,19 @@ git revert abc1234
 git reset --hard HEAD~1
 ```
 
-すでにpushしている場合は `git revert` で取り消しコミットを作るほうが安全。
+すでにpushしている場合は `git revert` で取り消しコミットを作るほうが安全。`reset --hard` は未pushのときだけ使う。
+
+---
 
 ## ハマったポイント
 
-- コミットハッシュは `git log --oneline` で確認するのが一番早い
-- cherry-pickするとコミットハッシュが変わる（別のコミットとして記録される）
-- 範囲指定 `A..B` はAを含まずBを含む（rebaseと同じ挙動）
-- 同じ変更を複数回cherry-pickするとコンフリクトが起きやすい
-- push済みのコミットを取り消すときは `reset` ではなく `revert` を使う
+- コミットハッシュは `git log --oneline` で確認するのが一番早い。フルハッシュ（40文字）を入力する必要はなく先頭7〜8文字でOK
+- cherry-pickするとコミットハッシュが変わる。元のブランチとは別の独立したコミットとして記録される。「同じ変更なのに別ハッシュで2つあって混乱」という状況になりやすい
+- 範囲指定 `A..B` はAを含まずBを含む。rebaseの範囲指定と同じ挙動で、これを知らずにAを漏らした
+- 同じ変更を複数回cherry-pickするとコンフリクトが起きやすい。「すでに適用済みです」的なエラーは出ないので、二重に適用してしまわないように注意
+- push済みのコミットを取り消すときは `reset` ではなく `revert` を使う。`reset --hard` でやってしまってforced pushが必要になった
 
-特定コミットのハッシュを調べる際は[git logでコミット履歴を確認する方法](/posts/git-log-history)が参考になる。また、作業中の変更を一時退避したい場合は[git stashで作業を一時退避する方法](/posts/git-stash-usage)も活用できる。
+---
 
 ## 関連記事
 

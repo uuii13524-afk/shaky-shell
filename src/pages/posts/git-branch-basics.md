@@ -6,33 +6,105 @@ layout: '../../layouts/PostLayout.astro'
 description: 'GitのブランチをCLIで作成・切り替え・削除する基本コマンドを解説。git branch・git checkout・git switchの使い方をまとめて紹介します。'
 ---
 
+## やりたかったこと
+
+mainブランチで直接コードを書いていたら、途中で「これは別ブランチで作業すべきだった」と気づいた。チームのリポジトリにpushしたら怒られて、ブランチの切り方をちゃんと覚えることにした。
+
+---
+
+## 環境
+
+- OS: macOS 13.5 / Ubuntu 22.04
+- Git: 2.42.0
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初は `git checkout -b ブランチ名` でブランチを作っていた。これ自体は動くが、「`checkout` って何でも使えすぎて意味がわかりにくい」と感じていた。ブランチの切り替えもファイルの復元も同じコマンドで、間違えてファイルを消したことが1回あった。
+
+次に、作業中のファイルを残したままブランチを切ろうとしたら、こんなエラーが出た。
+
+```
+error: Your local changes to the following files would be overwritten by checkout:
+  src/index.js
+Please commit your changes or stash them before you switch branches.
+```
+
+コミットもスタッシュも知らなかったので、一時的に変更を `git stash` で退避する方法を調べることになった。
+
+---
+
 ## 基本コマンド
 
+Git 2.23以降では `git switch` が推奨。`git checkout` より用途が明確で覚えやすい。
+
 ```bash
-git branch                    # ブランチ一覧
-git switch -c ブランチ名       # 作成して切り替え
+git branch                    # ブランチ一覧（現在のブランチに * が付く）
+git branch -a                 # リモートブランチも含めて表示
+git switch -c ブランチ名       # 作成して切り替え（checkout -b と同じ）
 git switch ブランチ名          # 切り替え
-git merge ブランチ名           # マージ
-git branch -d ブランチ名       # 削除
+git branch -d ブランチ名       # マージ済みブランチを削除
+git branch -D ブランチ名       # 強制削除（マージ未済みでも削除）
 ```
 
-## よくある使い方
+---
+
+## 実際の開発でよく使う流れ
 
 ```bash
-git switch -c feature/new-function
-git add .
-git commit -m "add new function"
+# mainを最新にしてからブランチを作る
 git switch main
-git merge feature/new-function
-git branch -d feature/new-function
+git pull origin main
+git switch -c feature/add-login
+
+# 作業してコミット
+git add src/login.js
+git commit -m "add login form"
+
+# mainにマージ
+git switch main
+git merge feature/add-login
+
+# 不要になったブランチを削除
+git branch -d feature/add-login
 ```
+
+---
+
+## 変更が残っているときのブランチ切り替え
+
+未コミットの変更があると `git switch` はエラーになる。2つの方法で対処できる。
+
+```bash
+# 変更を一時退避してからブランチを切り替え
+git stash
+git switch other-branch
+
+# 元のブランチに戻ってスタッシュを復元
+git switch feature/add-login
+git stash pop
+```
+
+または変更をコミットしてしまう（WIPコミット）:
+
+```bash
+git add -A
+git commit -m "WIP: 作業途中"
+git switch other-branch
+```
+
+---
 
 ## ハマったポイント
 
-- 古いGitでは `git checkout`。新しいGitでは `git switch` が推奨
-- マージ前に必ずmainに切り替える
+- `git switch` は Git 2.23以降。古いバージョンでは `git checkout` を使う。バージョンは `git --version` で確認できる
+- `git checkout` はブランチの切り替えとファイルの復元を両方やる。`git checkout ファイル名` でコミット前の変更を捨てられるが、間違えてやると変更が消える。`git switch` はブランチ操作に特化していてこの事故が起きない
+- `git pull origin main` より前に `git switch main` をしないと、別ブランチにmainの変更が引き込まれる。順番を間違えて余計なマージコミットが入った
+- ブランチ名に空白は使えない。`feature/add login` はエラーになるのでハイフンかアンダースコアを使う
+- `-d` で削除しようとしたらマージ未済みのブランチだと警告が出て削除できなかった。捨てて構わないなら `-D` で強制削除できる
 
-ブランチの操作に慣れたら、[git rebaseで履歴を整理する方法](/posts/git-rebase-basics)も覚えておくと便利だ。
+---
 
 ## 関連記事
 
