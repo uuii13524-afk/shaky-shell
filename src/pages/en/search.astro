@@ -1,0 +1,21 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+<BaseLayout
+  title="Search Articles - ErrNotes"
+  description="Search ErrNotes articles on Docker, Linux, Git, Cloudflare, and more."
+  lang="en"
+  altUrl="/"
+>
+  <link href="/pagefind/pagefind-ui.css" rel="stylesheet">
+  <h1 style="font-size:20px; font-weight:600; margin-bottom:24px;">Search Articles</h1>
+  <div id="search"></div>
+  <script src="/pagefind/pagefind-ui.js" is:inline></script>
+  <script is:inline>
+    window.addEventListener('DOMContentLoaded', () => {
+      const pf = new PagefindUI({ element: '#search', showImages: false });
+      const q = new URLSearchParams(window.location.search).get('q');
+      if (q) pf.triggerSearch(q);
+    });
+  </script>
+</BaseLayout>
