@@ -1,31 +1,55 @@
 ---
 const { frontmatter } = Astro.props;
+const { title, date, category } = frontmatter;
+const description = frontmatter.description ?? `${title} - ErrNotes error log and dev tools`;
+
+const path = Astro.url.pathname;
+const slug = path.replace(/^\/en\//, '').replace(/\/$/, '');
+const jaUrl = `/posts/${slug}`;
+const canonical = new URL(path, Astro.site).toString();
+const year = new Date().getFullYear();
 ---
+<!DOCTYPE html>
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>{frontmatter.title} - ErrNotes</title>
-    <meta name="description" content={frontmatter.title + ' - ErrNotes error log and dev tools'} />
+    <title>{title} - ErrNotes</title>
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" hreflang="ja" href={new URL(jaUrl, Astro.site).toString()} />
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="ErrNotes" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    {date && <meta property="article:published_time" content={String(date)} />}
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
     <header class="site-header">
       <div class="inner">
-        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <a href="/en" class="site-logo">Err<span>Notes</span></a>
         <nav class="site-nav">
-          <a href="/">Articles</a>
-          <a href="/base64">Base64</a>
+          <a href="/en">Articles</a>
           <a href="/json-formatter">JSON</a>
+          <a href="/base64">Base64</a>
+          <a href="/regex-tester">RegEx</a>
+          <span class="lang-switch">
+            <a href={jaUrl}>JA</a>
+            <a href="/en" class="active">EN</a>
+          </span>
         </nav>
       </div>
     </header>
     <main class="site-wrapper">
       <article>
         <div class="article-header">
-          <div class="category">{frontmatter.category}</div>
-          <h1>{frontmatter.title}</h1>
-          <div class="meta">{frontmatter.date}</div>
+          <div class="category">{category}</div>
+          <h1>{title}</h1>
+          <div class="meta">{date}</div>
         </div>
         <div class="article-body">
           <slot />
@@ -34,11 +58,13 @@ const { frontmatter } = Astro.props;
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/">← Back to articles</a>
-        &nbsp;·&nbsp;
-        <a href="/about">About</a>
-        &nbsp;·&nbsp;
-        <a href="/privacy">Privacy Policy</a>
+        <a href="/en/about">About</a>
+        <span class="sep">·</span>
+        <a href="/privacy">Privacy</a>
+        <span class="sep">·</span>
+        <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+        <span class="sep">·</span>
+        <span>© {year} ErrNotes</span>
       </div>
     </footer>
   </body>

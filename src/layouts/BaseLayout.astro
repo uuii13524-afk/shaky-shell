@@ -1,23 +1,57 @@
 ---
-const { title, description } = Astro.props;
+const {
+  title,
+  description = '',
+  lang = 'ja',
+  altUrl = lang === 'ja' ? '/en' : '/',
+} = Astro.props;
+
+const isEn = lang === 'en';
+const home = isEn ? '/en' : '/';
+const canonical = new URL(Astro.url.pathname, Astro.site).toString();
+const alternateHref = new URL(altUrl, Astro.site).toString();
+const alternateLang = isEn ? 'ja' : 'en';
+const year = new Date().getFullYear();
+const t = isEn
+  ? { articles: 'Articles', about: 'About', privacy: 'Privacy' }
+  : { articles: '記事', about: 'このサイトについて', privacy: 'プライバシー' };
+const aboutHref = isEn ? '/en/about' : '/about';
+
+// Lang switch: inactive lang links to counterpart (altUrl); active lang links to its home
+const jaHref = isEn ? altUrl : '/';
+const enHref = isEn ? '/en' : altUrl;
 ---
-<html lang="ja">
+<!DOCTYPE html>
+<html lang={isEn ? 'en' : 'ja'}>
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>{title}</title>
-    {description && <meta name="description" content={description} />}
+    <meta name="description" content={description} />
+    <link rel="canonical" href={canonical} />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="alternate" hreflang={alternateLang} href={alternateHref} />
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="ErrNotes" />
+    <meta property="og:title" content={title} />
+    <meta property="og:description" content={description} />
+    <meta property="og:url" content={canonical} />
+    <meta name="twitter:card" content="summary_large_image" />
     <link rel="stylesheet" href="/styles/global.css" />
   </head>
   <body>
     <header class="site-header">
       <div class="inner">
-        <a href="/" class="site-logo">Err<span>Notes</span></a>
+        <a href={home} class="site-logo">Err<span>Notes</span></a>
         <nav class="site-nav">
-          <a href="/">記事</a>
-          <a href="/base64">Base64</a>
+          <a href={home}>{t.articles}</a>
           <a href="/json-formatter">JSON</a>
-          <a href="/en">English</a>
+          <a href="/base64">Base64</a>
+          <a href="/regex-tester">RegEx</a>
+          <span class="lang-switch">
+            <a href={jaHref} class={isEn ? '' : 'active'}>JA</a>
+            <a href={enHref} class={isEn ? 'active' : ''}>EN</a>
+          </span>
         </nav>
       </div>
     </header>
@@ -26,11 +60,13 @@ const { title, description } = Astro.props;
     </main>
     <footer class="site-footer">
       <div class="site-wrapper">
-        <a href="/about">このサイトについて</a>
-        &nbsp;·&nbsp;
-        <a href="/privacy">プライバシーポリシー</a>
-        &nbsp;·&nbsp;
+        <a href={aboutHref}>{t.about}</a>
+        <span class="sep">·</span>
+        <a href="/privacy">{t.privacy}</a>
+        <span class="sep">·</span>
         <a href="https://bsky.app/profile/sasukkun.bsky.social" target="_blank" rel="noopener noreferrer">Bluesky</a>
+        <span class="sep">·</span>
+        <span>© {year} ErrNotes</span>
       </div>
     </footer>
   </body>
