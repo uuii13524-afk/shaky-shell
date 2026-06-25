@@ -1,104 +1,214 @@
 ---
-title: 'How to Run Commands Inside a Docker Container with docker exec'
+title: 'docker exec: Run Commands Inside a Container (with Examples)'
 date: '2026-06-02'
 category: 'Docker'
 layout: '../../layouts/PostLayoutEn.astro'
 ja_tags: ['Docker', 'docker exec', 'コンテナ', 'bash', 'デバッグ']
 en_tags: ['Docker', 'docker exec', 'container', 'bash', 'debugging']
-description: 'Learn how to use docker exec to enter a running container, run one-off commands, check logs, and debug your Docker environment.'
+description: 'How to use docker exec to enter a running container, run one-off commands, pass env vars, and debug with practical examples for bash, sh, and docker-compose.'
 ---
-## What I Wanted to Do
 
-I wanted to get inside a running Docker container and poke around — check files, run commands, look at logs.
-I kept Googling this every time I needed to debug, so I wrote it down.
-
-## Basic docker exec Usage
-
-### Enter a container with bash
+## Quick Answer
 
 ```bash
-docker exec -it <container-name-or-id> bash
+# Enter a running container with bash
+docker exec -it CONTAINER_NAME bash
+
+# Enter with sh (Alpine images without bash)
+docker exec -it CONTAINER_NAME sh
+
+# Run a single command without entering
+docker exec CONTAINER_NAME cat /etc/nginx/nginx.conf
 ```
 
-The `-i` flag keeps stdin open (interactive), and `-t` allocates a pseudo-TTY.
-Get the container name with `docker ps`.
+Get your container name from `docker ps`.
+
+---
+
+## Basic docker exec Syntax
+
+```
+docker exec [OPTIONS] CONTAINER COMMAND [ARG...]
+```
+
+| Option | Description |
+|---|---|
+| `-i` | Keep stdin open (interactive) |
+| `-t` | Allocate a pseudo-TTY (terminal) |
+| `-u` | Run as a specific user |
+| `-e` | Set an environment variable |
+| `-w` | Set the working directory |
+
+Always combine `-i` and `-t` as `-it` when opening an interactive shell. Without `-t`, you get no prompt. Without `-i`, input is immediately closed.
+
+---
+
+## Enter a Container Shell
+
+### bash (default for most images)
 
 ```bash
-docker ps
-# CONTAINER ID   IMAGE     COMMAND   NAMES
-# a1b2c3d4e5f6   nginx     ...       my-nginx
 docker exec -it my-nginx bash
 ```
 
-### Use sh if bash isn't available
+### sh (Alpine-based images)
 
-Alpine-based images often don't have bash installed.
-
-```bash
-docker exec -it <container-name> sh
-```
-
-### Run a single command without entering the container
+Alpine images don't ship with bash. Use `sh`:
 
 ```bash
-docker exec <container-name> cat /etc/nginx/nginx.conf
-docker exec <container-name> ls -la /var/log/nginx/
+docker exec -it my-alpine sh
 ```
 
-### Check environment variables
+### Enter as root for debugging
 
 ```bash
-docker exec <container-name> env
+docker exec -it -u root my-container bash
 ```
+
+### Enter as a specific user
+
+```bash
+docker exec -it -u www-data my-container bash
+```
+
+---
+
+## Run a Single Command
+
+```bash
+# Read a config file
+docker exec my-nginx cat /etc/nginx/nginx.conf
+
+# List files
+docker exec my-app ls -la /var/log/
+
+# Check environment variables
+docker exec my-app env
+
+# Check running processes
+docker exec my-app ps aux
+```
+
+---
+
+## Set Environment Variables
+
+```bash
+# Pass an env var to the command
+docker exec -e DEBUG=true my-app node debug.js
+
+# Pass multiple env vars
+docker exec -e NODE_ENV=production -e PORT=8080 my-app node app.js
+```
+
+---
+
+## Set Working Directory
+
+```bash
+docker exec -w /app my-container ls
+```
+
+---
 
 ## Using docker exec with docker-compose
 
-With docker-compose, you reference the service name instead of the container name.
+Use the **service name** from `docker-compose.yml`, not the container name:
 
 ```bash
+# Enter the web service
 docker-compose exec web bash
+
+# Connect to PostgreSQL
 docker-compose exec db psql -U postgres
+
+# Run a migration
+docker-compose exec web rails db:migrate
 ```
 
-The key difference: `docker-compose exec` uses the service name from `docker-compose.yml`, not the container name.
+Check service names with `docker-compose ps`.
 
-### Run as a specific user
-
-```bash
-# Enter as root (useful for permission debugging)
-docker exec -it -u root <container-name> bash
-
-# Run as a different user
-docker exec -it -u www-data <container-name> bash
-```
+---
 
 ## Common Debugging Patterns
 
 ### Tail a log file live
 
 ```bash
-docker exec <container-name> tail -f /var/log/nginx/error.log
-```
-
-### Check running processes
-
-```bash
-docker exec <container-name> ps aux
+docker exec my-nginx tail -f /var/log/nginx/error.log
 ```
 
 ### Test network connectivity between containers
 
 ```bash
-docker exec <container-name> curl -v http://other-container:3000
+docker exec my-app curl -v http://db:5432
+docker exec my-app ping redis
 ```
 
-## Pitfalls I Hit
+### Check open ports inside the container
 
-- Got `bash: not found` — switched to `sh`. Alpine images don't ship with bash
-- Forgot `-it` when entering a shell — the session exited immediately. Always add both flags when going interactive
-- Tried to run `docker exec` on a stopped container — it fails. Start it first with `docker start`
-- Used `docker-compose exec` with the wrong service name — got `no such service`. Check names with `docker-compose ps`
-- Created files as root inside the container, then couldn't write to them from the host. Use `-u` to match UIDs
+```bash
+docker exec my-container ss -tlnp
+```
+
+---
+
+## Common Errors
+
+### `bash: not found`
+
+The image doesn't include bash. Use `sh`:
+
+```bash
+docker exec -it my-container sh
+```
+
+### `the input device is not a TTY`
+
+You're missing `-t`. Always use `-it` for interactive sessions.
+
+### `cannot exec in a stopped container`
+
+Start the container first:
+
+```bash
+docker start CONTAINER_NAME
+docker exec -it CONTAINER_NAME bash
+```
+
+---
+
+## docker exec vs docker run
+
+| | `docker exec` | `docker run` |
+|---|---|---|
+| Target | Running container | Creates a new container |
+| Use case | Debug live container | Start a fresh container |
+| State | Uses existing state | Starts clean |
+
+---
+
+## FAQ
+
+**Q: What does `docker exec -it` mean?**
+`-i` keeps stdin open, `-t` allocates a terminal. Together they make the session interactive.
+
+**Q: How do I run a command in a Docker container?**
+`docker exec CONTAINER_NAME COMMAND`. Example: `docker exec my-app ls /var/log`.
+
+**Q: How do I enter a running Docker container?**
+`docker exec -it CONTAINER_NAME bash` (or `sh` for Alpine images).
+
+**Q: Why does `docker exec bash` give "bash: not found"?**
+The image is Alpine-based and doesn't include bash. Use `sh` instead.
+
+**Q: Can I run docker exec on a stopped container?**
+No. Start the container first with `docker start CONTAINER_NAME`.
+
+**Q: What is the difference between docker exec and docker attach?**
+`docker exec` creates a new process inside the container. `docker attach` connects to the main process (PID 1). Use `exec` for debugging.
+
+---
 
 ## Related Articles
 
