@@ -6,6 +6,19 @@ layout: '../../layouts/PostLayout.astro'
 description: 'git pushしてもCloudflare Pagesに変更が反映されない原因と解決方法を解説。GitHub連携の確認やビルドコマンドの見直しポイントを紹介します。'
 ---
 
+## ひとことで言うと
+
+```
+Deploymentsタブを開く → 新しいビルドが来ているか確認
+↓ビルドが来ていない
+Settings → Git repository → Manage → GitHubを再認証
+→ git commit --allow-empty -m "force deploy" && git push
+```
+
+まずDeploymentsタブで「ビルドが来ていないのか」「来ているが失敗しているのか」を切り分ける。何も来ていなければOAuth切断が9割。
+
+---
+
 ## やりたかったこと
 
 記事を更新してgit pushしたのに、Cloudflare Pagesのサイトに変更が全然反映されなかった。いつもは1〜2分で更新されるのに、30分待っても何も変わらない。Deploymentsタブを開いたら新しいデプロイが一切来ておらず、最後のデプロイが昨日のままになっていた。
@@ -59,6 +72,10 @@ Response: 401
 **ビルド成功なのにサイトが更新されないケース**
 
 ビルドは来るし「Success」になるのにサイトが更新されない現象もあった。CloudflareのCDNキャッシュが古いものを返し続けていたのが原因で、「Purge Cache」を手動で実行したら解決した。Cloudflareダッシュボードの「Caching」→「Configuration」→「Purge Everything」でキャッシュを削除できる。
+
+**Environment variablesの設定変更がビルドに反映されなかった**
+
+`NODE_VERSION`を設定したのにビルドが古いNode.jsで動いているように見えた。原因はEnvironment variablesの「Production」と「Preview」を別々に設定する必要があることを知らなかったことだった。変数設定の画面では「Production」タブと「Preview」タブが分かれていて、片方だけ設定しても両方には反映されない。「Production and Preview」のタブを選んで同時に設定するか、両方のタブでそれぞれ追加する必要があった。Previewのビルドだけで確認していたので本番ビルドに反映されず、切り分けに30分かかった。
 
 ## 解決策
 
@@ -161,6 +178,22 @@ pushした後は毎回Deploymentsタブを確認する習慣をつける。「2�
 - デプロイ「Success」なのにサイトが更新されない場合はCDNキャッシュが原因のことがある。ブラウザのハードリロードで変わらなければCloudflareのPurge Cacheで解決した。「ビルドはできているのに反映されない」という現象はキャッシュを真っ先に疑う
 
 そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。
+
+## よくある質問
+
+**Q: git pushしてもDeploymentsタブに何も来ません。バナーも出ていません。**
+バナーが出ていない場合はGitHubのWebhookを確認する。GitHubの該当リポジトリ → Settings → Webhooks → 「Recent Deliveries」タブを開く。HTTPステータスが401なら再認証が必要。DeliveriesにそもそもエントリがないならCloudflareのProduction branchの設定が実際のブランチ名と一致しているか確認する。
+
+**Q: ビルドは「Success」なのにサイトが古いままです。**
+Cloudflare CDNのキャッシュが原因。Cloudflareダッシュボード → ドメインを選択 → Caching → Configuration → Purge Cache → Purge Everythingでキャッシュを全削除してからブラウザをシークレットモードで確認する。ブラウザのスーパーリロード（Ctrl+Shift+R）では直らない。
+
+**Q: force pushしたらデプロイが走らなくなりました。**
+force pushはGitHubのWebhookをトリガーするが、CloudflareがそのコミットのSHAを「処理済み」として記録しているケースがある。空コミットをpushして強制的に新しいSHAを作ると確実にデプロイがトリガーされる：`git commit --allow-empty -m "trigger deploy" && git push`
+
+**Q: プライベートリポジトリでも自動デプロイは動きますか？**
+動く。OAuth認証でCloudflare Pagesがプライベートリポジトリにもアクセスできるようになっている。OAuth接続が切れた場合はプライベート・パブリックどちらでも同じように再認証が必要。
+
+---
 
 ## 関連記事
 

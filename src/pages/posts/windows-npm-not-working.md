@@ -6,6 +6,19 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Windowsでnpmコマンドが認識されない・動かない時の原因と解決方法を解説。PATHの確認・Node.jsの再インストール手順を紹介します。'
 ---
 
+## ひとことで言うと
+
+```cmd
+# まずターミナルを完全に閉じて開き直す（これだけで直るケースが多い）
+# 開き直した後
+node -v
+npm -v
+```
+
+Node.jsインストール後に同じターミナルで確認しても絶対に直らない。ターミナルは起動時にしか環境変数を読み込まない。インストール後は**ターミナルを閉じて開き直す**のが最初の一手。
+
+---
+
 ## やりたかったこと
 
 AstroプロジェクトをWindowsで動かそうとして`npm install`を実行したら、コマンドが認識されないエラーが出た。Node.jsのインストーラーは前日に実行してインストール完了のダイアログも確認していたのに、なぜ使えないのかわからなかった。
@@ -66,6 +79,18 @@ C:\Program Files\nodejs\node.exe
 ```
 
 Microsoft Storeのバージョンが先に見つかってしまい、更新管理がStore経由になる上にバージョンが古かった。「where nodeで複数パスが出る」という可能性を最初は考えていなかった。
+
+解決策はWindowsの設定から「アプリの実行エイリアス」を無効にすること。「設定 → アプリ → アプリの実行エイリアス」を開くと「アプリインストーラー - node.exe」という項目があるのでオフにする。これでStore版のNodeが無視されてnodejs.org版が優先されるようになった。アンインストールするより素早く切り替えられた。
+
+**`npm install`は成功するのに`npm run dev`でエラーが出た**
+
+node_modulesのインストール後に`npm run dev`を実行したら以下のエラーが出た。
+
+```
+Error: EPERM: operation not permitted, mkdir 'C:\Users\ユーザー名\project\node_modules\.vite'
+```
+
+OneDriveの同期フォルダの中にプロジェクトを作っていたのが原因だった。OneDriveがファイルをクラウドに同期しようとする処理と、Viteがキャッシュファイルを書き込もうとする処理がぶつかってEPERMエラーになっていた。プロジェクトをOneDrive外の`C:\dev\`フォルダに移してから起動したら正常に動いた。「インストールは通るのにrunでだけ失敗する」という場合はOneDriveやDropboxの同期フォルダに入っていないか確認するといい。
 
 ## 解決策
 
@@ -155,6 +180,22 @@ Windowsでnvmを使う場合は`nvm-windows`を使う。LinuxやmacOS用のnvm�
 - `node -v`は通るのに`npm -v`が「認識されません」になるパターンがあるとは知らなかった。Node.jsのインストールパス（`C:\Program Files\nodejs\`）とnpmのグローバルパス（`C:\Users\ユーザー名\AppData\Roaming\npm`）は別々にPATHに登録されているので、npmのパスだけ欠けていることがある。「Nodeが動くからインストールは成功している」と思い込んで問題の切り分けが遅れた
 - `where node`を実行したら複数のパスが返ってきて、Microsoft Storeのnode.exeが先に見つかってしまっていた。Store版を削除するか、Windowsの「アプリの実行エイリアス」でStoreのNode.jsを無効にするかで解決した。「インストールが重複していることがある」という発想が最初なかった
 - VS Codeのターミナルだけ再起動しても直らないと思っていたが、原因はVS Code自体を再起動していなかったことだった。VS Codeはアプリ起動時に環境変数を取得するので、VS Codeが起動したままではターミナルを何度再起動しても古い環境変数が引き継がれ続ける。VS Code全体を終了してから開き直すのが確実だった
+
+## よくある質問
+
+**Q: ターミナルを再起動しても直りません。**
+VS Codeを使っている場合はVS Code自体も終了して開き直す。VS Codeはアプリ起動時に環境変数を取得するため、VS Codeのターミナルだけ閉じても古い環境変数が引き継がれる。VS Code全体を終了 → 再起動が確実。
+
+**Q: `node -v` は通るのに `npm -v` が「認識されません」と出ます。**
+Node.jsのインストールパス（`C:\Program Files\nodejs\`）とnpmのグローバルパス（`C:\Users\ユーザー名\AppData\Roaming\npm`）は別々にPATHに登録されている。npmのパスだけ欠けていることがある。環境変数の設定でこのnpmのパスが含まれているか確認する。
+
+**Q: VS CodeのターミナルでPowerShellの実行ポリシーエラーが出ます。**
+管理者としてPowerShellを開いて `Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser` を実行する。またはVS Codeのターミナルをコマンドプロンプト（cmd）に切り替えると、このエラーは出なくなる。ターミナル右上の「v」ボタンから「Command Prompt」を選択できる。
+
+**Q: `where node` で複数のパスが返ってきます。**
+Microsoft Store版とnodejs.org版が両方インストールされている状態。Windowsの「アプリと機能」からMicrosoft Store版のNode.jsを削除するか、「アプリの実行エイリアス」でStoreのNode.jsを無効にする。開発用途はnodejs.orgのLTS版を使う方がPATHの管理が素直で問題が少ない。
+
+---
 
 ## 関連記事
 
