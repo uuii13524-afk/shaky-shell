@@ -6,7 +6,46 @@ layout: '../../layouts/PostLayout.astro'
 description: 'DockerfileのFROM・RUN・COPY・CMD・EXPOSEなど基本的な命令の書き方を解説。イメージのビルド手順と実践的なサンプルも紹介します。'
 ---
 
-## Dockerfileの基本構成
+## やりたかったこと
+
+Node.jsのアプリをDockerコンテナで動かそうとした。最初は `docker run node:18` でコンテナを起動してアプリを手動で入れていたが、毎回同じ手順を繰り返すのが面倒になってきた。Dockerfileを書けば同じ環境を一発で再現できると聞いて試してみた。
+
+---
+
+## 環境
+
+- OS: Ubuntu 22.04 LTS
+- Docker: 24.0.5
+- Node.js: 22系（alpine）
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初、こんな書き方をした。
+
+```dockerfile
+FROM node:22
+COPY . .
+RUN npm install
+CMD ["node", "server.js"]
+```
+
+ビルドは通ったが、毎回 `npm install` のキャッシュが効かずに全パッケージをダウンロードし直していた。2分近くかかっていて、コードを1行直すたびに待ち続けた。
+
+次に `node_modules` もまるごとCOPYしてビルドしていたが、ホストとコンテナでCPUアーキテクチャが違うせいでバイナリが壊れて起動エラーになった。
+
+```
+Error: /app/node_modules/bcrypt/lib/binding/napi-v3/bcrypt_lib.node: invalid ELF header
+```
+
+`.dockerignore` を知らなかったのが原因だった。
+
+---
+
+## 解決策
+
+`package*.json` だけを先にCOPYして `npm ci` を実行する。こうするとpackage.jsonが変わらない限りこのレイヤーのキャッシュが使い回されてビルドが速くなった。
 
 ```dockerfile
 FROM node:22-alpine
@@ -19,7 +58,7 @@ EXPOSE 3000
 CMD ["node", "server.js"]
 ```
 
-## .dockerignoreファイル
+`.dockerignore` も必ず作る。これがないとホスト側の `node_modules` がコンテナにコピーされてイメージが数GB単位で膨れ上がる。
 
 ```
 node_modules
@@ -29,19 +68,26 @@ dist
 *.log
 ```
 
-## イメージをビルドして実行
+ビルドして起動するコマンド:
 
 ```bash
 docker build -t myapp .
 docker run -d -p 3000:3000 myapp
 ```
 
+これで起動した。
+
+---
+
 ## ハマったポイント
 
-- `COPY package*.json ./` してから `RUN npm ci` を分けるとキャッシュが効く
-- `.dockerignore` がないと `node_modules` がコピーされてイメージが巨大になる
+- `COPY package*.json ./` を `COPY . .` より先に書かないとキャッシュが全く効かない。ちょっとしたコード修正のたびに `npm ci` が走って3分待ちになった
+- `.dockerignore` なしでビルドすると `node_modules`（700MB超）がイメージに入る。 `docker images` で確認したら1.8GBになっていて驚いた
+- `RUN npm install` より `RUN npm ci` のほうがCI/CDでは安定する。`package-lock.json` がないと `npm ci` はエラーになるのでlockファイルは必ずコミットしておく
+- `WORKDIR /app` を省略すると `/` 直下にファイルが散らばってあとで管理しにくくなった
+- `CMD` と `ENTRYPOINT` の違いで1時間ハマった。`CMD` は上書き可能、`ENTRYPOINT` は固定と覚えた
 
-DockerfileでビルドしたイメージをCI/CDで自動デプロイしたい場合は[GitHub Actionsで自動デプロイする基本的な設定方法](/posts/github-actions-basic)と組み合わせると効率が上がる。
+---
 
 ## 関連記事
 

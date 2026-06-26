@@ -7,14 +7,53 @@ ja_tags: ['Docker', 'docker-compose', '環境変数', '.env']
 en_tags: ['Docker', 'docker-compose', 'environment variables', '.env file']
 description: 'docker-composeで.envファイルを使って環境変数を管理する方法を解説。DBパスワードやAPIキーをコードに直書きせず安全に設定できる。'
 ---
+
 ## やりたかったこと
 
-docker-compose.ymlにDBのパスワードやAPIキーをハードコードしていて、Gitにpushするのが怖かった。
-.envファイルを使えばうまく管理できると聞いて試してみた。
+docker-compose.ymlにMySQLのパスワードをそのまま書いていた。チームメンバーに「それGitHubに上がってるよ」と指摘されて血の気が引いた。`.env`ファイルで環境変数を管理する方法に切り替えることにした。
 
-## .envファイルの基本的な使い方
+---
 
-docker-compose.ymlと同じディレクトリに`.env`ファイルを置くと、自動で読み込まれる。
+## 環境
+
+- OS: Ubuntu 22.04 LTS / macOS 13.4
+- Docker: 24.0.5
+- docker compose: v2.20.2
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初はdocker-compose.ymlの中に直接 `environment` キーで書いていた。
+
+```yaml
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: mysecretpassword123
+```
+
+これをそのまま `git add` して `git commit` してしまった。GitHubのリポジトリ（パブリック）にパスワードが丸見えで上がっていた。`git log` を見たら過去のコミットにも残っていた。
+
+次に、シェルの環境変数としてexportしてcompose.ymlから参照しようとした。
+
+```bash
+export MYSQL_ROOT_PASSWORD=secret
+```
+
+```yaml
+environment:
+  MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+```
+
+動いたが、ターミナルを閉じるたびに毎回exportし直す必要があって面倒だった。チームで共有する方法もなかった。
+
+---
+
+## 解決策
+
+### .envファイルをdocker-compose.ymlと同じディレクトリに置く
 
 ```
 # .env
@@ -23,9 +62,10 @@ MYSQL_DATABASE=myapp
 APP_PORT=3000
 ```
 
+docker-composeは自動でこの `.env` を読み込んで、yml内の `${変数名}` に展開する。
+
 ```yaml
 # docker-compose.yml
-version: '3'
 services:
   db:
     image: mysql:8.0
@@ -40,11 +80,18 @@ services:
       - "${APP_PORT}:3000"
 ```
 
-`.env`に書いた値が`${変数名}`の部分に展開される。`.env`はGitignoreに追加しておく。
+### .gitignoreに追加する
 
-## env_fileでコンテナ内部に渡す方法
+```bash
+echo ".env" >> .gitignore
+echo ".env.local" >> .gitignore
+```
 
-`environment`キーとは別に、`env_file`キーを使うとファイルごとコンテナに渡せる。
+`.env.example`（ダミー値を入れたサンプル）はコミットして、実際の値が入った `.env` はGit管理外にする。
+
+### env_fileでコンテナ内部にも渡す
+
+`environment`キーに変数名を列挙する方法とは別に、ファイルごとコンテナに渡す方法もある。
 
 ```yaml
 services:
@@ -55,27 +102,31 @@ services:
       - .env.local
 ```
 
-複数ファイルを読み込めるので、`.env`に共通設定・`.env.local`にローカル上書きを分けると便利だった。
+`env_file` に指定したファイルの変数はそのままコンテナ内の環境変数になる。複数ファイルを重ねて読めるので、`.env` に共通設定・`.env.local` にローカル上書き用の値を書くと便利だった。
 
-## 設定値の確認方法
+### 設定値が正しく展開されているか確認する
 
 ```bash
-# 変数展開後のcompose設定を確認
+# 変数展開後のcompose設定を表示する
 docker compose config
 
 # コンテナ内の環境変数を直接確認
 docker exec -it <container_name> env
 ```
 
-`docker compose config`を実行すると変数が実際の値に置き換わった状態のymlが表示される。デプロイ前に必ず確認するようにした。
+`docker compose config` を実行すると変数が実際の値に置き換わった状態のymlが表示される。デプロイ前にこれで確認するようにした。
+
+---
 
 ## ハマったポイント
 
-- `.env`は自動でyml内の`${変数名}`を展開するが、`env_file`指定ファイルはコンテナ内部に渡されるだけで展開には使えない
-- 値にスペースが含まれる場合はクォートが必要：`MY_VAR="hello world"`
-- `.env`を`.gitignore`に追加し忘れてDBパスワードをGitHubにpushしてしまった
-- `docker-compose up`後に`.env`を書き換えても、`--env-file`なしだとコンテナを再起動するまで反映されない
-- `docker compose config`でおかしな値が見えたらすぐ気づけた
+- `.env` はyml内の `${変数名}` を展開するが、`env_file` で指定したファイルは展開に使えない。コンテナ内部に渡されるだけ。この2つの役割を混同して1時間ハマった
+- 値にスペースや特殊文字が含まれるときはクォートが必要：`MY_VAR="hello world"` / `SECRET="p@ss!word"`
+- `.gitignore` に追加し忘れてパスワードを含む `.env` をGitHubにpushしてしまった。GitHubにpushした秘密情報は「削除してpushし直す」だけでは履歴に残るので、パスワードを変更するのが正しい対処
+- `docker compose up` 後に `.env` を書き換えても、コンテナを再起動しないと反映されない。`docker compose up --force-recreate` が必要
+- `docker compose config` でおかしな値が見えたら `.env` の書き方を確認する。`=` の前後にスペースを入れると読み込まれない
+
+---
 
 ## 関連記事
 

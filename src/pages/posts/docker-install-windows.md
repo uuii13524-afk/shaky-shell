@@ -6,45 +6,92 @@ layout: '../../layouts/PostLayout.astro'
 description: 'WindowsにDocker Desktopをインストールして動かすまでの手順を解説。WSL2の有効化・インストール・動作確認までステップごとに紹介します。'
 ---
 
-## 手順
+## やりたかったこと
 
-### 1. WSL2をインストール
+Windowsのラップトップ（Windows 11 Home）でDockerを動かしたかった。チームのMacメンバーはすんなり動いているのに、自分だけ `docker run hello-world` を実行しても何も起きなくて、インストール手順を調べながら3時間格闘した。
+
+---
+
+## 環境
+
+- OS: Windows 11 Home 23H2
+- CPU: Intel Core i7（VT-x対応）
+- Docker Desktop: 4.30.0
+- WSL2: Ubuntu 22.04
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初、Docker Desktopのインストーラーをそのまま実行した。インストール自体は完了したが、Docker Desktopを開いたらこんなエラーが出た。
 
 ```
+WSL 2 installation is incomplete.
+The WSL 2 Linux kernel is not installed.
+```
+
+「WSL 2」の意味もわからず、とりあえず画面の「Restart」を押したが何も変わらなかった。
+
+次に公式ドキュメントを読んで `wsl --install` を実行しようとしたら、管理者権限なしのPowerShellで叩いたせいで権限エラーになった。
+
+```
+Error: 0x8007019e
+The Windows Subsystem for Linux optional component is not enabled.
+```
+
+BIOSの仮想化設定もデフォルトでOFFになっていたので、そこから直す必要があった。
+
+---
+
+## 解決策
+
+### 1. BIOSで仮想化を有効にする
+
+PCを再起動してBIOS画面に入る（Dellなら起動時にF2、HPならF10）。「Intel Virtualization Technology」または「AMD-V」をEnabledに変更して保存・再起動。
+
+### 2. 管理者権限のPowerShellでWSL2をインストール
+
+スタートメニューでPowerShellを右クリック→「管理者として実行」で開く。
+
+```powershell
 wsl --install
 ```
 
-再起動する。
+インストールが完了したら再起動する。再起動後にUbuntuのユーザー名とパスワードの設定画面が自動で開くので設定する。
 
-### 2. Docker Desktopをダウンロード
+### 3. Docker Desktopをダウンロード・インストール
 
-https://www.docker.com/products/docker-desktop から「Download for Windows」。
+https://www.docker.com/products/docker-desktop から「Download for Windows」をクリック。
 
-### 3. インストール
-
-「Use WSL 2 instead of Hyper-V」にチェックが入っていることを確認。再起動する。
+インストーラーを実行して、「Use WSL 2 instead of Hyper-V」にチェックが入っていることを確認してインストール。完了後に再起動。
 
 ### 4. 動作確認
 
-```
+PowerShellまたはコマンドプロンプトで実行する。
+
+```bash
 docker --version
 docker run hello-world
 ```
 
+```
+Hello from Docker!
+This message shows that your installation appears to be working correctly.
+```
+
+このメッセージが出たら成功した。
+
+---
+
 ## ハマったポイント
 
-- BIOSで仮想化（Intel VT-x / AMD-V）を有効にする
-- WSL2のインストールが必要：`wsl --install`
+- BIOSの仮想化設定がデフォルトでOFFになっていた。`wsl --install` をどれだけ実行してもここが原因でずっと失敗し続けた
+- `wsl --install` は管理者権限のPowerShellで実行しないとエラーになる。普通に開いたPowerShellでは権限不足だった
+- WSL2のインストール後に再起動しないとDockerが起動しない。再起動を省略して詰まった
+- Docker DesktopのインストールでHyper-Vを有効にする選択肢があったが、Windows HomeはHyper-V非対応なのでWSL2の選択肢を選ぶ必要があった
+- インストール直後にDocker Desktopを開いたらまたエラーが出て焦ったが、「Start」ボタンを押してデーモンが起動するまで待つだけだった
 
-WSL2のセットアップが初めての場合は[WindowsでWSL2をインストールする方法](/posts/wsl2-install-windows)の手順を先に確認しておくと迷わずに進められる。
-
-## ConoHa VPSでDockerを本番環境で使う
-
-ローカルでDockerを動かせるようになったら、次は本番サーバーへの展開です。
-ConoHa VPSならDockerがすぐに使える環境を低コストで用意できます。
-
-<a href="https://px.a8.net/svt/ejp?a8mat=4B3UZB+CFPZOY+50+4YQYYA" rel="nofollow">ConoHa VPSを見てみる →</a>
-<img border="0" width="1" height="1" src="https://www10.a8.net/0.gif?a8mat=4B3UZB+CFPZOY+50+4YQYYA" alt="">
+---
 
 ## 関連記事
 

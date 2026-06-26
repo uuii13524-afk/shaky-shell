@@ -6,50 +6,116 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Dockerでポートが既に使用中エラーが発生した時の原因調査と解決方法を解説。使用中のポートを確認してプロセスを終了する手順を紹介します。'
 ---
 
-## 症状
+## やりたかったこと
+
+いつも通り `docker compose up -d` でWebアプリを起動しようとしたら、こんなエラーが出て起動できなかった。
 
 ```
-Error response from daemon: Bind for 0.0.0.0:8080 failed: port is already allocated
+Error response from daemon: driver failed programming external connectivity on endpoint
+myapp-web-1: Bind for 0.0.0.0:8080 failed: port is already allocated
 ```
 
-## 解決方法
+昨日までは普通に動いていたのに、何も変えていないのになぜか急に起動しなくなった。
 
-### 別のポートを使う
+---
+
+## 環境
+
+- OS: Ubuntu 22.04 LTS
+- Docker: 24.0.7
+- docker compose: v2.21.0
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+まず `docker ps` でコンテナ一覧を見たが、起動中のコンテナは表示されなかった。「コンテナが動いていないならポートは空いているはずでは？」と思って再度 `docker compose up -d` したが同じエラーだった。
+
+次に `docker compose down` で明示的に停止してから再度upしてみた。それでも同じエラーが出た。
+
+「もしかしてDockerとは別のプロセスがポートを使ってる？」とやっと気づいた。
+
+---
+
+## 解決策
+
+### ポートを使っているプロセスを特定する
+
+**Linux / Mac の場合**
 
 ```bash
-docker run -d -p 8081:80 nginx
+lsof -i :8080
 ```
 
-### 使用中のポートを確認して解放する
+```
+COMMAND   PID   USER   FD   TYPE DEVICE SIZE/OFF NODE NAME
+node     3142   user   22u  IPv4  85432      0t0  TCP *:8080 (LISTEN)
+```
 
-**Windows**
+PIDを確認して kill する。
+
+```bash
+kill -9 3142
+```
+
+**Windows の場合**
 
 ```
 netstat -ano | findstr :8080
 ```
 
-タスクマネージャーで該当プロセスを終了。
-
-**Mac/Linux**
-
-```bash
-lsof -i :8080
-kill -9 PID
+```
+  TCP    0.0.0.0:8080    0.0.0.0:0    LISTEN    4312
 ```
 
-### 起動中のDockerコンテナを停止する
+タスクマネージャーでPID 4312のプロセスを探して終了する。または:
+
+```
+taskkill /PID 4312 /F
+```
+
+### 停止中のDockerコンテナを確認・削除する
+
+`docker ps` には停止中のコンテナが表示されない。`-a` フラグが必要。
 
 ```bash
-docker ps
-docker stop コンテナID
+docker ps -a
 ```
+
+```
+CONTAINER ID   IMAGE     COMMAND              STATUS    PORTS
+a1b2c3d4e5f6   myapp     "node server.js"   Exited(1) 0.0.0.0:8080->8080/tcp
+```
+
+ポートを確保したまま Exited になっているコンテナがあった。これを削除する。
+
+```bash
+docker rm a1b2c3d4e5f6
+```
+
+または全停止コンテナをまとめて掃除する:
+
+```bash
+docker container prune
+```
+
+### どうしても特定できないときは別ポートを使う
+
+```bash
+docker run -d -p 8081:80 nginx
+```
+
+---
 
 ## ハマったポイント
 
-- 以前起動したコンテナが残っていてポートを占有していることが多い
-- `docker ps -a` で停止中のコンテナも確認する
+- `docker ps` だけでは見つからない。`docker ps -a` で Exited のコンテナまで確認しないといけなかった。これに気づくまで30分以上かかった
+- 前回 `docker compose up` が途中でエラー終了したとき、コンテナが中途半端な状態でポートを掴んだまま Exited になることがある
+- PCを再起動すると治ることがあるが、毎回それをやるのは根本解決になっていなかった。`docker ps -a` で確認して `docker rm` するのが正解
+- Mac上のDocker Desktopで `--network host` を使うとポートが見えなくて同様のエラーになることがある。Macでは host ネットワークが動作しない
+- `docker compose down` はコンテナを削除するが、`docker compose stop` は停止するだけでコンテナが残る。stopで止めてからupすると同じエラーになる
 
-ポートを使っているプロセスを特定して終了する方法は[Linuxでプロセスを確認・終了する方法（ps/kill）](/posts/linux-process-management)も参考になる。
+---
 
 ## 関連記事
 

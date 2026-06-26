@@ -6,22 +6,70 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Dockerのボリュームを使ってコンテナのデータを永続化する方法を解説。ボリュームの作成・マウント・バックアップの基本的な使い方を紹介します。'
 ---
 
-## ボリュームとは
+## やりたかったこと
 
-Dockerコンテナのデータをホストマシンに保存する仕組み。コンテナを削除してもデータが残る。
+MySQLコンテナを立ち上げてデータを入れていたが、`docker compose down` したらデータが全部消えてしまった。「コンテナを落とすたびにDBが初期化されては困る」と気づいてボリュームを調べ始めた。
 
-## 名前付きボリューム（推奨）
+---
 
-```bash
-docker run -d -v mydata:/var/lib/mysql mysql:8
-```
+## 環境
 
-## docker-composeでの設定
+- OS: Ubuntu 22.04 LTS
+- Docker: 24.0.5
+- docker compose: v2.20.2
+- MySQL: 8.0.33
+
+---
+
+## 試したこと・うまくいかなかったこと
+
+最初はホストのディレクトリをバインドマウントしてみた。
 
 ```yaml
 services:
   db:
-    image: mysql:8
+    image: mysql:8.0
+    volumes:
+      - ./mysql-data:/var/lib/mysql
+```
+
+これで `docker compose down` してもデータが残るようになった。ただし、ホスト側の `./mysql-data` ディレクトリのパーミッションがrootになってしまって、ホストから中身を確認したり操作しようとすると `Permission denied` が出た。
+
+```
+ls: cannot open directory './mysql-data': Permission denied
+```
+
+次に、バインドマウントをそのままVPSに持っていったら、MySQLの起動時にこんなエラーが出て動かなくなった。
+
+```
+[ERROR] InnoDB: Operating system error number 13 in a file operation.
+```
+
+OS側のパーミッションとMySQLの期待するディレクトリ権限がズレていた。
+
+---
+
+## 解決策
+
+Dockerが管理する名前付きボリュームを使うと、こうしたパーミッション問題が起きない。
+
+### 名前付きボリュームで起動する
+
+```bash
+docker run -d \
+  -e MYSQL_ROOT_PASSWORD=secret123 \
+  -v mydata:/var/lib/mysql \
+  mysql:8.0
+```
+
+### docker-composeで設定する
+
+```yaml
+services:
+  db:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret123
     volumes:
       - db_data:/var/lib/mysql
 
@@ -29,21 +77,44 @@ volumes:
   db_data:
 ```
 
-## ボリュームの操作
+`volumes:` セクションを書かないとエラーになるので注意。
+
+### ボリュームの操作コマンド
 
 ```bash
-docker volume ls
-docker volume create mydata
-docker volume rm mydata
-docker volume prune
+docker volume ls                  # ボリューム一覧
+docker volume create mydata       # 手動作成
+docker volume inspect mydata      # 詳細確認（保存先パスも分かる）
+docker volume rm mydata           # 削除
+docker volume prune               # 使われていないボリュームを全削除
 ```
+
+### バックアップとリストア
+
+```bash
+# バックアップ（ボリュームの中身をtarで固める）
+docker run --rm \
+  -v mydata:/source \
+  -v $(pwd):/backup \
+  alpine tar czf /backup/mydata-backup.tar.gz -C /source .
+
+# リストア
+docker run --rm \
+  -v mydata:/target \
+  -v $(pwd):/backup \
+  alpine tar xzf /backup/mydata-backup.tar.gz -C /target
+```
+
+---
 
 ## ハマったポイント
 
-- `docker compose down -v` はボリュームも削除する（注意）
-- ボリュームなしでコンテナを削除するとデータが全部消える
+- `docker compose down` は停止のみ、ボリュームは残る。`docker compose down -v` はボリュームも一緒に削除する。うっかり `-v` をつけてDBのデータを全部吹き飛ばしたことがある
+- バインドマウント（`./ホストパス:/コンテナパス`）とボリューム（`名前:/コンテナパス`）は別物。バインドマウントはホストのパスを直接使うのでパーミッション問題が起きやすい
+- `docker volume inspect` で実際の保存先（`/var/lib/docker/volumes/mydata/_data`）が確認できる。ボリュームがどこにあるか分からなくて焦ったがこれで解決した
+- `docker compose up` で再起動してもボリュームのデータはそのまま引き継がれる。MySQLの初期化スクリプト（`/docker-entrypoint-initdb.d/`）はボリュームが空のときだけ実行される仕様で、データが残っていると実行されない
 
-ボリュームを使ったdocker-composeの構成については[docker-composeの基本的な使い方](/posts/docker-compose-basic)でまとめて確認できる。
+---
 
 ## 関連記事
 
