@@ -6,6 +6,22 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Google Search ConsoleにAstro+Cloudflare Pagesのサイトを登録するHTMLファイル認証の手順を解説。ファイルの設置方法から確認まで紹介します。'
 ---
 
+## ひとことで言うと
+
+```bash
+# 1. public/ にファイルを置く（src/pages/ は不可）
+cp ~/Downloads/googleXXXXXXXXXXXXXXXX.html public/
+
+# 2. ビルドしてdist/に含まれるか確認
+npm run build && ls dist/google*.html
+
+# 3. push後、Deploymentsタブ Success を確認してから「確認」ボタンを押す
+```
+
+`src/pages/` に置くとAstroのレイアウトが適用されてGoogleの確認が失敗する。`public/` 一択。
+
+---
+
 ## やりたかったこと
 
 Astro + Cloudflare Pagesで公開したブログをGoogle Search Consoleに登録しようとした。プロパティの追加画面でドメイン認証とHTMLファイル認証の2種類が出てきて、最初はドメイン認証（DNS TXTレコード方式）を試した。
@@ -45,6 +61,16 @@ google-site-verification: googleXXXXXXXXXXXXXXXX.html
 **`public/`に移したが、デプロイ前に確認ボタンを押してしまった → 失敗**
 
 2回目は`public/`に移した。だがDeploymentsタブの「Success」を確認する前に焦って「確認」ボタンを押してしまった。まだCloudflareのCDNにファイルが届いていない状態でGoogleが確認に来たから当然失敗した。「デプロイ成功」→「少し待つ」→「確認ボタンを押す」という順番を守るだけで解決できた話だった。
+
+念のため確認する方法として、`curl` でファイルの内容を確認してから「確認」ボタンを押すようにした。
+
+```bash
+curl https://yourdomain.com/googleXXXXXXXXXXXXXXXX.html
+# 出力: google-site-verification: googleXXXXXXXXXXXXXXXX.html
+# 上記1行のみが返ってくればOK
+```
+
+HTMLタグやナビゲーションが含まれた長い出力が返ってくる場合は、まだ`src/pages/`に置かれているか、古いキャッシュが返っている状態。
 
 **ブラウザでは正常なのにGSCだけ失敗し続けた → Cloudflareのキャッシュが原因**
 
@@ -159,6 +185,22 @@ cf-cache-status: HIT   ← キャッシュが返されている状態
 - デプロイ完了前に「確認」ボタンを押しても必ず失敗する。DeploymentsタブのSuccessを確認してから少なくとも1〜2分待ってから押す。焦って早押しすると余計な調査時間が発生する
 - 確認後も認証HTMLファイルを削除してはいけない。「確認が完了したからもう不要」と思って削除したら1ヶ月後にプロパティが無効になるメールが届いた。一度この失敗をしてから「削除禁止リスト」を自分で作った
 - サイトマップのURLをSearch Consoleに送信する時、`sitemap.xml`と入力したら「フェッチできませんでした」というエラーが出た。Astroが生成するのは`sitemap-index.xml`なのでこちらを入力する。この違いを知らずに何度か無駄に送信した
+
+## よくある質問
+
+**Q: ドメイン認証とHTMLファイル認証、どちらを使えばいいですか？**
+最初はHTMLファイル認証が確実。ドメイン認証はDNS TXTレコードの伝播待ちで時間がかかる上に、Cloudflareのプロキシがオンになっているとうまく確認できないケースがある。HTMLファイル認証はファイルを1個置くだけで手順が明確。慣れてきたらドメインプロパティに移行できる。
+
+**Q: 「所有権を確認できませんでした」が出続けます。**
+確認ポイントは4つ。(1) ファイルが`public/`に置かれているか（`src/pages/`では不可）。(2) Cloudflare PagesのデプロイがSuccessになっているか。(3) CDNキャッシュに古いバージョンが残っていないか（Purge Everythingを実行）。(4) `robots.txt`で認証ファイルへのアクセスがブロックされていないか。
+
+**Q: 認証ファイルを誤って削除してしまいました。**
+`public/`に再度ファイルを置いてpush→デプロイ→Search Consoleで「再確認」の操作をすれば復旧できる。失効期間中のデータは欠損するが、プロパティ自体は残っているので大きな問題にはならない。
+
+**Q: サイトマップを送信したのに「検出されたURL：0」のままです。**
+Search Consoleがサイトマップの中身を処理するまで数日かかる。1〜3日後に再確認すれば「検出されたURL」の件数が増えているはず。「読み取り成功」と表示されていれば問題ない。
+
+---
 
 ## 関連記事
 

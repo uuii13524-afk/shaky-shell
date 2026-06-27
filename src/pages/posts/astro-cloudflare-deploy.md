@@ -6,6 +6,17 @@ layout: '../../layouts/PostLayout.astro'
 description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解説。GitHubとの連携設定・ビルドコマンドの指定・カスタムドメインの設定方法までわかりやすく紹介します。'
 ---
 
+## ひとことで言うと
+
+```
+Workers & Pages → Create application → 画面下部「Looking to deploy Pages? Get started here」
+→ GitHub連携 → Framework preset を「Astro」に設定 → Save and Deploy
+```
+
+「Create application」を押すとWorkers画面になるが、**画面下部**の小さいリンクがPages入口。Framework presetを「Astro」にするだけでNode.jsバージョン問題も回避できる。
+
+---
+
 ## やりたかったこと
 
 Astroで作ったブログをCloudflare Pagesで公開しようとした。VercelからCloudflareに移行する目的だったが、Cloudflare PagesのUIがVercelと全然違って、最初どこから設定を始めればいいかわからなかった。
@@ -62,6 +73,25 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 ```
 
 ローカルのdevモードではスキップされてもCloudflareのproductionビルドでは必須になる設定がいくつかあった。ローカルテストだけでは発見できないバグがこの段階で2件出た。
+
+さらに`@astrojs/mdx`を使っていてこのエラーも出た。
+
+```
+Error: Cannot find module 'remark-gfm'
+```
+
+`remark-gfm`をoptionalDependenciesに入れていたのが原因で、これも`dependencies`に移すことで解消した。Cloudflare Pagesはどのdependency categoriesをインストールするか、Settings → Buildsの「Build command」で`npm ci --include=dev`のように明示的に変更することもできるが、パッケージを`dependencies`に移す方がシンプルだった。
+
+本番ビルドで初めて発覚するエラーを減らすには、ローカルでも本番と同じ環境を再現してビルドするのが有効だった。
+
+```bash
+# node_modulesを削除してdependenciesのみインストール
+rm -rf node_modules
+npm install --omit=dev
+npm run build
+```
+
+これで本番環境と同じ条件でビルドが通るか事前確認できた。
 
 ## 解決策
 
@@ -194,6 +224,22 @@ Rollbackはデプロイ先を変えるだけでGitのコミット履歴には影
 - `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているから気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
 - ローカルのdevモードでは正常に動いても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされる。全てのプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
 - 2年前のChrome記事のUIスクリーンショットが現在のCloudflareと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事では「Pages」が独立メニューに見えていた。GitHubやCloudflare関連のチュートリアルは記事の日付を必ず確認してから参考にする
+
+## よくある質問
+
+**Q: VercelからCloudflare Pagesに移行するメリットはありますか？**
+Cloudflare PagesのFreeプランは月500回のビルドと月500GBの転送量が上限で、個人ブログの規模ではまず引っかからない。VercelのFreeプランはTeamメンバー数や帯域制限がある。ただしVercelはAI機能やEdge Functionsの統合が手厚いので、静的なブログであればCloudflare Pagesの方がコスト面で優位。
+
+**Q: デプロイ後に「522 Connection Timed Out」が出ます。**
+デプロイ直後はCloudflareのエッジへのDNS伝播中で数分間出ることがある。5分待ってからリロードすると直ることが多い。それでも続く場合はDNS設定に古いAレコードが残っていないか確認する。
+
+**Q: ローカルでビルドが通るのにCloudflareでビルドエラーになります。**
+最もよくある原因はNode.jsバージョンの違い。Settings → Environment variablesで`NODE_VERSION=20`を追加する。`devDependencies`に入れたパッケージが本番ビルドでインストールされないことも原因になる。必要なパッケージは`dependencies`に入れる。
+
+**Q: mainブランチ以外のpushでもデプロイが走りますか？**
+はい。Cloudflare PagesはすべてのブランチへのpushでプレビューURLを生成する。本番（Production branch）とは別のURLになる。不要なブランチのビルドを止めたい場合はSettings → Buildsで「Enable Preview deployments」をオフにできる。
+
+---
 
 ## 関連記事
 

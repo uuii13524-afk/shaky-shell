@@ -6,6 +6,30 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Astroサイトに@astrojs/sitemapプラグインでsitemap.xmlを自動生成し、robots.txtを手動で設置する方法を解説します。'
 ---
 
+## ひとことで言うと
+
+```bash
+npm install @astrojs/sitemap
+```
+
+```js
+// astro.config.mjs
+import sitemap from '@astrojs/sitemap';
+export default defineConfig({
+  site: 'https://yourdomain.com',  // localhost はダメ
+  integrations: [sitemap()],
+});
+```
+
+```bash
+npm run build && ls dist/sitemap*.xml
+# → sitemap-index.xml と sitemap-0.xml が生成されたら成功
+```
+
+Search Consoleに送る時は `sitemap.xml` ではなく `sitemap-index.xml` を入力する。
+
+---
+
 ## やりたかったこと
 
 AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録したら、サイトマップを送信するよう求められた。最初は`sitemap.xml`を自分で手書きするXMLファイルだと思って、`public/sitemap.xml`を直接編集して記事を書くたびに`<url>`タグを1件ずつ追加していた。
@@ -28,6 +52,16 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 **汎用ViteプラグインでサイトマップURLがおかしくなった**
 
 `@astrojs/sitemap`を知る前に`vite-plugin-sitemap`を試した。「ViteベースならAstroでも使えるだろう」と思って`npm install vite-plugin-sitemap`してから`astro.config.mjs`の`vite.plugins`に追加した。ビルド自体は通ったが、生成されたサイトマップのURLが全部おかしかった。Astroのファイルベースルーティングを無視してVite側のビルドパスを参照していたため、`.astro`ファイルのパスがそのまま入ったり末尾の拡張子が残ったりしていた。30分試してあきらめた。
+
+生成されたサイトマップを`cat dist/sitemap-0.xml`で確認したら以下のような形になっていた。
+
+```xml
+<url>
+  <loc>https://yourdomain.com/src/pages/posts/my-article.astro</loc>
+</url>
+```
+
+URLに`.astro`拡張子が付いていてGoogleがクロールしてもページが存在しない状態だった。Astroのルーティングを理解しているプラグインでないと正しいURLが生成されないことがわかった。
 
 **`@astrojs/sitemap`をインストールしてもサイトマップが生成されなかった**
 
@@ -148,6 +182,22 @@ Search ConsoleへのHTMLファイル認証登録がまだの場合は[Google Sea
 - devモードではサイトマップが生成されないとは知らなかった。`npm run dev`でサーバーを起動して`/sitemap-index.xml`にアクセスしても404になり続けた。サイトマップは`npm run build`でのみ生成されるので、確認は必ず`npm run build && ls dist/sitemap*.xml`の後に行う必要があった
 
 SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
+
+## よくある質問
+
+**Q: サイトマップが生成されているか確認する方法は？**
+`npm run build && ls dist/sitemap*.xml` で確認する。`sitemap-index.xml` と `sitemap-0.xml` の2ファイルが出れば成功。`npm run dev` ではサイトマップは生成されないので必ずビルドして確認する。
+
+**Q: 特定のページをサイトマップから除外したい。**
+`filter` オプションで除外できる。例：管理ページや下書きページを除く場合は `sitemap({ filter: (page) => !page.includes('/draft/') })` のように書く。
+
+**Q: Search Consoleでサイトマップが「フェッチできませんでした」になります。**
+原因は3つ。(1) `sitemap-index.xml` ではなく `sitemap.xml` と入力した（ファイル名が違う）。(2) Cloudflare Pagesのデプロイがまだ完了していない。(3) `astro.config.mjs` の `site` がlocalhostになっていてURLが正しくない。`dist/sitemap-0.xml` を直接開いてURLがhttps://yourdomain.comで始まっているか確認する。
+
+**Q: robots.txtのSitemapの行は必須ですか？**
+必須ではないが設定しておくと検索エンジンがサイトマップを見つけやすくなる。`Sitemap: https://yourdomain.com/sitemap-index.xml` の1行を追加するだけなので設定しておいた方がいい。
+
+---
 
 ## 関連記事
 

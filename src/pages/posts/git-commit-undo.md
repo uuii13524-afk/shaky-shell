@@ -6,6 +6,25 @@ layout: '../../layouts/PostLayout.astro'
 description: 'Gitで間違えてcommitした時の取り消し方を解説。git reset --softやgit revertを使ったコミットの取り消し・修正方法をまとめて紹介します。'
 ---
 
+## ひとことで言うと
+
+```bash
+# pushする前 → ファイルは残してコミットだけ消す
+git reset --soft HEAD~1
+
+# pushした後 → 取り消しコミットを追加（履歴は残る）
+git revert HEAD --no-edit && git push
+
+# .envを誤pushした緊急対応
+git rm --cached .env && echo ".env" >> .gitignore
+git commit -m "remove .env from tracking"
+# ← キーの無効化を先にやること。gitの操作より優先
+```
+
+`--soft` はファイルを残してコミットだけ消す。`--hard` はファイルごと消える。間違えると取り返しがつかない。
+
+---
+
 ## やりたかったこと
 
 `.env`ファイルを誤ってコミットしていたことに、pushした後で気づいた。GitHubのリポジトリをブラウザで確認したら`.env`の中身がそのまま公開されていた。`STRIPE_SECRET_KEY=sk_live_xxxxxxxx`という行がコミットの差分ビューに丸見えになっていて、かなり焦った。
@@ -48,6 +67,12 @@ git status
 **push後に`git commit --amend`を試した → force pushが必要になった**
 
 コミットメッセージを修正しようとして`git commit --amend`を使ったら、すでにpushした後だったのでリモートとの差分が生まれてしまい`git push --force`が必要になった。チームリポジトリだったのでforce pushは使えなかった。
+
+結局`git revert HEAD --no-edit`で「コミットメッセージを誤って記入した」を取り消すコミットを追加することになった。amendは便利だが「まだpushしていないか」の確認を先に行う癖をつけておけばこの失敗は防げた。
+
+**`git filter-repo`を使って全履歴から削除しようとしたら、Python環境でハマった**
+
+`pip install git-filter-repo`を試したら`pip`コマンドが見つからないエラーになった。Windows環境でPythonをインストールしてあったが、インストール時に「Add Python to PATH」のチェックを外していたのが原因だった。Pythonのインストーラーを開き直して「Repair」から「Add Python to PATH」を有効にして再インストールした。その後`pip install git-filter-repo`が通って`.env`の全履歴削除ができた。`git filter-repo`はPython 3.6以上が必要で、バージョンが古い場合は`python --version`で確認してから進めるといい。
 
 ## 解決策
 
@@ -183,6 +208,22 @@ force push後もGitHubのキャッシュに古いコミットが残ることが�
 - push後に`git commit --amend`を使ったらforce pushが必要になった。push後のコミットに`--amend`を使うと「ローカルのコミット履歴がリモートより進んでいる」状態になり、次の`git push`が弾かれる。`git status`で「Your branch is ahead of origin」が出ていれば push 前、「up to date」なら push 済みという確認を先に行う
 - `git reset --hard`で消したコードは「永遠に戻らない」と思っていたが、90日以内なら`git reflog`からコミットのハッシュを探して復元できる。これを知らなくて1時間分の作業をゼロから書き直した。`git reset --hard`を実行する前に現在のハッシュをメモしておくか、`git reflog`の使い方を覚えておけば取り返しがつく
 - `.env`をpushしてからgit操作だけに集中して認証情報の無効化を後回しにしてしまった。git操作で履歴を消している間も漏洩は続いている。正しい優先順位は「まず認証情報を無効化、その後履歴から削除」で、この2つは並行して進めるべき別々の作業だった
+
+## よくある質問
+
+**Q: `git reset --soft` と `git reset --hard` の違いは？**
+`--soft` はコミットのみ取り消してファイルの変更はstagingエリアに残す。`--hard` はコミット・staging・作業ディレクトリすべて取り消してファイルの変更ごと消える。「コミットだけ取り消したい、変更は残したい」なら`--soft`一択。`--hard`は実行前に必ず`git diff HEAD~1`で消える変更を確認する。
+
+**Q: `git revert`は何のために使いますか？**
+pushした後に「コミットを取り消した」という事実を履歴に残したい場合に使う。`revert`は「取り消しコミット」を新しく追加するだけで過去のコミット自体は履歴に残る。チームリポジトリでforce pushを使えない状況に適している。.envなど機密情報が含まれるコミットの場合、`revert`だけでは過去のコミットに内容が残るので注意。
+
+**Q: `git reset --hard` で消したファイルを戻せますか？**
+`git reflog` を使えば90日以内なら戻せる。`git reflog` を実行してリセット前のコミットハッシュを探し、`git reset --hard <ハッシュ>` で戻す。`reflog` には `git reset --hard` を実行する直前の状態が `HEAD@{1}` として残っている。
+
+**Q: .envをpushしてしまった。gitの操作より先にやることは？**
+認証情報の無効化が最優先。Stripe・AWS・GCPなど該当するダッシュボードでキーを即時削除して新しいキーを発行する。git操作で履歴を消している間も漏洩は続いているので、「まず無効化、それからgit操作」という順番を守る。
+
+---
 
 ## 関連記事
 

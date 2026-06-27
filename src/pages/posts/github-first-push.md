@@ -6,6 +6,22 @@ layout: '../../layouts/PostLayout.astro'
 description: 'GitHubでリポジトリを新規作成してローカルの既存プロジェクトを初めてpushするまでの手順をステップごとに解説します。'
 ---
 
+## ひとことで言うと
+
+```bash
+git init
+git add .
+git commit -m "first commit"
+git remote add origin https://github.com/ユーザー名/リポジトリ名.git
+git branch -M main
+git push -u origin main
+# ↑ パスワード欄にはGitHubのパスワードではなくPersonal Access Token（PAT）を貼り付ける
+```
+
+2021年8月以降、GitHubはパスワード認証を廃止している。パスワードを何度入れても `Authentication failed` になる。PATを発行して貼り付けるのが正解。
+
+---
+
 ## やりたかったこと
 
 ローカルで作っていたAstroのプロジェクトをGitHubにpushしようとしたら、認証でエラーが出て詰まった。YouTubeで「GitHubにpushする方法」という動画を見つけて、その通りにコマンドを打って、パスワードを入力する画面が出たのでGitHubのアカウントパスワードを入れた。そしたら以下のエラーが出た。
@@ -153,6 +169,27 @@ gh auth login
 
 `gh auth login`を実行するとブラウザ経由でGitHubアカウントと連携できる。PATの発行・スコープ設定・トークンの保管という手間が一切不要だった。認証後は普通に`git push`が使えるようになる。
 
+### 8. SSHで認証する方法（もう一つの代替手段）
+
+HTTPSのPAT認証が複雑に感じる場合、SSH認証に切り替える方法もある。
+
+```bash
+# SSHキーを生成
+ssh-keygen -t ed25519 -C "GitHubに登録しているメールアドレス"
+# 生成されたキーをクリップボードにコピー（Windows）
+type C:\Users\ユーザー名\.ssh\id_ed25519.pub | clip
+```
+
+コピーしたキーをGitHub → Settings → SSH and GPG keys → New SSH key に貼り付けて保存。
+その後リモートのURLをSSH形式に変更する。
+
+```bash
+git remote set-url origin git@github.com:ユーザー名/リポジトリ名.git
+git push -u origin main
+```
+
+一度設定すれば期限切れがないのでSSHの方が長期的には便利だった。ただし初回設定のステップが多いので、最初のpushを早く済ませたい場合はPATかGitHub CLIの方が簡単だった。
+
 ## ハマったポイント
 
 - GitHubはパスワード認証が2021年8月に廃止されていた。エラーメッセージの1行目「Support for password authentication was removed」にそのまま書いてあったが英文を読み飛ばして何度もパスワードを入れ直した。エラーメッセージを最初に読む習慣があれば5分で解決できた。参考にした動画が2020年録画で仕様変更前の手順だったことも原因で、動画の公開日を確認してから参考にする必要があった
@@ -160,6 +197,22 @@ gh auth login
 - リポジトリ作成時に「Add a README file」を有効にするとREADMEのコミットが入った状態になり、最初のpushで「remote contains work that you do not have locally」と弾かれる。空のリポジトリから始める方が圧倒的にトラブルが少なかった。「初期ファイルを作ってくれるから便利」と思って入れたのが裏目に出た
 - Windowsで一度PATを使って認証が通ると「資格情報マネージャー」に保存されるが、PATの有効期限が切れると古いトークンが保存されたまま毎回認証エラーになり続ける。新しいPATを発行しても資格情報マネージャーの古いエントリが使われてしまう。「資格情報マネージャーからエントリを削除してから再発行」という手順を知るまで30分かかった
 - ローカルのブランチ名が`master`のままだとGitHubの`main`と名前が合わずに`git push -u origin main`が「src refspec main does not match any」で失敗する。`git branch -M main`でブランチ名を変更してから再度pushする。そもそも`git remote -v`でoriginのURLが正しく設定されているか確認する手順を最初に踏んでいれば余分な時間を省けた
+
+## よくある質問
+
+**Q: GitHubにpushする時にパスワードを入力しても「Authentication failed」と出ます。**
+2021年8月以降、GitHubはパスワード認証を廃止している。パスワード欄にはGitHubのアカウントパスワードではなくPersonal Access Token（PAT）を貼り付ける。PATはGitHub → Settings → ページ最下部「Developer settings」→ Personal access tokens から発行できる。
+
+**Q: PATの有効期限が切れたら毎回再発行が必要ですか？**
+Windowsの場合、期限切れのPATが資格情報マネージャーに保存されたままになる。「コントロールパネル → 資格情報マネージャー → Windows資格情報 → `git:https://github.com` のエントリを削除」してから新しいPATを発行して認証すればリセットできる。GitHub CLIを使うと期限切れの問題が起きにくい。
+
+**Q: `git push`で「src refspec main does not match any」と出ます。**
+ローカルのブランチ名が`master`のままGitHubのデフォルトブランチ`main`にpushしようとして失敗している。`git branch -M main` でブランチ名を変えてからpushする。`git branch` でカレントブランチを確認してから操作するのが安全。
+
+**Q: 「remote contains work that you do not have locally」と出てpushできません。**
+リポジトリ作成時に「Add a README file」を有効にしたため、リモートにコミットが存在してローカルと履歴が食い違っている状態。`git pull origin main --allow-unrelated-histories` で統合してからpushする。次からリポジトリを作る時はREADMEのチェックを外す。
+
+---
 
 ## 関連記事
 
