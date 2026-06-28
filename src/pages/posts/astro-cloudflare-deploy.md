@@ -3,6 +3,7 @@ title: 'AstroをCloudflare Pagesにデプロイする手順'
 date: '2026-05-03'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+ja_tags: ['Astro', 'Cloudflare Pages', 'デプロイ', 'GitHub', 'ビルド']
 description: 'AstroサイトをCloudflare Pagesにデプロイする手順を解説。GitHubとの連携設定・ビルドコマンドの指定・カスタムドメインの設定方法までわかりやすく紹介します。'
 ---
 
@@ -25,11 +26,11 @@ MediumでAstro+Cloudflareのデプロイ記事を見つけて読んでいたの�
 
 「Create application」を押したらWorkers用の画面が出てきて、Pagesの設定入口がどこにあるかわからなくなった。Vercelなら「New Project」→GitHubリポジトリを選ぶだけで繋がるのに、Cloudflareは全然違う流れになっていた。
 
-最終的に初回デプロイ完了まで3時間かかった。2回目以降は5分でできるようになった。
-
-3時間のトラブルは大きく3段階に分かれていた。「UI上でPagesの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3つだった。最初にこの3段階を知っていれば1時間以下で終わっていたと思う。
+最終的に初回デプロイ完了まで3時間かかった。2回目以降は5分でできるようになった。3時間のトラブルは大きく3段階に分かれていた。「UI上でPagesの設定に入れない」「ビルドコマンドの設定ミス」「環境依存のビルドエラー」の3つだった。最初にこの3段階を知っていれば1時間以下で終わっていたと思う。
 
 VercelのFreeプランはTeamメンバー数や帯域に制限があるが、Cloudflare PagesのFreeプランは月500回のビルドと月500GBの転送量が上限で、個人ブログの規模ではまず引っかからない。コスト面での移行メリットはあった。
+
+---
 
 ## 環境
 
@@ -39,6 +40,8 @@ VercelのFreeプランはTeamメンバー数や帯域に制限があるが、Clo
 - Astro 5.2.3
 - GitHub（リポジトリ作成済み）
 - Cloudflare Pages（Freeプラン）
+
+---
 
 ## 試したこと・うまくいかなかったこと
 
@@ -58,15 +61,15 @@ error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
 
 ローカルのNode.js 20でコンパイルできるコードが、CloudflareのデフォルトNode.js 18環境でTypeScriptエラーになっていた。Framework presetで「Astro」を選べばNode.jsの推奨バージョンも適用されるのに、手動入力したせいで環境変数の設定漏れが起きた。この時点で2回ビルドを無駄にした。
 
-**`devDependencies`に入れたパッケージが本番ビルドでエラー**
+**`devDependencies` に入れたパッケージが本番ビルドでエラー**
 
 ```
 Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 ```
 
-`sharp`を`devDependencies`に入れていたのが原因。Cloudflareの本番ビルドは`dependencies`のみをインストールする。ローカルでは`npm install`で全部入っているから気づかなかった。
+`sharp` を `devDependencies` に入れていたのが原因。Cloudflareの本番ビルドは `dependencies` のみをインストールする。ローカルでは `npm install` で全部入っているから気づかなかった。
 
-`@astrojs/sitemap`プラグインで`site`オプション未設定のエラーも出た。
+`@astrojs/sitemap` プラグインで `site` オプション未設定のエラーも出た。
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
@@ -74,13 +77,23 @@ Error [ERR_MODULE_NOT_FOUND]: Cannot find package 'sharp'
 
 ローカルのdevモードではスキップされてもCloudflareのproductionビルドでは必須になる設定がいくつかあった。ローカルテストだけでは発見できないバグがこの段階で2件出た。
 
-さらに`@astrojs/mdx`を使っていてこのエラーも出た。
+さらに `@astrojs/mdx` を使っていてこのエラーも出た。
 
 ```
 Error: Cannot find module 'remark-gfm'
 ```
 
-`remark-gfm`をoptionalDependenciesに入れていたのが原因で、これも`dependencies`に移すことで解消した。Cloudflare Pagesはどのdependency categoriesをインストールするか、Settings → Buildsの「Build command」で`npm ci --include=dev`のように明示的に変更することもできるが、パッケージを`dependencies`に移す方がシンプルだった。
+`remark-gfm` をoptionalDependenciesに入れていたのが原因で、これも `dependencies` に移すことで解消した。Cloudflare Pagesはどのdependency categoriesをインストールするか、Settings → Buildsの「Build command」で `npm ci --include=dev` のように明示的に変更することもできるが、パッケージを `dependencies` に移す方がシンプルだった。
+
+**ビルドは成功するが `*.pages.dev` のURLで「522 Connection Timed Out」**
+
+初回デプロイが「Success」になったので早速 `*.pages.dev` のURLにアクセスしたら、
+
+```
+522: Connection timed out
+```
+
+と表示された。「ビルドは成功したのになぜページが開かないのか」とかなり焦った。Cloudflareのエッジへの伝播に5分ほどかかっているだけで、5分待ってリロードしたら正常に開いた。
 
 本番ビルドで初めて発覚するエラーを減らすには、ローカルでも本番と同じ環境を再現してビルドするのが有効だった。
 
@@ -92,6 +105,8 @@ npm run build
 ```
 
 これで本番環境と同じ条件でビルドが通るか事前確認できた。
+
+---
 
 ## 解決策
 
@@ -116,7 +131,7 @@ git branch -M main
 git push -u origin main
 ```
 
-pushする前に`.gitignore`に`node_modules/`と`.env`が含まれているか確認する。`node_modules`をpushしてしまうとリポジトリサイズが膨大になってpushに数分かかるようになる。
+pushする前に `.gitignore` に `node_modules/` と `.env` が含まれているか確認する。`node_modules` をpushしてしまうとリポジトリサイズが膨大になってpushに数分かかるようになる。
 
 ```bash
 cat .gitignore
@@ -149,19 +164,19 @@ Build output directory: dist
 ```
 Error: Cannot find module 'sharp'
 ```
-→ `package.json`の`dependencies`（`devDependencies`ではない）に`sharp`があるか確認する。
+→ `package.json` の `dependencies`（`devDependencies` ではない）に `sharp` があるか確認する。
 
 ```
 error: No matching version found for node@xx.x.x
 ```
-→ Settings → Environment variablesで`NODE_VERSION=20`を追加する。
+→ Settings → Environment variablesで `NODE_VERSION=20` を追加する。
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
 ```
-→ `astro.config.mjs`に`site: 'https://yourdomain.com'`を追加する。
+→ `astro.config.mjs` に `site: 'https://yourdomain.com'` を追加する。
 
-ビルドログは「Download logs」でテキストとして保存してから`Error:`で検索すると原因が一発で見つかる。ブラウザのログビューアをスクロールしながら探すより圧倒的に速い。
+ビルドログは「Download logs」でテキストとして保存してから `Error:` で検索すると原因が一発で見つかる。ブラウザのログビューアをスクロールしながら探すより圧倒的に速い。
 
 ```
 Installing dependencies...   ← ここでエラーが出れば依存問題
@@ -171,21 +186,21 @@ Building Astro site...       ← ここでエラーが出ればビルド設定�
 
 ### 5. 環境変数の設定
 
-Settings → Environment variablesで追加する。`NODE_VERSION=20`は最初から設定しておくと安定する。
+Settings → Environment variablesで追加する。`NODE_VERSION=20` は最初から設定しておくと安定する。
 
 ```
 NODE_VERSION = 20
 ```
 
-TypeScriptエラーがローカルでは出ないのにCloudflareで出る場合、ほぼ確実にNode.jsバージョン差異が原因。`NODE_VERSION`を揃えるだけで解消するエラーが多かった。
+TypeScriptエラーがローカルでは出ないのにCloudflareで出る場合、ほぼ確実にNode.jsバージョン差異が原因。`NODE_VERSION` を揃えるだけで解消するエラーが多かった。
 
 ### 6. デプロイ完了後の確認
 
-Deploymentsタブで「Success」になったら`*.pages.dev`のURLが発行される。デプロイ直後は「522 Connection Timed Out」が出ることがある。CloudflareのエッジへのDNS伝播中で、5分待ってからリロードすると正常に表示された。
+Deploymentsタブで「Success」になったら `*.pages.dev` のURLが発行される。デプロイ直後は「522 Connection Timed Out」が出ることがある。CloudflareのエッジへのDNS伝播中で、5分待ってからリロードすると正常に表示された。
 
 ### 7. プレビューデプロイの活用
 
-`main`以外のブランチへのpushに対しても自動でプレビューURLが発行される。
+`main` 以外のブランチへのpushに対しても自動でプレビューURLが発行される。
 
 ```bash
 git checkout -b feature/add-new-section
@@ -197,7 +212,7 @@ git push origin feature/add-new-section
 
 ### 8. 以降のpushの流れ
 
-一度設定が完了すれば、`git push`するだけで自動デプロイが走る。
+一度設定が完了すれば、`git push` するだけで自動デプロイが走る。
 
 ```bash
 git add src/pages/posts/new-post.md
@@ -215,15 +230,31 @@ DeploymentsタブのビルドエントリにあるRollback機能で以前のデ�
 2. 戻したいビルドの「…」→「Rollback to this deployment」
 3. 1〜2分で以前のビルドが本番に反映される
 
-Rollbackはデプロイ先を変えるだけでGitのコミット履歴には影響しない。Rollback後に`git push`すれば最新コミットの内容で再びビルドが走る。
+Rollbackはデプロイ先を変えるだけでGitのコミット履歴には影響しない。Rollback後に `git push` すれば最新コミットの内容で再びビルドが走る。
+
+### 10. カスタムドメインの設定
+
+デプロイが安定したらカスタムドメインを設定する。
+
+1. Cloudflareダッシュボードで対象プロジェクトを開く
+2. 「Custom domains」タブ → 「Set up a custom domain」
+3. 取得済みのドメイン名を入力
+4. DNSの設定指示に従ってCloudflareのNameserverを設定
+
+ドメインをCloudflare自体で管理している場合は自動でDNSが設定される。別のレジストラで管理している場合はCNAMEレコードを手動で追加する。
+
+---
 
 ## ハマったポイント
 
 - 「Create application」を押すとWorkers用の画面になる。Pages用は画面**下部**の「Looking to deploy Pages? Get started here」という目立たないリンクから入る。上部だけ見ていると絶対に見つからない。Vercelとは全く違うUI設計で、最初にここで10分以上時間を取られた
 - Framework presetで「Astro」を選ばずに手動でビルドコマンドを入力すると、推奨Node.jsバージョンの環境変数が設定されない。ローカルはNode.js 20でもCloudflareのデフォルトが古くて、TypeScriptのエラーがCloudflareのビルドでだけ出る状態になった。最初からFramework presetを「Astro」に設定するだけで避けられる失敗だった
-- `devDependencies`に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは`npm install`で全部入っているから気づかないが、Cloudflare側では`dependencies`のみが対象。Astroのintegrationなど実行時に必要なものは`dependencies`に入れる
-- ローカルのdevモードでは正常に動いても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap`の`site`オプション未設定エラーがその一つで、devモードではスキップされる。全てのプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
-- 2年前のChrome記事のUIスクリーンショットが現在のCloudflareと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事では「Pages」が独立メニューに見えていた。GitHubやCloudflare関連のチュートリアルは記事の日付を必ず確認してから参考にする
+- `devDependencies` に入れたパッケージはCloudflareの本番ビルドでインストールされない。ローカルでは `npm install` で全部入っているから気づかないが、Cloudflare側では `dependencies` のみが対象。Astroのintegrationなど実行時に必要なものは `dependencies` に入れる
+- ローカルのdevモードでは正常に動いても、Cloudflareのproductionビルドで初めて発覚するエラーがある。`@astrojs/sitemap` の `site` オプション未設定エラーがその一つで、devモードではスキップされる。全てのプラグインのドキュメントにある「Required for production」の項目は最初から確認しておくべきだった
+- 2年前のUI記事のスクリーンショットが現在のCloudflareと全然違っていた。「Workers」と「Pages」が統合されて「Workers & Pages」になったのが2023年頃で、古い記事では「Pages」が独立メニューに見えていた。GitHubやCloudflare関連のチュートリアルは記事の日付を必ず確認してから参考にする
+- 初回デプロイ「Success」直後の「522 Connection Timed Out」でビルドが失敗したと思い込んでしまった。Cloudflareのエッジへのプロパゲーションが完了するまで5分程度かかる。焦って再デプロイやCloudflare設定を触り始めてしまったが、待つだけでよかった
+
+---
 
 ## よくある質問
 
@@ -234,10 +265,13 @@ Cloudflare PagesのFreeプランは月500回のビルドと月500GBの転送量�
 デプロイ直後はCloudflareのエッジへのDNS伝播中で数分間出ることがある。5分待ってからリロードすると直ることが多い。それでも続く場合はDNS設定に古いAレコードが残っていないか確認する。
 
 **Q: ローカルでビルドが通るのにCloudflareでビルドエラーになります。**
-最もよくある原因はNode.jsバージョンの違い。Settings → Environment variablesで`NODE_VERSION=20`を追加する。`devDependencies`に入れたパッケージが本番ビルドでインストールされないことも原因になる。必要なパッケージは`dependencies`に入れる。
+最もよくある原因はNode.jsバージョンの違い。Settings → Environment variablesで `NODE_VERSION=20` を追加する。`devDependencies` に入れたパッケージが本番ビルドでインストールされないことも原因になる。必要なパッケージは `dependencies` に入れる。
 
 **Q: mainブランチ以外のpushでもデプロイが走りますか？**
 はい。Cloudflare PagesはすべてのブランチへのpushでプレビューURLを生成する。本番（Production branch）とは別のURLになる。不要なブランチのビルドを止めたい場合はSettings → Buildsで「Enable Preview deployments」をオフにできる。
+
+**Q: デプロイが失敗し続ける場合の最終手段は？**
+「Disconnect Git repository」で接続を切断してから「Connect to Git」で接続し直す。これで設定が初期化される。Framework presetもAstroを選び直して、環境変数も再設定する。接続し直しで解消したケースが何度かあった。
 
 ---
 
