@@ -3,6 +3,7 @@ title: 'Cloudflare PagesのGitHub自動デプロイが動かない時の対処�
 date: '2026-05-04'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+ja_tags: ['Cloudflare', 'GitHub', 'デプロイ', '自動デプロイ', 'git push']
 description: 'git pushしてもCloudflare Pagesに変更が反映されない原因と解決方法を解説。GitHub連携の確認やビルドコマンドの見直しポイントを紹介します。'
 ---
 
@@ -36,6 +37,8 @@ This may cause deployments to fail.
 
 自動デプロイが止まる原因は「ビルドが来ない」「ビルドは来るが失敗する」「デプロイは成功するがサイトに反映されない」の3パターンに分かれる。最初にDeploymentsタブを開いて「ビルドが来ているかどうか」だけ確認する一手間が、診断時間を大幅に短縮する。
 
+---
+
 ## 環境
 
 - Cloudflare Pages（2026年5月時点）
@@ -43,19 +46,21 @@ This may cause deployments to fail.
 - Astro 5.2.3
 - Node.js 20.11.0
 
+---
+
 ## 試したこと・うまくいかなかったこと
 
 **コードを疑ってローカルでビルド確認 → コードの問題ではなかった**
 
-「変なコードを入れたか？」と思って`git diff`で確認したが問題なし。ローカルで`npm run build`したら正常に通った。コードの問題ではないとわかったが、ではなぜデプロイが来ないのかわからなかった。
+「変なコードを入れたか？」と思って `git diff` で確認したが問題なし。ローカルで `npm run build` したら正常に通った。コードの問題ではないとわかったが、ではなぜデプロイが来ないのかわからなかった。
 
 次にDeploymentsタブを全部見直したが「Failed」のビルドがあるわけではなく、新しいビルド自体が全く来ていなかった。「ビルドが失敗している」と「ビルドが来ていない」は全く別の問題で、診断の入口が変わってくる。ここで「ビルドが来ていない」のだから接続の問題だとすぐ気づくべきだったが、ビルド設定を疑ってSettings画面を調べ始めてしまった。
 
-**`git push --force`まで試した → 何も起きなかった**
+**`git push --force` まで試した → 何も起きなかった**
 
-「もう一度pushすれば直るかも」と`git push`を再実行し、最終的に`git push --force`まで試したが、Cloudflareは全く反応しなかった。GitHubとCloudflareの接続が切れているのだから、どんな形でpushしても届かない。pushが成功しても「GitHubにコミットが届いた」というだけで、「Cloudflareがそのpushをトリガーにビルドした」とは別のことだった。
+「もう一度pushすれば直るかも」と `git push` を再実行し、最終的に `git push --force` まで試したが、Cloudflareは全く反応しなかった。GitHubとCloudflareの接続が切れているのだから、どんな形でpushしても届かない。pushが成功しても「GitHubにコミットが届いた」というだけで、「Cloudflareがそのpushをトリガーにビルドした」とは別のことだった。
 
-GitHubのWebhook deliveryログを確認したら、最新エントリのHTTPステータスが`401 Unauthorized`になっていた。
+GitHubのWebhook deliveryログを確認したら、最新エントリのHTTPステータスが `401 Unauthorized` になっていた。
 
 ```
 POST https://api.cloudflare.com/client/v4/pages/webhooks/deploy/...
@@ -67,15 +72,27 @@ Response: 401
 
 **ブランチ名の不一致でビルドが来なかったケース（別の機会）**
 
-別の日に`master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らないことがあった。`git branch`でカレントブランチを確認したら確かに`master`だった。`git checkout main`して`git merge master`してから`git push origin main`でビルドが来た。
+別の日に `master` ブランチで作業してpushしていたのに、CloudflareのProduction branchが `main` に設定されていてデプロイが走らないことがあった。`git branch` でカレントブランチを確認したら確かに `master` だった。
+
+```bash
+git branch
+# * master
+#   main
+```
+
+`git checkout main` して `git merge master` してから `git push origin main` でビルドが来た。
 
 **ビルド成功なのにサイトが更新されないケース**
 
 ビルドは来るし「Success」になるのにサイトが更新されない現象もあった。CloudflareのCDNキャッシュが古いものを返し続けていたのが原因で、「Purge Cache」を手動で実行したら解決した。Cloudflareダッシュボードの「Caching」→「Configuration」→「Purge Everything」でキャッシュを削除できる。
 
+ブラウザのスーパーリロード（Ctrl+Shift+R）ではCloudflare CDNのキャッシュは削除できない。「自分のブラウザだけキャッシュされているのかも」と思って別ブラウザでも確認した。別ブラウザでも同じ古いコンテンツが出ていたのでCDN側の問題だと確定した。
+
 **Environment variablesの設定変更がビルドに反映されなかった**
 
-`NODE_VERSION`を設定したのにビルドが古いNode.jsで動いているように見えた。原因はEnvironment variablesの「Production」と「Preview」を別々に設定する必要があることを知らなかったことだった。変数設定の画面では「Production」タブと「Preview」タブが分かれていて、片方だけ設定しても両方には反映されない。「Production and Preview」のタブを選んで同時に設定するか、両方のタブでそれぞれ追加する必要があった。Previewのビルドだけで確認していたので本番ビルドに反映されず、切り分けに30分かかった。
+`NODE_VERSION` を設定したのにビルドが古いNode.jsで動いているように見えた。原因はEnvironment variablesの「Production」と「Preview」を別々に設定する必要があることを知らなかったことだった。変数設定の画面では「Production」タブと「Preview」タブが分かれていて、片方だけ設定しても両方には反映されない。「Production and Preview」のタブを選んで同時に設定するか、両方のタブでそれぞれ追加する必要があった。Previewのビルドだけで確認していたので本番ビルドに反映されず、切り分けに30分かかった。
+
+---
 
 ## 解決策
 
@@ -141,19 +158,19 @@ Deploymentsタブ→該当ビルド→「View build logs」でエラー内容を
 ```
 Error: Cannot find module '@astrojs/sitemap'
 ```
-→ `package.json`の`dependencies`に含まれているか確認。`devDependencies`に入れると本番ビルドでインストールされない。
+→ `package.json` の `dependencies` に含まれているか確認。`devDependencies` に入れると本番ビルドでインストールされない。
 
 ```
 Error: Build failed with exit code 1
 ```
-→ Settings → Environment variablesで`NODE_VERSION=20`を追加する。
+→ Settings → Environment variablesで `NODE_VERSION=20` を追加する。
 
 ```
 Build exceeded the time limit of 20 minutes
 ```
-→ 画像の最適化処理や大量ページのビルドで発生。`npm run build`のローカル実行時間を計測して原因箇所を特定する。
+→ 画像の最適化処理や大量ページのビルドで発生。`npm run build` のローカル実行時間を計測して原因箇所を特定する。
 
-ビルドログが大量ある場合は「Download logs」でテキストとして保存してから`Error:`で検索するのが最速。
+ビルドログが大量ある場合は「Download logs」でテキストとして保存してから `Error:` で検索するのが最速。
 
 ### CDNキャッシュの問題
 
@@ -169,15 +186,18 @@ Cloudflare PagesのNotifications機能でビルド失敗のメール通知を設
 
 pushした後は毎回Deploymentsタブを確認する習慣をつける。「2分でビルドが来るはず」という感覚が身につくと、来ない場合にすぐ気づける。
 
+---
+
 ## ハマったポイント
 
 - サイトが問題なく表示されていたので「回線の問題かも」と最初に疑ったが、Cloudflareのキャッシュが古いバージョンを返し続けていただけだった。「サイトが表示される＝デプロイが動いている」という思い込みを捨てて、まずDeploymentsタブを確認するのが正しかった
 - 「ビルドが来ていない」のか「来ているが失敗している」のかで原因が全然違う。Deploymentsタブを最初に開いて状態を確認するのが一番早い診断だった。「Failedが来ていれば原因3、何も来ていなければ原因1か2」という切り分けだけ覚えておけばいい
 - 再認証後に「GitHubにもうpush済みだから大丈夫」と思い込んでいたが、Cloudflareは認証復旧後に過去のコミットを遡ってビルドしてくれない。認証回復後に空コミットpushが別途必要だと気づくまで20分以上待ち続けた
-- `master`ブランチで作業してpushしていたのに、CloudflareのProduction branchが`main`に設定されていてデプロイが走らなかった。ブランチ名の不一致は気づきにくい。接続時に設定したブランチ名を`git remote show origin`で定期的に確認する習慣が防止になる
+- `master` ブランチで作業してpushしていたのに、CloudflareのProduction branchが `main` に設定されていてデプロイが走らなかった。ブランチ名の不一致は気づきにくい。接続時に設定したブランチ名を `git remote show origin` で定期的に確認する習慣が防止になる
 - デプロイ「Success」なのにサイトが更新されない場合はCDNキャッシュが原因のことがある。ブラウザのハードリロードで変わらなければCloudflareのPurge Cacheで解決した。「ビルドはできているのに反映されない」という現象はキャッシュを真っ先に疑う
+- Environment variablesはProductionとPreviewを別々に設定する必要がある。Previewだけに設定してPreviewビルドで動作確認したが、本番にも同じ変数が必要なのに設定されておらず本番だけ壊れていた。最初から「Production and Preview」を選ぶか両タブに追加する
 
-そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。
+---
 
 ## よくある質問
 
@@ -193,7 +213,12 @@ force pushはGitHubのWebhookをトリガーするが、Cloudflareがそのコ�
 **Q: プライベートリポジトリでも自動デプロイは動きますか？**
 動く。OAuth認証でCloudflare Pagesがプライベートリポジトリにもアクセスできるようになっている。OAuth接続が切れた場合はプライベート・パブリックどちらでも同じように再認証が必要。
 
+**Q: デプロイが頻繁に失敗する場合の調査方法は？**
+Cloudflareのビルド失敗通知をメールで受け取れるよう「Notifications」を設定する。失敗時はDeploymentsタブの該当ビルドから「Download logs」でテキストを保存してERRORキーワードで検索する。失敗パターンが `devDependencies` か `NODE_VERSION` の問題であれば1回で解決できることが多かった。
+
 ---
+
+そもそもAstroをCloudflare Pagesに繋いでいない場合は[AstroをCloudflare Pagesにデプロイする手順](/posts/astro-cloudflare-deploy)を参考に初期設定を確認してほしい。
 
 ## 関連記事
 

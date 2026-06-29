@@ -3,6 +3,7 @@ title: 'Astroでrobots.txtとsitemapを自動生成する方法'
 date: '2026-05-05'
 category: 'Astro'
 layout: '../../layouts/PostLayout.astro'
+ja_tags: ['Astro', 'sitemap', 'robots.txt', 'SEO', 'Google Search Console']
 description: 'Astroサイトに@astrojs/sitemapプラグインでsitemap.xmlを自動生成し、robots.txtを手動で設置する方法を解説します。'
 ---
 
@@ -32,13 +33,21 @@ Search Consoleに送る時は `sitemap.xml` ではなく `sitemap-index.xml` を
 
 ## やりたかったこと
 
-AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録したら、サイトマップを送信するよう求められた。最初は`sitemap.xml`を自分で手書きするXMLファイルだと思って、`public/sitemap.xml`を直接編集して記事を書くたびに`<url>`タグを1件ずつ追加していた。
+AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録したら、サイトマップを送信するよう求められた。最初は `sitemap.xml` を自分で手書きするXMLファイルだと思って、`public/sitemap.xml` を直接編集して記事を書くたびに `<url>` タグを1件ずつ追加していた。
 
-3ヶ月間それを続けたが、記事が30本を超えたあたりで破綻した。更新を忘れてインデックスされない記事が出てきたり、URLをtypoしたまま登録してしまったりと問題が積み重なった。`<loc>`の中のtypoはGoogleがエラーを教えてくれないので、誤ったURLでインデックスされてしばらく気づかなかった。
+3ヶ月間それを続けたが、記事が30本を超えたあたりで破綻した。更新を忘れてインデックスされない記事が出てきたり、URLをtypoしたまま登録してしまったりと問題が積み重なった。`<loc>` の中のtypoはGoogleがエラーを教えてくれないので、誤ったURLでインデックスされてしばらく気づかなかった。
 
-`@astrojs/sitemap`プラグインを見つけてから試してみたら、「プラグインをインストールして設定ファイルに2行追加するだけ」が本当にそれだけだった。手動管理の3ヶ月が何だったのかと思った。
+```xml
+<!-- こんなtypoがあっても誰も教えてくれない -->
+<loc>https://errsolved.com/posts/docker-exec-bash</loc>
+<loc>https://errsolved.com/pots/docker-volume</loc>  <!-- postsがpots -->
+```
 
-ただ自動生成への切り替えも一筋縄ではいかなかった。`site`プロパティ未設定でビルドエラー、`sitemap-index.xml`と`sitemap.xml`の混乱、`integrations`への追加を忘れてサイトマップが生成されない、という3つのハマりポイントを踏んで完成まで2時間かかった。
+`@astrojs/sitemap` プラグインを見つけてから試してみたら、「プラグインをインストールして設定ファイルに2行追加するだけ」が本当にそれだけだった。手動管理の3ヶ月が何だったのかと思った。
+
+ただ自動生成への切り替えも一筋縄ではいかなかった。`site` プロパティ未設定でビルドエラー、`sitemap-index.xml` と `sitemap.xml` の混乱、`integrations` への追加を忘れてサイトマップが生成されない、という3つのハマりポイントを踏んで完成まで2時間かかった。
+
+---
 
 ## 環境
 
@@ -47,13 +56,15 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 - Node.js 20.11.0
 - npm 10.2.4
 
+---
+
 ## 試したこと・うまくいかなかったこと
 
 **汎用ViteプラグインでサイトマップURLがおかしくなった**
 
-`@astrojs/sitemap`を知る前に`vite-plugin-sitemap`を試した。「ViteベースならAstroでも使えるだろう」と思って`npm install vite-plugin-sitemap`してから`astro.config.mjs`の`vite.plugins`に追加した。ビルド自体は通ったが、生成されたサイトマップのURLが全部おかしかった。Astroのファイルベースルーティングを無視してVite側のビルドパスを参照していたため、`.astro`ファイルのパスがそのまま入ったり末尾の拡張子が残ったりしていた。30分試してあきらめた。
+`@astrojs/sitemap` を知る前に `vite-plugin-sitemap` を試した。「ViteベースならAstroでも使えるだろう」と思って `npm install vite-plugin-sitemap` してから `astro.config.mjs` の `vite.plugins` に追加した。ビルド自体は通ったが、生成されたサイトマップのURLが全部おかしかった。
 
-生成されたサイトマップを`cat dist/sitemap-0.xml`で確認したら以下のような形になっていた。
+生成されたサイトマップを `cat dist/sitemap-0.xml` で確認したら以下のような形になっていた。
 
 ```xml
 <url>
@@ -61,22 +72,47 @@ AstroサイトをCloudflare Pagesで公開してGoogle Search Consoleに登録�
 </url>
 ```
 
-URLに`.astro`拡張子が付いていてGoogleがクロールしてもページが存在しない状態だった。Astroのルーティングを理解しているプラグインでないと正しいURLが生成されないことがわかった。
+URLに `.astro` 拡張子が付いていてGoogleがクロールしてもページが存在しない状態だった。Astroのルーティングを理解しているプラグインでないと正しいURLが生成されないことがわかった。30分試してあきらめた。
 
-**`@astrojs/sitemap`をインストールしてもサイトマップが生成されなかった**
+**`@astrojs/sitemap` をインストールしてもサイトマップが生成されなかった**
 
-`npm install @astrojs/sitemap`の後ビルドしたが`sitemap-index.xml`が生成されなかった。「インストールが失敗したのかも」と思ってもう一度インストールし直したが変わらなかった。原因はパッケージのインストールだけでは動かず、`astro.config.mjs`の`integrations`配列に追加する設定が別途必要だったことで、これを書き忘れていた。30分以上「なぜ生成されないのか」を調べてようやく気づいた。
+`npm install @astrojs/sitemap` の後ビルドしたが `sitemap-index.xml` が生成されなかった。「インストールが失敗したのかも」と思ってもう一度インストールし直したが変わらなかった。
 
-**`site`プロパティをlocalhostで設定してしまった**
+原因はパッケージのインストールだけでは動かず、`astro.config.mjs` の `integrations` 配列に追加する設定が別途必要だったことで、これを書き忘れていた。
 
-`integrations`への追加後、`site`プロパティが必要というエラーが出た。
+```js
+// これだけではダメ。npm installしただけ。
+import { defineConfig } from 'astro/config';
+export default defineConfig({
+  site: 'https://yourdomain.com',
+});
+
+// integrations に追加しないと生成されない
+import sitemap from '@astrojs/sitemap';
+export default defineConfig({
+  site: 'https://yourdomain.com',
+  integrations: [sitemap()],  // ← これが必要
+});
+```
+
+30分以上「なぜ生成されないのか」を調べてようやく気づいた。
+
+**`site` プロパティをlocalhostで設定してしまった**
+
+`integrations` への追加後、`site` プロパティが必要というエラーが出た。
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
 A site URL is required to generate a sitemap.
 ```
 
-`site`を追加したが、ローカル確認用に`site: 'http://localhost:4321'`と書いたままビルドした。生成された`sitemap-0.xml`の中のURLが全部`http://localhost:4321/...`になっていた。Search Consoleに送信しても意味がないので本番URLに書き直した。
+`site` を追加したが、ローカル確認用に `site: 'http://localhost:4321'` と書いたままビルドした。生成された `sitemap-0.xml` の中のURLが全部 `http://localhost:4321/...` になっていた。Search Consoleに送信しても意味がないので本番URLに書き直した。
+
+**devサーバーでサイトマップにアクセスしようとした → 404**
+
+`npm run dev` でサーバーを起動して `http://localhost:4321/sitemap-index.xml` にアクセスしてもずっと404だった。サイトマップは `npm run build` でのみ生成されるとわかるまでかなりの時間を無駄にした。
+
+---
 
 ## 解決策
 
@@ -98,9 +134,9 @@ export default defineConfig({
 });
 ```
 
-`site`には本番環境のURL（`https://`付き）を書く。**ここでlocalhostを書いてしまうと生成されるサイトマップのURLが全部localhostになる**ので注意。
+`site` には本番環境のURL（`https://` 付き）を書く。**ここでlocalhostを書いてしまうと生成されるサイトマップのURLが全部localhostになる**ので注意。
 
-特定のページをサイトマップから除外したい場合は`filter`オプションを使う。
+特定のページをサイトマップから除外したい場合は `filter` オプションを使う。
 
 ```js
 integrations: [
@@ -117,9 +153,9 @@ npm run build
 ls dist/sitemap*.xml
 ```
 
-`sitemap-index.xml`と`sitemap-0.xml`の2ファイルが生成されていれば成功。`sitemap-index.xml`は各サイトマップファイルを束ねるインデックスで、Search Consoleには`sitemap-index.xml`を送信する。
+`sitemap-index.xml` と `sitemap-0.xml` の2ファイルが生成されていれば成功。`sitemap-index.xml` は各サイトマップファイルを束ねるインデックスで、Search Consoleには `sitemap-index.xml` を送信する。
 
-`dist/sitemap-0.xml`の中身を確認して、記事ページのURLが正しく入っているか確認する。
+`dist/sitemap-0.xml` の中身を確認して、記事ページのURLが正しく入っているか確認する。
 
 ```bash
 head -20 dist/sitemap-0.xml
@@ -127,11 +163,11 @@ head -20 dist/sitemap-0.xml
 
 URLがlocalhostになっていないか、記事のURLが含まれているかの2点を確認しておく。
 
-サイトマップは`npm run dev`では生成されない。`npm run build`後の`dist/`フォルダで確認するのが唯一の方法で、devサーバーで`/sitemap-index.xml`にアクセスしても404になる。
+サイトマップは `npm run dev` では生成されない。`npm run build` 後の `dist/` フォルダで確認するのが唯一の方法で、devサーバーで `/sitemap-index.xml` にアクセスしても404になる。
 
 ### 4. robots.txtをpublicフォルダに設置
 
-`public/robots.txt`として以下の内容で保存する。
+`public/robots.txt` として以下の内容で保存する。
 
 ```
 User-agent: *
@@ -140,15 +176,15 @@ Allow: /
 Sitemap: https://yourdomain.com/sitemap-index.xml
 ```
 
-`Sitemap:`の行のURLは自分のドメインに書き換える。`public/`に置くことでビルド後に`dist/robots.txt`にそのままコピーされる。Astroによる変換処理は一切入らない。
+`Sitemap:` の行のURLは自分のドメインに書き換える。`public/` に置くことでビルド後に `dist/robots.txt` にそのままコピーされる。Astroによる変換処理は一切入らない。
 
-`src/pages/`に`.txt`ファイルを置いてもAstroはページとして処理しないため機能しなかった。テキストファイルはstatic assetとして`public/`に置くのが正解だった。
+`src/pages/` に `.txt` ファイルを置いてもAstroはページとして処理しないため機能しなかった。テキストファイルはstatic assetとして `public/` に置くのが正解だった。
 
 ```bash
 cat dist/robots.txt
 ```
 
-`Sitemap:`の行に設定したURLが表示されていればOK。
+`Sitemap:` の行に設定したURLが表示されていればOK。
 
 ### 5. 両方をpushしてデプロイ
 
@@ -173,15 +209,18 @@ git push
 
 Search ConsoleへのHTMLファイル認証登録がまだの場合は[Google Search ConsoleのHTMLファイル認証をAstro+Cloudflare Pagesで行う手順](/posts/google-search-console-html-verification)から先に設定する。
 
+---
+
 ## ハマったポイント
 
-- パッケージをインストールするだけではサイトマップは生成されないと思っていなかった。`npm install @astrojs/sitemap`後に`astro.config.mjs`の`integrations`配列への追加が別途必要で、これを書き忘れると`npm run build`しても`sitemap-index.xml`は生成されない。「インストールしたのになぜ動かないのか」と30分悩んだが、設定ファイルへの追記を忘れていただけだった
-- `site`プロパティにlocalhostを書いてしまうと`sitemap-0.xml`の中のURLが全部`http://localhost:4321/...`になる。Search Consoleで「フェッチできませんでした」が出た時は`sitemap-0.xml`の中身を確認して、URLがlocalhostになっていないかを最初に確認する
-- Search ConsoleにサイトマップのURLを入力する時、`sitemap.xml`と書いたら「フェッチできませんでした」というエラーが出た。Astroが生成するのは`sitemap-index.xml`で、`sitemap.xml`というファイルは存在しない。この2つのファイル名は全然違うので入力欄に正確に書く必要があった
-- `src/pages/`に`.txt`ファイルを置いてrobots.txtを設置しようとしたが機能しなかった。Astroは`.astro`・`.md`・`.mdx`・`.html`以外のファイルをページとして扱わない。テキストファイルは`public/`に置くのが唯一の正解で、`public/`に置いたファイルはAstroのビルド処理を通らずそのままコピーされる
-- devモードではサイトマップが生成されないとは知らなかった。`npm run dev`でサーバーを起動して`/sitemap-index.xml`にアクセスしても404になり続けた。サイトマップは`npm run build`でのみ生成されるので、確認は必ず`npm run build && ls dist/sitemap*.xml`の後に行う必要があった
+- パッケージをインストールするだけではサイトマップは生成されない。`npm install @astrojs/sitemap` 後に `astro.config.mjs` の `integrations` 配列への追加が別途必要で、これを書き忘れると `npm run build` しても `sitemap-index.xml` は生成されない。「インストールしたのになぜ動かないのか」と30分悩んだが、設定ファイルへの追記を忘れていただけだった
+- `site` プロパティにlocalhostを書いてしまうと `sitemap-0.xml` の中のURLが全部 `http://localhost:4321/...` になる。Search Consoleで「フェッチできませんでした」が出た時は `sitemap-0.xml` の中身を確認して、URLがlocalhostになっていないかを最初に確認する
+- Search ConsoleにサイトマップのURLを入力する時、`sitemap.xml` と書いたら「フェッチできませんでした」というエラーが出た。Astroが生成するのは `sitemap-index.xml` で、`sitemap.xml` というファイルは存在しない。この2つのファイル名は全然違うので入力欄に正確に書く必要があった。最初に `sitemap.xml` と入れてずっとエラーが出ていて10分無駄にした
+- `src/pages/` に `.txt` ファイルを置いてrobots.txtを設置しようとしたが機能しなかった。Astroは `.astro`・`.md`・`.mdx`・`.html` 以外のファイルをページとして扱わない。テキストファイルは `public/` に置くのが唯一の正解で、`public/` に置いたファイルはAstroのビルド処理を通らずそのままコピーされる
+- devモードではサイトマップが生成されないとは知らなかった。`npm run dev` でサーバーを起動して `/sitemap-index.xml` にアクセスしても404になり続けた。サイトマップは `npm run build` でのみ生成されるので、確認は必ず `npm run build && ls dist/sitemap*.xml` の後に行う必要があった
+- 手動管理のsitemap.xmlでtypoがあってもGoogleがエラーを教えてくれない。「クロール済み - インデックス未登録」という状態が続いていた記事が、typoURLが原因でインデックスされていなかったと後からわかった。自動生成に切り替えてからこの種の問題がなくなった
 
-SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
+---
 
 ## よくある質問
 
@@ -197,7 +236,12 @@ SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmeta
 **Q: robots.txtのSitemapの行は必須ですか？**
 必須ではないが設定しておくと検索エンジンがサイトマップを見つけやすくなる。`Sitemap: https://yourdomain.com/sitemap-index.xml` の1行を追加するだけなので設定しておいた方がいい。
 
+**Q: 記事が増えたらsitemap-0.xml, sitemap-1.xmlと増えますか？**
+はい。Astroの `@astrojs/sitemap` は1ファイルあたり5万URLを上限として自動で分割する。通常のブログで分割が必要になることはほぼないが、`sitemap-index.xml` が複数のsitemapファイルを束ねる構造になっているのはそのため。
+
 ---
+
+SEOのmeta情報も一緒に設定したい場合は[AstroでSEOに必要なmetaタグを設定する方法](/posts/astro-seo-meta-tags)も合わせて対応しておくとSEO対策が一通り揃う。
 
 ## 関連記事
 

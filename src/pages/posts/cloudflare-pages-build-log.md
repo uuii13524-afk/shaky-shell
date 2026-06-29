@@ -3,7 +3,19 @@ title: 'Cloudflare Pagesのビルドログの見方とエラーの対処法'
 date: '2026-05-09'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayout.astro'
+ja_tags: ['Cloudflare', 'ビルドログ', 'エラー', 'デプロイ', 'Astro']
 description: 'Cloudflare Pagesのビルドログの確認方法とよくあるビルドエラーの原因・解決策を解説。ダッシュボードからログを開く手順も紹介します。'
+---
+
+## ひとことで言うと
+
+```
+Cloudflare → Workers & Pages → プロジェクト → Deployments → Failedのビルド → Build log
+→ 右上の「Download logs」でテキスト保存 → VSCodeでCtrl+FしてERRORを検索
+```
+
+ビルドログを目視でスクロールするのは1000行超えで破綻する。Download → テキスト検索が圧倒的に速かった。
+
 ---
 
 ## やりたかったこと
@@ -16,6 +28,8 @@ AstroサイトをCloudflare Pagesにデプロイしたらビルドが失敗し�
 
 というエラーが出ていたが、ローカルでは正常にビルドが通っていた。「ローカルで動くのになぜCloudflareで失敗するのか」という状況が何度も続いて、毎回ビルドログの読み方に迷っていた。
 
+---
+
 ## 環境
 
 - Windows 11
@@ -24,13 +38,30 @@ AstroサイトをCloudflare Pagesにデプロイしたらビルドが失敗し�
 - Astro 5.2.3
 - Cloudflare Pages（Freeプラン）
 
+---
+
 ## 試したこと・うまくいかなかったこと
 
-最初、ビルドログのページを開いてからスクロールバーを手で動かしながらエラーを探していた。ログが1000行以上あって、どこにエラーがあるかわからないまま何分もスクロールしていた。
+**ビルドログをスクロールしながらエラーを探した → 1000行で破綻**
 
-ブラウザのCtrl+Fで「Error」を検索しようとしたが、Cloudflareのビルドログビューアはリアルタイムで行が追加される仕組みのためか、ブラウザの検索機能が正常に機能しなかった。
+最初、ビルドログのページを開いてからスクロールバーを手で動かしながらエラーを探していた。ログが1000行以上あって、どこにエラーがあるかわからないまま何分もスクロールしていた。ブラウザのCtrl+Fで「Error」を検索しようとしたが、Cloudflareのビルドログビューアはリアルタイムで行が追加される仕組みのためか、ブラウザの検索機能が正常に機能しなかった。
 
-`npm warn deprecated`が大量に出ていて、最初はそのWARNINGが原因だと思ってパッケージを調べ始めた。30分ほど調べてから「WARNINGはビルド失敗に直接関係ない」とわかった。`npm warn deprecated react@17.0.2`のような警告は単にパッケージのバージョンが非推奨になっているという通知で、これだけが原因でビルドが止まることはない。ERRORとWARNINGの違いを意識せずにいたせいで、見るべきものを見逃していた。
+**`npm warn deprecated` をエラーの原因だと思って30分調べた**
+
+`npm warn deprecated` が大量に出ていて、最初はそのWARNINGが原因だと思ってパッケージを調べ始めた。
+
+```
+npm warn deprecated react@17.0.2: This version has vulnerabilities. Please update.
+npm warn deprecated mkdirp@0.5.6: Legacy versions of mkdirp are no longer supported.
+```
+
+30分ほど調べてから「WARNINGはビルド失敗に直接関係ない」とわかった。ERRORとWARNINGの違いを意識せずにいたせいで、見るべきものを見逃していた。
+
+**Failedのビルドから「Build log」タブへの入り方がわからなかった**
+
+「Failed」の文字をクリックしてもリンクになっていなかった。ビルドのタイムスタンプかビルド番号のリンクをクリックすると詳細ページに入れるのに気づくまで時間がかかった。さらに詳細ページを開いた後に「Build log」タブが別に存在していて、最初は「Deployments」タブを開いたままエラーを探していた。
+
+---
 
 ## 解決策
 
@@ -38,8 +69,8 @@ AstroサイトをCloudflare Pagesにデプロイしたらビルドが失敗し�
 
 1. Cloudflareダッシュボード → 「Workers & Pages」
 2. 対象プロジェクト → 「Deployments」タブ
-3. 「Failed」になっているビルドのリンクをクリック
-4. 「Build log」タブを開く
+3. 「Failed」になっているビルドのタイムスタンプかビルドIDのリンクをクリック
+4. ビルド詳細ページの「Build log」タブを開く
 
 「Failed」の文字はリンクになっていない場合がある。ビルドのタイムスタンプかビルド番号のリンクをクリックすると詳細ページに入れる。
 
@@ -83,36 +114,81 @@ Building Astro site...          ← ここのエラー = ビルド設定やコ�
 
 ### よくあるエラーと対処法
 
+**依存パッケージが見つからない**
+
 ```
 ✘ [ERROR] Could not resolve "@astrojs/sitemap"
 ```
-→ `@astrojs/sitemap`が`devDependencies`に入っている。本番ビルドでは`devDependencies`はインストールされない。`npm install @astrojs/sitemap --save`で`dependencies`に移す。
+
+→ `@astrojs/sitemap` が `devDependencies` に入っている。本番ビルドでは `devDependencies` はインストールされない。`npm install @astrojs/sitemap --save` で `dependencies` に移す。
+
+```bash
+# 移し直すコマンド
+npm uninstall @astrojs/sitemap
+npm install @astrojs/sitemap --save
+```
+
+**Node.jsバージョン不一致によるTypeScriptエラー**
 
 ```
 error TS2339: Property 'xxx' does not exist on type 'ImportMeta'
 ```
-→ CloudflareのデフォルトNode.jsバージョンがローカルより古い。Settings → Environment variables で`NODE_VERSION=20`を追加して再デプロイする。
+
+→ CloudflareのデフォルトNode.jsバージョンがローカルより古い。Settings → Environment variables で `NODE_VERSION=20` を追加して再デプロイする。
+
+**Astro 5でAPIが変わっていた**
 
 ```
 Astro.glob is not a function
 ```
-→ Astro 5以降で`Astro.glob()`が廃止された。`import.meta.glob()`に書き換える。
+
+→ Astro 5以降で `Astro.glob()` が廃止された。`import.meta.glob()` に書き換える。
+
+```js
+// Astro 4まで
+const posts = await Astro.glob('./posts/*.md');
+
+// Astro 5以降
+const posts = Object.values(import.meta.glob('./posts/*.md', { eager: true }));
+```
+
+**サイトmap設定のビルドエラー**
 
 ```
 [@astrojs/sitemap] No `site` option is set in your Astro config.
 ```
-→ `astro.config.mjs`に`site: 'https://yourdomain.com'`を追加する。ローカルのdevモードではこのエラーが出ないのにビルド時だけ出る。
+
+→ `astro.config.mjs` に `site: 'https://yourdomain.com'` を追加する。ローカルのdevモードではこのエラーが出ないのにビルド時だけ出る。
+
+**ビルド時間超過**
 
 ```
 Build exceeded the time limit of 20 minutes
 ```
-→ ビルド時間超過。`sharp`による画像最適化が重い場合に起きやすい。
+
+→ ビルド時間超過。`sharp` による画像最適化が重い場合に起きやすい。画像の枚数が多いサイトでは `@astrojs/image` の設定を見直す。
+
+**記事frontmatterの必須フィールド不足**
 
 ```
 ✘ [ERROR] rendering /posts/xxx...
-  Error: Cannot read properties of undefined
+  Error: Cannot read properties of undefined (reading 'title')
 ```
-→ 記事のfrontmatterに必須プロパティが抜けているか、レイアウト側で`undefined`チェックをしていない。ローカルで`npm run build`を実行して同じエラーが出るか確認する。
+
+→ 記事のfrontmatterに必須プロパティが抜けているか、レイアウト側で `undefined` チェックをしていない。ローカルで `npm run build` を実行して同じエラーが出るか確認する。
+
+### ローカルで本番ビルドを再現する
+
+Cloudflareでしか出ないエラーを減らすには、ローカルでも本番と同じ条件でビルドする。
+
+```bash
+# devDependenciesを除いてinstallしてビルド
+rm -rf node_modules
+npm install --omit=dev
+npm run build
+```
+
+これで本番環境と同じ条件でビルドが通るか事前確認できた。
 
 ### 古いコミットがデプロイされているとき
 
@@ -123,13 +199,33 @@ git commit --allow-empty -m "force deploy"
 git push
 ```
 
+---
+
 ## ハマったポイント
 
-- `npm warn deprecated`が大量に出ていてWARNINGを原因だと思って調べ続けた。WARNINGはビルド失敗に直接関係しない。`Error:`や`✘ [ERROR]`が出ている行だけを見ればよく、WARNINGは無視していい
-- ブラウザのビルドログビューアでスクロールしながらエラーを探すのは1000行超えのログでは現実的でない。「Download logs」でテキスト保存してVSCodeで`ERROR`を全文検索するのが圧倒的に速かった
-- ローカルで`npm run build`が通るのにCloudflareで失敗するのは、ほぼNode.jsのバージョン差異か`devDependencies`の問題。この2点を最初に確認するだけで大半のケースが解決できた
-- ログの依存インストールフェーズのエラーは前半に出る。「最後にエラーがある」と思い込んでログの後半だけ見ていたら、前半で起きているnpm installの失敗を見落とした
-- Deploymentsタブで「Failed」のビルドをクリックしてから「Build log」タブを探す必要がある。「View build logs」というリンクやボタンが見当たらないときは、ビルドのタイムスタンプのリンクをクリックしてから「Build log」タブに入る手順で見つかった
+- `npm warn deprecated` が大量に出ていてWARNINGを原因だと思って調べ続けた。WARNINGはビルド失敗に直接関係しない。`Error:` や `✘ [ERROR]` が出ている行だけを見ればよく、WARNINGは無視していい。ERRORとWARNINGを混同したまま30分溶かした
+- ブラウザのビルドログビューアでスクロールしながらエラーを探すのは1000行超えのログでは現実的でない。「Download logs」でテキスト保存してVSCodeで `ERROR` を全文検索するのが圧倒的に速かった。この手順に気づいてからビルドエラーの解決時間が10分の1になった
+- ローカルで `npm run build` が通るのにCloudflareで失敗するのは、ほぼNode.jsのバージョン差異か `devDependencies` の問題。この2点を最初に確認するだけで大半のケースが解決できた。`devDependencies` に入れたパッケージはClooudflareの本番ビルドでインストールされないという事実は最初に知っておきたかった
+- ログの依存インストールフェーズのエラーは前半に出る。「最後にエラーがある」と思い込んでログの後半だけ見ていたら、前半で起きているnpm installの失敗を見落とした。全文検索で `ERROR` を探す方法に切り替えてから前後の区別が不要になった
+- Deploymentsタブで「Failed」のビルドをクリックしてから「Build log」タブを探す必要がある。「View build logs」というリンクやボタンが見当たらないときは、ビルドのタイムスタンプのリンクをクリックしてから「Build log」タブに入る手順で見つかった。UIが直感的でないので初見では迷う
+
+---
+
+## よくある質問
+
+**Q: ビルドログはどのくらいの期間保存されますか？**
+Cloudflareのビルドログは通常90日間保存される。古いビルドのログも確認できるが、削除されている場合もある。重要なエラーログは「Download logs」でローカルに保存しておくと安心だった。
+
+**Q: ビルドがどこで止まっているか素早く確認する方法は？**
+ダウンロードしたログの最終行を見ると、ビルドがどのフェーズで止まったかがわかる。「Installing dependencies...」で止まっていれば依存の問題、「Building with Astro」で止まっていればコードの問題。
+
+**Q: ローカルのビルドとCloudflareのビルドを一致させるには？**
+`rm -rf node_modules && npm install --omit=dev && npm run build` をローカルで実行して事前確認する。これで `devDependencies` の問題が発見できる。Node.jsバージョンの差異は `NODE_VERSION=20` を環境変数に追加することで揃えられる。
+
+**Q: ビルドエラーのメール通知を受け取れますか？**
+設定できる。Cloudflareダッシュボード → 「Workers & Pages」 → プロジェクト → 「Settings」 → 「Notifications」でビルド失敗のメール通知を追加できる。pushするたびにDeploymentsタブを確認しなくてよくなった。
+
+---
 
 デプロイが全く来ない場合はビルドエラーではなくGitHubとの接続切れが原因のこともある。その場合は[Cloudflare PagesがGitHubと切断された時の対処法](/posts/cloudflare-github-disconnect)を確認してほしい。
 
