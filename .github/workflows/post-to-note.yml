@@ -1,0 +1,57 @@
+name: Post new articles to note.com
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "src/pages/posts/**.md"
+      - "src/pages/posts/**.mdx"
+
+jobs:
+  post-to-note:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install helper dependencies
+        run: npm install --no-save gray-matter marked
+
+      - name: Detect newly added posts
+        id: detect
+        run: |
+          BEFORE="${{ github.event.before }}"
+          AFTER="${{ github.sha }}"
+          if [ -z "$BEFORE" ] || [ "$BEFORE" = "0000000000000000000000000000000000000000" ]; then
+            # 初回実行など比較元がない場合は最新コミットの追加分のみを見る
+            FILES=$(git diff --name-only --diff-filter=A "${AFTER}^" "${AFTER}" -- src/pages/posts | grep -E '\.(md|mdx)$' || true)
+          else
+            FILES=$(git diff --name-only --diff-filter=A "$BEFORE" "$AFTER" -- src/pages/posts | grep -E '\.(md|mdx)$' || true)
+          fi
+          echo "files<<EOF" >> "$GITHUB_OUTPUT"
+          echo "$FILES" >> "$GITHUB_OUTPUT"
+          echo "EOF" >> "$GITHUB_OUTPUT"
+          echo "検出された新規記事:"
+          echo "$FILES"
+
+      - name: Post each new article to note.com
+        if: steps.detect.outputs.files != ''
+        env:
+          NOTE_GQL_AUTH_TOKEN: ${{ secrets.NOTE_GQL_AUTH_TOKEN }}
+          NOTE_SESSION_V5: ${{ secrets.NOTE_SESSION_V5 }}
+          NOTE_XSRF_TOKEN: ${{ secrets.NOTE_XSRF_TOKEN }}
+          SITE_BASE_URL: ${{ vars.SITE_BASE_URL }}
+        run: |
+          echo "${{ steps.detect.outputs.files }}" | while IFS= read -r file; do
+            if [ -n "$file" ]; then
+              echo "=== Posting: $file ==="
+              node scripts/post-to-note.mjs "$file"
+            fi
+          done
