@@ -78,6 +78,8 @@ https://errsolved.com/posts/vscode-extensions
 https://errsolved.com/posts/windows-env-variables
 https://errsolved.com/posts/windows-terminal-setup
 https://errsolved.com/posts/wsl2-install-windows
+https://errsolved.com/posts/git-detached-head-fix/
+https://errsolved.com/en/git-detached-head-fix/
 
 ## ルール
 - 申請できる限り毎日申請する
