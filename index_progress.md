@@ -82,6 +82,8 @@ https://errsolved.com/posts/npm-eresolve-error/
 https://errsolved.com/en/npm-eresolve-error/
 https://errsolved.com/posts/docker-permission-denied/
 https://errsolved.com/en/docker-permission-denied/
+https://errsolved.com/posts/git-push-rejected-fix/
+https://errsolved.com/en/git-push-rejected-fix/
 
 ## ルール
 - 申請できる限り毎日申請する
