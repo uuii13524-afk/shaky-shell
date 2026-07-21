@@ -84,8 +84,8 @@ https://errsolved.com/posts/docker-permission-denied/
 https://errsolved.com/en/docker-permission-denied/
 https://errsolved.com/posts/git-push-rejected-fix/
 https://errsolved.com/en/git-push-rejected-fix/
-https://errsolved.com/posts/nginx-403-forbidden/
-https://errsolved.com/en/nginx-403-forbidden/
+https://errsolved.com/posts/node-heap-out-of-memory/
+https://errsolved.com/en/node-heap-out-of-memory/
 
 ## ルール
 - 申請できる限り毎日申請する
