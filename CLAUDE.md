@@ -1,168 +1,248 @@
-# CLAUDE.md — errsolved.com 記事作成ルール
+# SEO改善ルーティン指示（errsolved.com）
 
-## 1. プロジェクト基本情報
+> Claude Code 用ルーティン。GSC「検索パフォーマンス（過去3か月・ウェブ）2026-07-22」の実データに基づく。
+> 配置先の推奨: `.github/routines/seo-improvement-routine.md`
+> 実行言語: 日本語（です・ます調）。コードは必ずバッククォート3つで囲む。
 
-- サイト: https://errsolved.com（技術エラー解決ブログ・アフィリエイト収益化）
-- 技術スタック: Astro + GitHub + Cloudflare Pages（push時自動デプロイ）
-- リポジトリ: uuii13524-afk/shaky-shell
-- ローカルパス: C:\Users\acia\shaky-shell
-- 目標: アフィリエイト収益で月50万円
-- 現フェーズ: **品質回復フェーズ**。新規記事は本ファイルの品質基準を全てクリアしたもののみ公開可
+---
 
-## 2. ファイル配置とslug命名
+## 0. このルーティンの前提（現状スナップショット）
 
-### 配置場所
-- 日本語: `src/pages/posts/[slug].md`
-- 英語: `src/pages/en/[slug].md`
-- JA/ENペアはslugを完全一致させる（例: `posts/docker-logs-tail.md` と `en/docker-logs-tail.md`）
+Claude Code はタスク開始時にこの数字を「解決すべき現状」として認識すること。
 
-### slug命名規則
-- 小文字英数字とハイフンのみ。アンダースコア・大文字禁止
-- 形式: `[技術名]-[操作/エラー内容]`（例: `git-detached-head-fix`, `nginx-502-bad-gateway`）
-- 3〜5単語。1単語slug（`docker.md`）や6単語以上は禁止
-- 作成前に `src/pages/posts/` 内の既存slugと重複・類似がないか確認する。
-  類似テーマの既存記事がある場合は新規作成せず、その記事の加筆を提案する
+| 指標 | 値 | 意味 |
+|---|---|---|
+| 総表示 / 総クリック | 963 / 2（CTR 0.2%） | 見られているがクリックされない |
+| 表示トレンド | 6月243 → 7月720 | インデックスは回復中 |
+| 英語 `/en/` の表示シェア | 95.7% | 流入はほぼ海外・英語 |
+| 日本語を含むクエリ | 247件中1件 | 日本語需要はほぼ未獲得 |
+| 順位51位以下の表示 | 638 / 963 | 大半が6ページ目以降 |
+| 上位10位のページ | 11（表示合計20） | 低価値ページ中心 |
+| 重複URLを持つスラッグ | 約16 | 評価分散・低品質シグナル |
 
-## 3. frontmatter（必須6項目・順序固定）
+**根本課題**: ①流入言語（英語）と収益（日本語VPSアフィリエイト）の不一致、②URL正規化崩れ、③順位低迷、④ビッグワードでの正面衝突。
+
+**実行順序は必ず Phase 0 → 4 の順**。Phase 0（技術）を放置したまま記事改善（Phase 2以降）をやっても効果が出ない。
+
+---
+
+## Phase 0.【最優先・ブロッカー】URL正規化を1本化する
+
+同一コンテンツが `/en/slug`・`/en/slug/`・`/posts/slug/` の最大3URLでインデックスされている。1コンテンツ=1URLに統一する。
+
+### 0-1. 正規URLルールを固定
+- **正規形は「末尾スラッシュあり」**（errsolved.com は末尾スラッシュURLを配信）。
+- 英語記事の正規は `/en/<slug>/`。旧 `/posts/<slug>/` は英語版へ301。
+- GSC送信URLは必ず末尾スラッシュ付き（スラッシュ無しはリダイレクトエラーになる）。
+
+### 0-2. Astro 設定で末尾スラッシュを強制
+`astro.config.mjs` を確認し、無ければ追記する。
+
+```js
+export default defineConfig({
+  site: 'https://errsolved.com',
+  trailingSlash: 'always',
+  build: { format: 'directory' },
+});
+```
+
+### 0-3. Cloudflare Pages の `_redirects` で旧パス・非正規を301
+`public/_redirects` に追記（存在するスラッグのみ。存在しないパスのルールは作らない）。
+
+```
+# 旧 /posts/ を英語版へ集約（実在スラッグのみ列挙）
+/posts/docker-exec-bash/            /en/docker-exec-bash/            301
+/posts/docker-image-cleanup/        /en/docker-image-cleanup/        301
+/posts/cloudflare-github-disconnect/ /en/cloudflare-github-disconnect/ 301
+/posts/cloudflare-redirect-rules/   /en/cloudflare-redirect-rules/   301
+/posts/node-version-management-nvm/ /en/node-version-management-nvm/ 301
+/posts/github-issue-pullrequest     /en/github-issue-pullrequest/    301
+/posts/xserver-cloudflare-full-setup/ /en/xserver-cloudflare-full-setup/ 301
+
+# 末尾スラッシュ無し → あり（Astro/Pages側で吸収できない場合のみ）
+/en/*  /en/:splat/  301
+```
+
+> 注意: `_redirects` のワイルドカードは既存の正しいURLをループさせないこと。デプロイ後に必ず 0-5 で検証する。
+
+### 0-4. 自己参照canonicalを全ページに付与
+共通レイアウト（`src/layouts/*.astro`）の `<head>` に、末尾スラッシュ付き絶対URLの canonical を出力する。
+
+```astro
+---
+const canonical = new URL(Astro.url.pathname.replace(/\/?$/, '/'), Astro.site).href;
+---
+<link rel="canonical" href={canonical} />
+```
+
+### 0-5. デプロイ後の正規化監査（毎回実行）
+以下を回し、旧URL・非スラッシュが 301 で正規URLへ飛ぶことを確認する。
+
+```bash
+cd C:\Users\acia\shaky-shell
+# 例: 主要スラッグの応答コードを確認
+for u in \
+  https://errsolved.com/en/docker-exec-bash \
+  https://errsolved.com/posts/docker-exec-bash/ \
+  https://errsolved.com/en/docker-image-cleanup ; do
+  echo "$u"; curl -sI "$u" | grep -Ei "^HTTP|^location"
+done
+```
+
+**完了条件**: 非正規URLがすべて `301` で正規URL（末尾スラッシュ付き `/en/<slug>/`）へ集約され、`200` を返すのは正規URLのみ。
+
+---
+
+## Phase 1. 収益導線を「ページ言語」で分岐させる
+
+**英語ページに日本語VPSアフィリエイトを貼らない。** 流入の96%は海外英語ユーザーで、ConoHa等は成約しない。むしろCTRを下げる。
+
+### 1-1. `add_affiliate_links.py` に言語分岐を追加
+`.github/scripts/add_affiliate_links.py` の注入ロジックを、対象ファイルのパスで分岐する。
+
+- パスに `/en/` を含む → **グローバル案件ブロック**（AWIN: Cloudways / Cherry Servers）＋（承認後）AdSense枠。
+- それ以外（日本語ページ）→ 従来の DOMAIN → VPS → LEARNING 優先順の日本語ブロック。
+
+疑似ロジック:
+
+```python
+def pick_block(md_path: str, slug_type: str) -> str:
+    if "/en/" in md_path.replace("\\", "/"):
+        return EN_GLOBAL_BLOCK   # Cloudways / Cherry Servers (AWIN)
+    return jp_block_by_priority(slug_type)  # DOMAIN > VPS > LEARNING > DEFAULT
+```
+
+> 既存の日本語ブロック（プロライター思考力講座 `4B3VRB+6M5ER6+4XF8+5ZEMQ` / Winスクール `4B3VRB+7N2A9E+529E+5YJRM` 等）は**日本語ページ専用**として維持。英語ページからは除外する。
+
+### 1-2. AdSense枠の準備（承認回復後に有効化）
+インデックス回復後の再申請を見据え、英語ページ側に広告枠のプレースホルダのみ用意しておく（承認前は非表示）。実装は承認後にコメントアウト解除する方針。
+
+### 1-3. 収益ページの棚卸し
+英語ページの末尾アフィリエイト差し替え後、`affiliate_links.md` に「言語別・案件別」の一覧を更新する。
+
+**完了条件**: 英語ページに日本語VPSリンクが1件も残っていない。`grep` で確認する。
+
+```bash
+cd C:\Users\acia\shaky-shell
+grep -rl "a8.net" src/pages/en/ || echo "OK: 英語ページに日本語A8リンクなし"
+```
+
+---
+
+## Phase 2. 「勝てるクエリ」に集中する（コンテンツ方針）
+
+ビッグワード（`docker build` 順位80 等）は捨て、**具体的エラー・具体的手順の長尾**に振り切る。実データで上位に来ているのはこの型。
+
+### 2-1. 狙う型（GOOD）
+- 具体的なエラーメッセージ全文（例: `error grabbing logs: invalid character 'l' after object key:value pair`）
+- 「A × B の組み合わせ手順」（例: `xserver-cloudflare-full-setup` 順位10.8）
+- サービス固有の詰まりどころ（例: `cloudflare-github-disconnect` 順位13.8＝唯一クリック獲得）
+- 自作ツール系（`cron-checker` 順位6.6 等）
+
+### 2-2. 避ける型（BAD）
+- 単体ビッグワード（`docker build` / `docker exec` / `permission denied` / `nginx location`）を主題にしない。既存記事のタイトルがこれらのままなら、より具体的なエラー主題へリライトする。
+
+### 2-3. 既存記事の優先リライト順（表示があり惜しい順）
+表示が付いているのに沈んでいるページから着手する。上位候補:
+
+1. `/en/docker-image-cleanup/`（表示81・順位76）
+2. `/en/cloudflare-redirect-rules/`（表示69・順位55）
+3. `/en/node-version-management-nvm/`（表示57・順位79）
+4. `/en/windows-git-install/`（表示56・順位70）
+5. `/en/nginx-location-directives/`（表示52・順位60）
+
+各記事はより具体的なエラー・失敗シナリオへ寄せ、タイトルH1もそれに合わせて書き換える。
+
+> 補足: 日本語での収益を本気で取りにいくなら、別軸で「日本語の具体的エラー記事」を新規に育てる必要があります（現状の日本語流入はほぼゼロ）。ただし新規は**インデックス回復が確認できるまで着手しない**（品質回復フェーズの原則を維持）。
+
+---
+
+## Phase 3. タイトル・メタでCTRを取り切る
+
+順位が2ページ目以内に入ったページから、CTR最適化を行う（順位が来る前のメタ改善は効果が薄いので後回し）。
+
+- **title**: `<具体的エラー/症状> の原因と解決手順` の形。数字・年・環境を含める（例: `2026` / `Ubuntu 24.04` / `Docker Compose`）。
+- **description**: 120〜160字。1文目で「何が起きているか」、2文目で「本記事で解決できること」を明示。
+- H1とtitleを一致させる。クリックされない汎用タイトルは廃止。
+
+### frontmatter（SEO項目）
+既存必須4項目 `title / date / category / layout` に加え、**SEO上は `description` と（自己参照）`canonical` を持たせることを強く推奨**します。
 
 ```yaml
 ---
-title: '記事タイトル'
-date: 'YYYY-MM-DD'
-category: 'カテゴリ名'
-layout: '../../layouts/PostLayout.astro'
-ja_tags: ['タグ1', 'タグ2', 'タグ3']
-en_tags: ['tag1', 'tag2', 'tag3']
+title: "<具体的なエラー主題>"
+date: 2026-07-22
+category: Docker        # Git / Linux / Docker / Node.js / Cloudflare / Astro
+layout: ../../layouts/Post.astro
+description: "<120-160字。症状→解決の要約>"   # SEO推奨
 ---
 ```
 
-### 各項目のルール
-- **title**:
-  - JA: 32文字以内目安。「〜する方法」「〜の対処法」「〜が出た時の解決方法」のいずれかで終える
-  - JA: エラー系記事はエラーメッセージの一部をタイトルに含める（例: 「Dockerで permission denied が出た時の対処法」）
-  - EN: 60文字以内。"How to Fix ..." / "How to ..." / "... : Causes and Solutions" 形式
-  - シングルクォートで囲む。タイトル内にシングルクォートを使う場合は `''` でエスケープ
-- **date**: 作成日。未来日付禁止
-- **category**: 次の9つのみ使用可。新カテゴリの追加は事前確認必須
-  `Git` / `Linux` / `Docker` / `Node.js` / `Cloudflare` / `Astro` / `Windows` / `nginx` / `GitHub Actions`
-- **layout**: `'../../layouts/PostLayout.astro'` 固定（JA/EN共通）
-- **ja_tags / en_tags**: 各3〜5個。1つ目はカテゴリ名と同一にする
+> メモとの差分メモ: 今回いただいた仕様では必須frontmatterは4項目ですが、過去の作業では6項目版も存在していました。**どちらを正とするかを確定**し、`CLAUDE.md` に一本化してください（混在はビルド事故のもと）。
 
-## 4. 記事品質基準（全項目必須・1つでも欠けたら公開不可）
+---
 
-### 4-1. 文字数
-- 日本語: 本文2,000字以上（コードブロック・frontmatter・アフィリエイト部を除く）
-- 英語: 本文800語以上（同上）
+## Phase 4. 内部リンクと計測
 
-### 4-2. 構成テンプレート（この順序・この見出しで書く）
+- 関連記事同士を最低3本、文中リンクで相互接続（孤立ページを作らない）。
+- `sitemap.xml` に正規URL（末尾スラッシュ付き）のみが載っているか確認。旧 `/posts/` を除外。
+- リライト・正規化の効果は**GSCの「表示回数」ではなく「平均順位の改善」で判定**する（クリックは順位が上がってから遅れて付く）。
 
-```markdown
-## やりたかったこと（または「症状」）
-## 環境
-## 試したこと
-## 原因
-## 解決方法
-## ハマったポイント
-## よくある質問
-## 関連記事
-```
+---
 
-### 4-3. 各セクションの執筆ルール
+## 記事リライト時 SEOセルフチェック（10項目）
 
-**## やりたかったこと / 症状**（150字以上）
-- 一人称で、具体的な作業文脈から始める
-- ❌ 悪い例: 「Dockerのログを確認する方法を紹介します。」
-- ⭕ 良い例: 「VPS上で動かしているDockerコンテナが深夜に落ちていた。原因を調べようとしたが、`docker logs` の出力が数万行あってエラー箇所にたどり着けなかった。」
-- エラー系記事は、実際のエラーメッセージ全文をコードブロックで冒頭に載せる
+リライト完了後、以下を全て満たすまで納品しない。
 
-**## 環境**
-- 箇条書き3〜5行。OS・ツールのバージョンを具体的に書く
-- ❌「Docker」 ⭕「Docker 26.1.4 (Docker Desktop for Windows)」
+1. 正規URLは `/en/<slug>/`（末尾スラッシュ）で、canonicalが自己参照になっている。
+2. title・H1・descriptionが具体的エラー主題で一致している。
+3. ビッグワード単体をタイトル主題にしていない。
+4. 英語ページに日本語VPSアフィリエイトが混入していない。
+5. 収益ブロックが言語に応じて正しく分岐している。
+6. エラーメッセージ・コマンドを捏造していない（検証済み・実体験ベースのみ）。
+7. 関連内部リンクが3本以上ある。
+8. コードブロックはバッククォート3つで囲まれている。
+9. frontmatterの項目順・必須項目が `CLAUDE.md` 準拠。
+10. アフィリエイトセクションとfrontmatterを破壊していない。
 
-**## 試したこと**（200字以上）
-- **失敗した試行を最低1つ含める。** 形式:「最初に○○を試した → △△という結果になった → □□が原因で効かなかった」
-- 失敗時の実際の出力・エラーメッセージをコードブロックで載せる
-- ❌ 悪い例: 「いくつか方法を試しましたが解決しませんでした。」
-- ⭕ 良い例: 「まず `docker logs コンテナ名 | grep error` を試したが、パイプ処理が終わるまで30秒以上かかった。ログが3GB超あり全読み込みが走っていた。」
+---
 
-**## 原因**（100字以上）
-- 「なぜその問題が起きるのか」の仕組みを説明する。解決コマンドを書く場所ではない
+## GSC運用ルール
 
-**## 解決方法**
-- コマンド → 実行結果の出力例 → 「なぜこれで直るのか」1〜2文、を1セットとする
-- **実行結果の出力例は実物を再現する。実在しない出力を創作しない。** 出力が環境依存で再現困難な場合は載せない（捏造するより載せない方が良い）
-- コマンドは冒頭に `cd` を含めない（記事は汎用手順のため。CLAUDE運用時のgit操作とは区別）
+- 送信は **1日5件まで**。送信URLは必ず**末尾スラッシュ付きの正規URL**。
+- 送信前に `index_progress.md` を照合し、重複送信を避ける。
+- 送信優先順: **正規化・リライト済みの既存記事 > 新規記事**。
+- 「インデックス登録済み(17)／未登録」の区分移動は、Acia が登録を明示確認したときのみ行う。
+- 効果測定は**リライトから2〜4週間後**の平均順位で判定。
 
-**## ハマったポイント**
-- 箇条書き3〜5個。それぞれ「何をしたら何が起きたか」まで書く
-- ❌「パスに注意」 ⭕「相対パスで指定したら `no such file or directory` になった。docker cp はホスト側を絶対パスで書く必要がある」
+---
 
-**## よくある質問**
-- Q&A形式で2〜3問。検索者が次に疑問に思うことを書く
-- 質問文に関連検索キーワードを自然に含める（例: 「docker logs を tail -f のようにリアルタイムで見るには？」）
-- 回答は各100字以上、コマンド例付き
+## 禁止事項
 
-**## 関連記事**
-- 4〜5本。**リンク先slugが `src/pages/posts/` に実在することを1本ずつ確認する。** 存在しないslugへのリンクは即公開不可
-- リンク形式: `/posts/slug`（末尾スラッシュなし。astro.config.mjs の trailingSlash: 'always' がビルド時処理）
+- Phase 0（正規化）未完了のまま新規記事を公開しない。
+- エラーメッセージ・コマンド・ログの捏造。
+- `git add .`（ファイル単位で明示ステージング）。
+- push前の `git pull origin main --rebase` 省略（Routinesと競合するため必須）。
+- 英語ページへの日本語VPSアフィリエイト再混入。
+- インデックス回復未確認での AdSense 再申請・新規大量投入。
 
-### 4-4. 文体・禁止事項
-- です・ます調ベース。体験談部分は「〜だった」「〜でハマった」可
-- 「〜することができます」は記事全体で2回まで
-- 前置きの一般論禁止（「近年、Dockerは広く使われています」等）
-- 「いかがでしたか」「ぜひ試してみてください」等の定型締め禁止
-- 記事末尾は「ハマったポイント」以降のセクションで自然に終える。まとめセクション不要
+---
 
-### 4-5. コードブロック
-- 必ずバッククォート3つ + 言語指定（bash / powershell / yaml / javascript / markdown / text）
-- エラー出力・ログは言語指定 `text`
-- 1コードブロック20行以内。超える場合は分割して間に説明を挟む
-- Windows前提の記事はPowerShell構文を使う（`curl -s -H` 等のUnix構文をPowerShellとして書かない）
-
-## 5. 英語版の書き方
-
-- 日本語版の直訳禁止。英語圏の開発者が自分のブログに書いた体裁にする
-- 構成・技術内容・コマンドは日本語版と一致させる
-- 冒頭の体験談は英語圏で自然な状況設定に置き換えてよい
-- 関連記事リンクは `/en/slug` の実在するもののみ。EN版が存在しない記事にはリンクしない（JA版へのリンクも禁止）
-
-## 6. アフィリエイトリンク
-
-- **記事本文には手動で貼らない。** `.github/scripts/add_affiliate_links.py` がslugキーワードで自動挿入する
-  （優先順位: DOMAIN → VPS → LEARNING → DEFAULT）
-- 記事は「関連記事」セクションで書き終える
-- 例外: スクリプトが対象外と判定した場合のみ、後からDEFAULTブロックを手動追加
-
-## 7. Git運用（新規記事push手順）
+## 今日から着手する具体手順（コピペ用）
 
 ```bash
 cd C:\Users\acia\shaky-shell
 git pull origin main --rebase
-git add src/pages/posts/[slug].md src/pages/en/[slug].md index_progress.md
-git commit -m "add: [slug] (JA+EN)"
+
+# 1) 正規化: astro.config.mjs に trailingSlash: 'always' を確認/追記
+# 2) public/_redirects に旧 /posts/ の301を追記（実在スラッグのみ）
+# 3) レイアウトへ自己参照canonicalを追加
+# 4) add_affiliate_links.py に /en/ 言語分岐を追加
+
+git add astro.config.mjs public/_redirects src/layouts/Post.astro .github/scripts/add_affiliate_links.py
+git commit -m "seo: canonicalize URLs (trailing-slash), 301 legacy /posts/, split affiliate blocks by language"
+git pull origin main --rebase
 git push origin main
 ```
 
-- push前の `git pull origin main --rebase` は必須（Routinesとの競合防止）
-- `git add .` ではなく対象ファイルを明示する（Routinesの作業中ファイルの巻き込み防止）
-- push後、Cloudflare Pagesのデプロイ完了を確認してから次の作業に移る
-
-## 8. index_progress.md への追記
-
-新規記事作成時、「残り（次回以降）」の**最後尾**に追記:
-https://errsolved.com/posts/[slug]/
-https://errsolved.com/en/[slug]/
-
-- 末尾スラッシュ必須
-- 「申請済み」への移動はGSCで登録確認できたもののみ。作成しただけでは移動しない
-
-## 9. GSCインデックス申請
-
-- 1日5件まで
-- **申請優先順位: ①リライト済み記事 → ②既存未申請記事 → ③新規記事**
-- 新規記事は既存キューが消化されるまで申請しない
-
-## 10. 出力言語
-
-- Claudeの回答・コミットメッセージ以外のやりとりは日本語
-- コマンドは `cd` から始まる完全な形で提示する
+デプロイ完了後、Phase 0-5 の正規化監査 `curl -sI` を実行し、301集約を確認して完了とする。
