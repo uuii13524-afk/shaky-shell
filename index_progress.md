@@ -90,6 +90,8 @@ https://errsolved.com/posts/node-eaddrinuse-port-fix/
 https://errsolved.com/en/node-eaddrinuse-port-fix/
 https://errsolved.com/posts/npm-install-permission-denied/
 https://errsolved.com/en/npm-install-permission-denied/
+https://errsolved.com/posts/git-fatal-not-a-git-repository/
+https://errsolved.com/en/git-fatal-not-a-git-repository/
 
 ## ルール
 - 申請できる限り毎日申請する
