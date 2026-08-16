@@ -94,6 +94,8 @@ https://errsolved.com/posts/git-fatal-not-a-git-repository/
 https://errsolved.com/en/git-fatal-not-a-git-repository/
 https://errsolved.com/posts/git-clone-lfs-pointer-file/
 https://errsolved.com/en/git-clone-lfs-pointer-file/
+https://errsolved.com/posts/git-refusing-to-merge-unrelated-histories/
+https://errsolved.com/en/git-refusing-to-merge-unrelated-histories/
 
 ## ルール
 - 申請できる限り毎日申請する
