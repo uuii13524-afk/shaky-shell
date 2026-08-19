@@ -3,6 +3,7 @@ title: 'How to Manage Services with systemd (start/stop/enable/status)'
 date: '2026-05-24'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Manage Linux services with systemctl start, stop, enable, and status, view logs via journalctl, and write a custom systemd unit file for your own app.'
 ja_tags: ['Linux', 'systemd', 'サービス管理']
 en_tags: ['Linux', 'systemd', 'service management']
 ---

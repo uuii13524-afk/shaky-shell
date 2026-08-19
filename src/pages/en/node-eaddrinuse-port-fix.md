@@ -3,6 +3,7 @@ title: 'How to Fix "EADDRINUSE: Address Already in Use" in Node.js'
 date: '2026-07-21'
 category: 'Node.js'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'A restarted nodemon server failed with EADDRINUSE: address already in use :::3000, caused by a zombie node process. lsof -i :3000 plus kill -9 freed the port.'
 ja_tags: ['Node.js', 'EADDRINUSE', 'ポート使用中', 'express']
 en_tags: ['Node.js', 'EADDRINUSE', 'port in use', 'express']
 ---

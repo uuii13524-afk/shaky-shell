@@ -3,6 +3,7 @@ title: 'git cherry-pick: Apply a Specific Commit to Another Branch'
 date: '2026-05-21'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Use git cherry-pick abc1234 to bring one commit onto another branch, resolve a CONFLICT (content) error, and undo it safely with git revert.'
 ja_tags: ['Git', 'cherry-pick', 'バージョン管理']
 en_tags: ['Git', 'cherry-pick', 'version control']
 ---

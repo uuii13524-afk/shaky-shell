@@ -3,6 +3,7 @@ title: 'Node.jsでheap out of memoryが出た時の対処法'
 date: '2026-07-21'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'ConoHaのメモリ1GB VPSでnpm run build実行時にJavaScript heap out of memoryが発生。原因はswap未設定による物理メモリ不足で、2GBのswapfile作成とNODE_OPTIONS=--max-old-space-size=1536設定で解決しました。'
 ja_tags: ['Node.js', 'heap out of memory', 'メモリ不足', 'VPS']
 en_tags: ['Node.js', 'heap out of memory', 'memory', 'VPS']
 ---

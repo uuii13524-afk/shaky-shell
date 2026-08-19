@@ -3,6 +3,7 @@ title: 'Git Branch Commands: Create, Switch, and Merge'
 date: '2026-05-08'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Create and switch branches with git switch -c, merge into main, then delete the merged branch with git branch -d in a full feature workflow.'
 ---
 
 ## Basic Commands

@@ -3,6 +3,7 @@ title: 'How to Fix a Rejected Git Push (Non-Fast-Forward)'
 date: '2026-07-19'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'git push fails with rejected (fetch first) - looks like a permissions issue, but it is a diverged branch. Fixed with git pull --rebase, then pushing again.'
 en_tags: ['Git', 'github', 'push', 'rejected', 'rebase']
 ---
 

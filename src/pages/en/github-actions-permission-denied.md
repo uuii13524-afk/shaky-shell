@@ -3,6 +3,7 @@ title: 'How to Fix "Permission denied" on git push in GitHub Actions'
 date: '2026-07-15'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'GitHub Actions git push fails with 403 permission denied to github-actions[bot]. Fix needs both permissions: contents: write and a repo setting change.'
 ja_tags: ['GitHub Actions', 'git push', 'Permission denied', 'GITHUB_TOKEN']
 en_tags: ['GitHub Actions', 'git push', 'permission denied', 'GITHUB_TOKEN']
 ---

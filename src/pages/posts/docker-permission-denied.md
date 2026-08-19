@@ -3,6 +3,7 @@ title: 'Dockerでpermission deniedが出た時の対処法'
 date: '2026-07-18'
 category: 'Docker'
 layout: '../../layouts/PostLayout.astro'
+description: 'sudoなしでdocker psを実行するとpermission deniedエラーが出る症状を解説します。chmod 666では再起動で戻ってしまう原因を説明し、usermod -aG dockerとセッション再作成で恒久的に解決する手順を紹介します。'
 ja_tags: ['Docker', 'permission denied', 'docker.sock', 'usermod']
 en_tags: ['Docker', 'permission denied', 'docker.sock', 'usermod']
 ---

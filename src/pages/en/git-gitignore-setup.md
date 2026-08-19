@@ -3,6 +3,7 @@ title: 'How to Set Up .gitignore and Exclude Files from Git'
 date: '2026-05-09'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fix a .gitignore that is not excluding already-tracked files: run git rm -r --cached filename, then commit so node_modules and .env stay ignored.'
 ---
 
 ## Basic Syntax
