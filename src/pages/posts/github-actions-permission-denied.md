@@ -3,6 +3,7 @@ title: 'GitHub Actionsのgit pushでPermission deniedが出た時の対処法'
 date: '2026-07-15'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayout.astro'
+description: 'GitHub Actionsのgit pushで403 Permission denied to github-actions[bot]が出る症状を解説します。ワークフローYAMLのpermissions: contents: writeとリポジトリ設定の両方が必要な理由と解決手順を紹介します。'
 ja_tags: ['GitHub Actions', 'git push', 'Permission denied', 'GITHUB_TOKEN']
 en_tags: ['GitHub Actions', 'git push', 'permission denied', 'GITHUB_TOKEN']
 ---

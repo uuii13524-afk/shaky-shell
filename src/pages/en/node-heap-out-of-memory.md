@@ -3,6 +3,7 @@ title: 'How to Fix "JavaScript Heap Out of Memory" in Node.js'
 date: '2026-07-21'
 category: 'Node.js'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'A Next.js build on a 1GB VPS died with JavaScript heap out of memory. A 2GB swap file plus NODE_OPTIONS=--max-old-space-size=1536 fixed it for good.'
 ja_tags: ['Node.js', 'heap out of memory', 'メモリ不足', 'VPS']
 en_tags: ['Node.js', 'heap out of memory', 'memory', 'VPS']
 ---

@@ -3,6 +3,7 @@ title: 'GitHub Actions: How to Set Up Basic Auto-Deploy'
 date: '2026-05-10'
 category: 'GitHub Actions'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Sets up .github/workflows/deploy.yml to auto-run npm install and npm run build on every push to main, using actions/checkout and actions/setup-node.'
 ---
 
 ## Basic Workflow Example

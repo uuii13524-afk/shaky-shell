@@ -3,6 +3,7 @@ title: 'How to Set Up Swap on Linux (swapfile, enable, check)'
 date: '2026-05-24'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fixes VPS OOM Killer crashes on a 1GB RAM server by creating a swapfile with dd and mkswap, enabling it with swapon, and persisting it in /etc/fstab.'
 ja_tags: ['Linux', 'swap', 'VPS']
 en_tags: ['Linux', 'swap', 'VPS']
 ---

@@ -3,6 +3,7 @@ title: 'Cloudflare Pages GitHub Auto-Deploy Not Working: How to Fix It'
 date: '2026-05-04'
 category: 'Cloudflare'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Cloudflare Pages stops auto-deploying and shows "disconnected from your Git account"? Re-authenticate GitHub, then force redeploy with an empty commit.'
 ---
 
 ## Symptoms

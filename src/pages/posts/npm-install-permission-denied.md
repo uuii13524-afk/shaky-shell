@@ -3,6 +3,7 @@ title: 'npm installでEACCES権限エラーが出た時の対処法'
 date: '2026-07-22'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'さくらのVPSでnpm install -g pm2実行時にEACCES: permission deniedエラーが発生。原因はグローバルprefixがroot所有の/usr配下だったためで、npm config set prefixで自分のホーム配下に変更し解決しました。'
 ja_tags: ['Node.js', 'npm', 'EACCES', '権限エラー']
 en_tags: ['Node.js', 'npm', 'EACCES', 'permission denied']
 ---

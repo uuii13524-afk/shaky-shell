@@ -3,6 +3,7 @@ title: 'How to Use docker-compose: A Practical Guide'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Set up docker-compose.yml with nginx and mysql:8, run docker compose up -d and exec, and persist database data using named volumes, not anonymous ones.'
 ---
 
 ## Basic docker-compose.yml

@@ -3,6 +3,7 @@ title: 'Linux Basic Commands Cheatsheet (ls/cd/mkdir/rm)'
 date: '2026-05-10'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'A cheatsheet for core Linux commands like ls, cd, mkdir, rm -rf, cp, and mv, including why rm -rf folder/ is irreversible and must be used carefully.'
 ---
 
 ## View Files

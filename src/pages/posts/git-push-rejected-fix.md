@@ -3,6 +3,7 @@ title: 'git pushでrejectedになった時の対処法'
 date: '2026-07-19'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git pushが! [rejected] (fetch first)で拒否される症状を解説します。権限エラーと誤解しがちですが原因はリモートとの分岐で、git pull --rebaseで取り込んでから再度pushする解決手順を紹介します。'
 ja_tags: ['Git', 'GitHub', 'push', 'rejected', 'rebase']
 en_tags: ['Git', 'github', 'push', 'rejected', 'rebase']
 ---

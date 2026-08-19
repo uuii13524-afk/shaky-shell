@@ -3,6 +3,7 @@ title: 'How to Fix npm ERESOLVE Dependency Tree Error'
 date: '2026-07-17'
 category: 'Node.js'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Adding testing-library/react@14 to a React 17 app threw ERESOLVE unable to resolve dependency tree - its peer wants react@18. Downgrading to v13 fixed it.'
 ja_tags: ['Node.js', 'npm', 'ERESOLVE', '依存関係']
 en_tags: ['Node.js', 'npm', 'ERESOLVE', 'dependency']
 ---

@@ -3,6 +3,7 @@ title: 'How to Enable gzip Compression in nginx'
 date: '2026-05-24'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Enable gzip compression in the nginx.conf http block, then verify with curl -H Accept-Encoding: gzip -I and check for content-encoding: gzip in the reply.'
 ja_tags: ['nginx', 'gzip', 'パフォーマンス']
 en_tags: ['nginx', 'gzip', 'performance']
 ---

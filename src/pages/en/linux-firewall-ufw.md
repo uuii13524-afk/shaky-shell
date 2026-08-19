@@ -3,6 +3,7 @@ title: 'Linux UFW Firewall Setup Basics'
 date: '2026-05-22'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Shows how to configure UFW on a VPS with sudo ufw allow ssh before sudo ufw enable, so you do not lock yourself out, plus port rules and ufw reset.'
 ja_tags: ['Linux', 'UFW', 'ファイアウォール', 'セキュリティ', 'VPS']
 en_tags: ['Linux', 'UFW', 'Firewall', 'Security', 'VPS']
 ---

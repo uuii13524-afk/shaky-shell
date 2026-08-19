@@ -3,6 +3,7 @@ title: 'How to Clear npm Cache and Fix Install Issues'
 date: '2026-05-09'
 category: 'Node.js'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fix broken npm installs with npm cache clean --force, or do a full reset by deleting node_modules and package-lock.json before running npm install again.'
 ---
 
 ## Clear the Cache

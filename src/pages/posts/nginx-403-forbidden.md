@@ -3,6 +3,7 @@ title: 'nginxで403 Forbiddenが出た時の対処法'
 date: '2026-07-20'
 category: 'nginx'
 layout: '../../layouts/PostLayout.astro'
+description: 'nginxでcurlが403 Forbiddenを返す症状を解説します。原因はindex.html自体ではなく/home/deployなど祖先ディレクトリの実行権限不足で、namei -lで特定しchmod o+xで解決する手順を紹介します。'
 ja_tags: ['nginx', '403', 'Forbidden', 'パーミッション', 'Linux']
 en_tags: ['nginx', '403', 'forbidden', 'permission', 'linux']
 ---

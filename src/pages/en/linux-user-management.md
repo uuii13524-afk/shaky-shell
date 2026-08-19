@@ -3,6 +3,7 @@ title: 'How to Add and Remove Users on Linux (useradd/userdel)'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Create a non-root Linux user with useradd -m, set a password, add them to the sudo group with usermod -aG sudo, and remove users safely with userdel -r.'
 ---
 
 ## What I Wanted to Do

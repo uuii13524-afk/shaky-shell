@@ -3,6 +3,7 @@ title: 'How to Fix Docker "Permission Denied" on docker.sock'
 date: '2026-07-18'
 category: 'Docker'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'docker.sock returns permission denied when running docker ps without sudo. Why chmod 666 resets after reboot, and the usermod -aG docker fix that persists.'
 ja_tags: ['Docker', 'permission denied', 'docker.sock', 'usermod']
 en_tags: ['Docker', 'permission denied', 'docker.sock', 'usermod']
 ---

@@ -3,6 +3,7 @@ title: 'How to Compress and Extract Files with tar and zip on Linux'
 date: '2026-05-26'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Compress and extract files on Linux with tar (-czvf, -xzvf) and zip/unzip, including date-stamped log archives and the --exclude flag for skipping files.'
 ja_tags: ['Linux', 'tar', 'zip', 'コマンド', 'ファイル操作']
 en_tags: ['Linux', 'tar', 'zip', 'command', 'file operation']
 ---

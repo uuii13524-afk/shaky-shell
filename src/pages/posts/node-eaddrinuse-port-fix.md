@@ -3,6 +3,7 @@ title: 'Node.jsでEADDRINUSEエラーが出た時の対処法'
 date: '2026-07-21'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'nodemonでNode.jsを再起動するとError: listen EADDRINUSE: address already in use :::3000が発生。原因はゾンビ化した旧プロセスがポートを占有していたことで、lsof -i :3000でPIDを特定しkill -9で解決した手順を解説します。'
 ja_tags: ['Node.js', 'EADDRINUSE', 'ポート使用中', 'express']
 en_tags: ['Node.js', 'EADDRINUSE', 'port in use', 'express']
 ---

@@ -3,6 +3,7 @@ title: 'How to Sync and Backup Files with rsync'
 date: '2026-05-25'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Explains rsync -av for incremental backups instead of scp, covering trailing-slash behavior, --delete, --dry-run, and automating backups via cron.'
 ja_tags: ['Linux', 'rsync', 'バックアップ', 'SSH']
 en_tags: ['Linux', 'rsync', 'backup', 'SSH']
 ---

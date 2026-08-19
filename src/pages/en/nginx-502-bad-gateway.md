@@ -3,6 +3,7 @@ title: 'nginx 502 Bad Gateway: Causes and How to Fix It'
 date: '2026-05-20'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fix nginx 502 Bad Gateway: check for a stopped backend, correct proxy_pass port mismatches, and use Docker service names instead of localhost.'
 ---
 
 ## Symptoms

@@ -3,6 +3,7 @@ title: 'How to Fix Git Detached HEAD State'
 date: '2026-07-16'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'git checkout on an old commit leaves you in detached HEAD; commits vanish from git log after switching branches. Recover them with git reflog and git branch.'
 en_tags: ['Git', 'detached-head', 'branch', 'checkout']
 ---
 

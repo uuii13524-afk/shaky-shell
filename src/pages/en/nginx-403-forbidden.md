@@ -3,6 +3,7 @@ title: 'How to Fix nginx 403 Forbidden Error'
 date: '2026-07-20'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'nginx returns 403 Forbidden though index.html is 644. Cause: a missing execute bit on /home/deploy, found via namei -l and fixed with chmod o+x.'
 en_tags: ['nginx', '403', 'forbidden', 'permission', 'linux']
 ---
 

@@ -3,6 +3,7 @@ title: 'Linux Permission Denied Error: Causes and Fixes'
 date: '2026-05-14'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fixes "bash: ./script.sh: Permission denied" on Linux by running chmod +x, using sudo for root-only commands, or fixing ownership with chown.'
 ---
 
 ## Symptoms

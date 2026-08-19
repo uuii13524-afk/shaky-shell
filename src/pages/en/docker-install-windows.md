@@ -3,6 +3,7 @@ title: 'How to Install Docker on Windows and Get It Running'
 date: '2026-05-10'
 category: 'Docker'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Install Docker Desktop on Windows via wsl --install, fix BIOS virtualization errors, then verify it works with docker run hello-world.'
 ---
 
 ## Environment

@@ -3,6 +3,7 @@ title: "How to Set Up a Free SSL Certificate on nginx with certbot (Let's Encryp
 date: '2026-05-23'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
+description: "Get a free Let's Encrypt SSL cert for nginx with certbot --nginx -d example.com, review the generated config, and test renewal via certbot renew --dry-run."
 ja_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 en_tags: ['nginx', 'SSL', 'certbot', 'HTTPS', "Let's Encrypt"]
 ---

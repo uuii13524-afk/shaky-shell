@@ -3,6 +3,7 @@ title: 'Docker Basic Commands Cheatsheet (run/stop/rm/ps)'
 date: '2026-05-12'
 category: 'Docker'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Quick reference for docker run, ps, stop, rm, and exec -it, plus the -p host-port:container-port format and why omitting -d runs in the foreground.'
 ---
 
 ## Container Operations

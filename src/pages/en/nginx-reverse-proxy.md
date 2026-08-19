@@ -3,6 +3,7 @@ title: 'nginx Reverse Proxy Setup: Expose a Node.js App on Port 80/443'
 date: '2026-05-23'
 category: 'nginx'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Set up nginx as a reverse proxy for a Node.js app on ports 80/443 using proxy_pass, add WebSocket upgrade headers, and route multiple apps by domain.'
 ja_tags: ['nginx', 'リバースプロキシ', 'Node.js', 'VPS']
 en_tags: ['nginx', 'reverse proxy', 'Node.js', 'VPS']
 ---

@@ -3,6 +3,7 @@ title: 'npm installで ERESOLVE エラーが出た時の対処法'
 date: '2026-07-17'
 category: 'Node.js'
 layout: '../../layouts/PostLayout.astro'
+description: 'React17のプロジェクトで@testing-library/react@14を追加するとERESOLVE unable to resolve dependency treeが発生。react@18を要求するpeerDependenciesが原因で、v13へのダウングレードで解決しました。'
 ja_tags: ['Node.js', 'npm', 'ERESOLVE', '依存関係']
 en_tags: ['Node.js', 'npm', 'ERESOLVE', 'dependency']
 ---

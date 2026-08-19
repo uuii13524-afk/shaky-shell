@@ -3,6 +3,7 @@ title: 'How to Fix npm EACCES Permission Denied Error'
 date: '2026-07-22'
 category: 'Node.js'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'npm install -g pm2 on a DigitalOcean droplet threw EACCES: permission denied - the global prefix was root-owned /usr. Pointing it at the home dir fixed it.'
 ja_tags: ['Node.js', 'npm', 'EACCES', '権限エラー']
 en_tags: ['Node.js', 'npm', 'EACCES', 'permission denied']
 ---

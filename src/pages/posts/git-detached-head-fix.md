@@ -3,6 +3,7 @@ title: 'Gitでdetached HEAD stateになった時の対処法'
 date: '2026-07-16'
 category: 'Git'
 layout: '../../layouts/PostLayout.astro'
+description: 'git checkoutで古いコミットに移動しdetached HEAD状態で作業し、ブランチ切替後にコミットがgit logから消えた症状を解説します。git reflogで見つけてgit branchで復元する手順を紹介します。'
 ja_tags: ['Git', 'detached HEAD', 'ブランチ', 'checkout']
 en_tags: ['Git', 'detached-head', 'branch', 'checkout']
 ---

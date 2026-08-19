@@ -3,6 +3,7 @@ title: 'Linux File Permissions Guide (chmod/chown)'
 date: '2026-05-21'
 category: 'Linux'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Explains chmod numeric modes like 755 and 644, why chmod 600 is required for SSH keys, and how chown -R changes ownership recursively.'
 ---
 
 ## What I Wanted to Do

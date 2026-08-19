@@ -3,6 +3,7 @@ title: 'How to Install WSL2 on Windows'
 date: '2026-05-11'
 category: 'Windows'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Install WSL2 on Windows with wsl --install, set up your Ubuntu username and password, and access Windows files from Linux via /mnt/c/Users/username/.'
 ---
 
 ## Steps

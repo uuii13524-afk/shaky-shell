@@ -3,6 +3,7 @@ title: 'Git Rebase: How to Keep a Clean Commit History'
 date: '2026-05-21'
 category: 'Git'
 layout: '../../layouts/PostLayoutEn.astro'
+description: 'Fixes "error: failed to push some refs" after a git rebase, using git push --force-with-lease and resolving conflicts with git rebase --continue.'
 ja_tags: ['Git', 'rebase', 'バージョン管理']
 en_tags: ['Git', 'rebase', 'version control']
 ---
