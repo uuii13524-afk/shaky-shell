@@ -96,6 +96,8 @@ https://errsolved.com/posts/git-clone-lfs-pointer-file/
 https://errsolved.com/en/git-clone-lfs-pointer-file/
 https://errsolved.com/posts/git-submodule-not-initialized/
 https://errsolved.com/en/git-submodule-not-initialized/
+https://errsolved.com/posts/git-unrelated-histories/
+https://errsolved.com/en/git-unrelated-histories/
 
 ## ルール
 - 申請できる限り毎日申請する
