@@ -96,6 +96,8 @@ https://errsolved.com/posts/git-clone-lfs-pointer-file/
 https://errsolved.com/en/git-clone-lfs-pointer-file/
 https://errsolved.com/posts/git-submodule-not-initialized/
 https://errsolved.com/en/git-submodule-not-initialized/
+https://errsolved.com/posts/astro-could-not-resolve-layout/
+https://errsolved.com/en/astro-could-not-resolve-layout/
 
 ## ルール
 - 申請できる限り毎日申請する
